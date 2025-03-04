@@ -24,6 +24,7 @@ public interface NodoReceiptOldModelRepository extends JpaRepository<RT, Long> {
             "AND t.INSERTED_TIMESTAMP < TO_DATE(@minDateInsertion, 'yyyy-mm-dd hh24:mi:ss')  " +
             "AND (r.FLAG_SECONDA = 'N' OR r.FLAG_SECONDA IS NULL)  " +
             "AND t.GENERATA_DA = 'PSP'  " +
+            "AND pr.PAYMENT_TOKEN NOT IN @paymentTokenList " +
             "UNION  " +
             "SELECT DISTINCT r.CCP, r.IUV  " +
             "FROM NODO_ONLINE.RT t  " +
@@ -38,12 +39,14 @@ public interface NodoReceiptOldModelRepository extends JpaRepository<RT, Long> {
             "AND t.INSERTED_TIMESTAMP < TO_DATE(@minDateInsertion, 'yyyy-mm-dd hh24:mi:ss')  " +
             "AND r.FLAG_SECONDA = 'Y'  " +
             "AND t.GENERATA_DA = 'PSP'  " +
+            "AND pr.PAYMENT_TOKEN NOT IN @paymentTokenList " +
             ")  " +
             "SELECT CCP, IUV FROM vecchio")
-    List<PositionReceipt> getReceiptFromReceiptDate(
+    List<PositionReceipt> getReceiptFromReceiptDateAndNotInPaymentTokenList(
             @Param("minDate") String minDate,
             @Param("maxDateReceipt") String maxDateReceipt,
-            @Param("maxDateInsertion") String maxDateInsertion
+            @Param("maxDateInsertion") String maxDateInsertion,
+            @Param("paymentTokenList") List<String> paymentTokenList
     );
 
     @Query("with vecchio as ( " +

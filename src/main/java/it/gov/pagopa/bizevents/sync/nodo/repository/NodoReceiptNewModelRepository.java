@@ -11,16 +11,18 @@ import java.util.List;
 @Repository
 public interface NodoReceiptNewModelRepository extends JpaRepository<PositionReceipt, Long> {
 
-    @Query("SELECT  " +
-            "FROM  NODO_ONLINE.POSITION_RECEIPT pr " +
+    @Query("SELECT pr" +
+            "FROM  POSITION_RECEIPT " +
             "WHERE pr.INSERTED_TIMESTAMP >= TO_DATE(@minDate) " +
             "AND pr.INSERTED_TIMESTAMP < TO_DATE(@maxDateInsertion) " +
             "AND pr.PAYMENT_DATE_TIME >= TO_DATE(@minDate) " +
-            "AND pr.PAYMENT_DATE_TIME < TO_DATE(@maxDateReceipt)")
-    List<PositionReceipt> getPositionReceiptFromReceiptDate(
+            "AND pr.PAYMENT_DATE_TIME < TO_DATE(@maxDateReceipt)" +
+            "AND pr.PAYMENT_TOKEN NOT IN @paymentTokenList")
+    List<PositionReceipt> getPositionReceiptFromReceiptDateAndNotInPaymentTokenList(
             @Param("minDate") String minDate,
             @Param("maxDateReceipt") String maxDateReceipt,
-            @Param("maxDateInsertion") String maxDateInsertion
+            @Param("maxDateInsertion") String maxDateInsertion,
+            @Param("paymentTokenList") List<String> paymentTokenList
     );
 
     @Query("SELECT COUNT(1) FROM NODO_ONLINE.POSITION_RECEIPT pr " +

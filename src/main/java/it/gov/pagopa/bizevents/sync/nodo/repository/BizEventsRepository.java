@@ -11,11 +11,15 @@ import java.util.List;
 @Repository
 public interface BizEventsRepository extends CosmosRepository<BizEvent, String> {
 
-    @Query("SELECT c.paymentInfo.paymentToken, c.debtorPosition.noticeNumber FROM c " +
+    @Query("SELECT * FROM c " +
             "WHERE c.paymentInfo.paymentDateTime >= @minDate " +
             "AND c.paymentInfo.paymentDateTime < @maxDate")
     List<BizEvent> getBizEventsFromPaymentDateTime(@Param("minDate") String minDate, @Param("maxDate") String maxDate);
 
+    @Query("SELECT c.paymentInfo.paymentToken FROM c " +
+            "WHERE c.paymentInfo.paymentDateTime >= @minDate " +
+            "AND c.paymentInfo.paymentDateTime < @maxDate")
+    List<String> getBizEventsPaymentTokenFromPaymentDateTime(@Param("minDate") String minDate, @Param("maxDate") String maxDate);
 
     @Query("SELECT COUNT(1) FROM c " +
             "WHERE c.paymentInfo.paymentDateTime >= @minDate " +
