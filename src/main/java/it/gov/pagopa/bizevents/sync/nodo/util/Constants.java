@@ -1,4 +1,4 @@
-package it.gov.pagopa.microservice.util;
+package it.gov.pagopa.bizevents.sync.nodo.util;
 
 import lombok.experimental.UtilityClass;
 

@@ -1,6 +1,6 @@
-package it.gov.pagopa.microservice.config;
+package it.gov.pagopa.bizevents.sync.nodo.config;
 
-import static it.gov.pagopa.microservice.util.Constants.HEADER_REQUEST_ID;
+import static it.gov.pagopa.bizevents.sync.nodo.util.Constants.HEADER_REQUEST_ID;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;

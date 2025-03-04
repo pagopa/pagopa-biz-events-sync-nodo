@@ -1,9 +1,9 @@
-package it.gov.pagopa.microservice.config;
+package it.gov.pagopa.bizevents.sync.nodo.config;
 
-import static it.gov.pagopa.microservice.util.CommonUtility.deNull;
+import static it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility.deNull;
 
-import it.gov.pagopa.microservice.exception.AppError;
-import it.gov.pagopa.microservice.model.ProblemJson;
+import it.gov.pagopa.bizevents.sync.nodo.exception.AppError;
+import it.gov.pagopa.bizevents.sync.nodo.model.ProblemJson;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

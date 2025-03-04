@@ -1,4 +1,4 @@
-package it.gov.pagopa.microservice.exception;
+package it.gov.pagopa.bizevents.sync.nodo.exception;
 
 import jakarta.validation.constraints.NotNull;
 import java.util.Formatter;
