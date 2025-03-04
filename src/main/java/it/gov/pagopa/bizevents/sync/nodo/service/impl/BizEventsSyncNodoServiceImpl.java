@@ -1,8 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.service.impl;
 
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionReceipt;
 import it.gov.pagopa.bizevents.sync.nodo.model.NodoReceiptInfo;
-import it.gov.pagopa.bizevents.sync.nodo.model.enumeration.NodoReceiptInfoVersion;
 import it.gov.pagopa.bizevents.sync.nodo.repository.BizEventsRepository;
 import it.gov.pagopa.bizevents.sync.nodo.repository.NodoReceiptNewModelRepository;
 import it.gov.pagopa.bizevents.sync.nodo.repository.NodoReceiptOldModelRepository;
@@ -43,22 +41,26 @@ public class BizEventsSyncNodoServiceImpl implements BizEventsSyncNodoService {
     @Override
     public List<NodoReceiptInfo> retrieveNotElaboratedNodoReceipts(String bizEventMinDate, String bizEventMaxDate, String nodoMinDate, String nodoMaxDateReceipt, String nodoMaxDateInsert) {
         // Retrieve all biz events payment_token from yesterday
-        List<String> paymentTokenList  = this.bizEventsRepository.getBizEventsPaymentTokenFromPaymentDateTime(bizEventMinDate, bizEventMaxDate);
+        List<String> bizEventPaymentTokenList = this.bizEventsRepository.getBizEventsPaymentTokenFromPaymentDateTime(bizEventMinDate, bizEventMaxDate);
 
-        // Count all payments from nodo with receipt day yesterday and inserted time max today
-        List<PositionReceipt> positionReceiptNewModelList = this.nodoReceiptNewModelRepository.getPositionReceiptFromReceiptDateAndNotInPaymentTokenList(nodoMinDate, nodoMaxDateReceipt, nodoMaxDateInsert, paymentTokenList);
-        List<PositionReceipt> positionReceiptOldModelList = this.nodoReceiptOldModelRepository.getReceiptFromReceiptDateAndNotInPaymentTokenList(nodoMinDate, nodoMaxDateReceipt, nodoMaxDateInsert, paymentTokenList);
+        // Retrieve all payments from nodo with receipt day yesterday and inserted time max today
+        List<NodoReceiptInfo> list = new ArrayList<>();
+        list.addAll(
+                this.nodoReceiptNewModelRepository.getPositionReceiptFromReceiptDateAndNotInPaymentTokenList(
+                        nodoMinDate,
+                        nodoMaxDateReceipt,
+                        nodoMaxDateInsert,
+                        bizEventPaymentTokenList
+                ));
+        list.addAll(
+                this.nodoReceiptOldModelRepository.getReceiptFromReceiptDateAndNotInPaymentTokenList(
+                        nodoMinDate,
+                        nodoMaxDateReceipt,
+                        nodoMaxDateInsert,
+                        bizEventPaymentTokenList
+                ));
 
-        // Map needed info from receipts
-        List<NodoReceiptInfo> nodoReceiptInfoList = new ArrayList<>();
-        positionReceiptNewModelList.parallelStream().forEach(el ->
-            nodoReceiptInfoList.add(NodoReceiptInfo.builder().receiptId(el.getId()).paymentToken(el.getPaymentToken()).version(NodoReceiptInfoVersion.NEW).build())
-        );
-        positionReceiptOldModelList.parallelStream().forEach(el ->
-            nodoReceiptInfoList.add(NodoReceiptInfo.builder().receiptId(el.getId()).paymentToken(el.getPaymentToken()).version(NodoReceiptInfoVersion.OLD).build())
-        );
-
-        return nodoReceiptInfoList;
+        return list;
     }
 
 }
