@@ -1,9 +1,9 @@
-microservice-chart:
-  namespace: "your-namespace" # TODO: set your AKS namespace
+microservice-chart: &microservice-chart
+  namespace: "bizevents"
   nameOverride: ""
   fullnameOverride: ""
   image:
-    repository: ghcr.io/pagopa/yourname # TODO
+    repository: ghcr.io/pagopa/pagopa-biz-events-service
     tag: "0.0.0"
     pullPolicy: Always
   livenessProbe:
@@ -27,16 +27,14 @@ microservice-chart:
     type: ClusterIP
     ports:
       - 8080
-  ingress:
+  ingress: &ingress
     create: true
-    host: "your.host" # TODO: set the host
-    path: /your-path-here/(.*) # TODO: set your path
+    host: "weuprod.bizevents.internal.platform.pagopa.it"
+    path: /pagopa-biz-events-sync-nodo/(.*)
     servicePort: 8080
   serviceAccount:
     create: false
-    annotations: { }
-    name: ""
-  podAnnotations: { }
+  podAnnotations: {}
   podSecurityContext:
     seccompProfile:
       type: RuntimeDefault
@@ -55,7 +53,7 @@ microservice-chart:
       cpu: "0.25"
   autoscaling:
     enable: true
-    minReplica: 3
+    minReplica: 1
     maxReplica: 10
     pollingInterval: 10 # seconds
     cooldownPeriod: 50 # seconds
@@ -66,31 +64,32 @@ microservice-chart:
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
           value: "75"
   envConfig:
-    APP_NAME: "yourProjectName" # TODO
-    APP_ENVIRONMENT: "prod"
     # TODO: set your name
-    WEBSITE_SITE_NAME: 'yourProjectName' # required to show cloud role name in application insights
-    ENV: 'azure-prod'
-    APP_LOGGING_LEVEL: 'INFO'
+    WEBSITE_SITE_NAME: 'pagopabizeventssyncnodo' # required to show cloud role name in application insights
+    ENV: 'azure-dev'
+    APP_LOGGING_LEVEL: 'DEBUG'
     DEFAULT_LOGGING_LEVEL: 'INFO'
-    CORS_CONFIGURATION: '{"origins": ["*"], "methods": ["*"]}'
 
-    OTEL_SERVICE_NAME: # TODO
-    OTEL_RESOURCE_ATTRIBUTES: "deployment.environment=prod"
-    OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
-    OTEL_TRACES_EXPORTER: otlp
-    OTEL_METRICS_EXPORTER: otlp
-    OTEL_LOGS_EXPORTER: none
-    OTEL_TRACES_SAMPLER: "always_on"
-  envSecret:
+    SPRING_DATASOURCE_URL: "jdbc:oracle:thin:@(DESCRIPTION=(ENABLE=BROKEN)(ADDRESS=(PROTOCOL=tcp)(PORT=1521)(HOST=db-nodo-pagamenti.p.db-nodo-pagamenti.com))(CONNECT_DATA=(SERVICE_NAME=NDPSPCP_NODO_ONLINE))(SO_KEEPALIVE=true)(TCP_KEEPIDLE=60)(TCP_KEEPINTVL=30)(TCP_KEEPCNT=15))"
+    SPRING_DATASOURCE_USERNAME: 'nodo-oracle-db-name'
+    SPRING_DATASOURCE_DRIVER: 'oracle.jdbc.OracleDriver'
+    SPRING_JPA_DB_PLATFORM: 'org.hibernate.dialect.Oracle12cDialect'
+    DATABASE_SCHEMA: 'NODO_ONLINE'
+
+    COSMOS_DB_URI: 'https://pagopa-p-weu-bizevents-ds-cosmos-account.documents.azure.com:443/'
+    COSMOS_DB_NAME: 'db'
+    COSMOS_DB_CONTAINER_NAME: 'biz-events'
+    COSMOS_QUERY_METRICS: 'false'
+  envSecret: &envSecret
     # required
-    APPLICATIONINSIGHTS_CONNECTION_STRING: 'app-insight-connection-string'
-    OTEL_EXPORTER_OTLP_HEADERS: elastic-apm-secret-token
+    APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-p-connection-string'
+    COSMOS_DB_PRIMARY_KEY: 'cosmos-p-biz-key'
+    SPRING_DATASOURCE_PASSWORD: 'nodo-oracle-db-password'
   keyvault:
-    name: "pagopa-p-name-kv" #TODO
+    name: "pagopa-p-bizevents-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
-  nodeSelector: { }
-  tolerations: [ ]
+  nodeSelector: {}
+  tolerations: []
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
@@ -99,24 +98,8 @@ microservice-chart:
               - key: node_type
                 operator: In
                 values:
-                  - user
+                  - "user"
   canaryDelivery:
-    create: true
-    ingress:
-      create: true
-      canary:
-        type: header
-        headerName: X-Canary
-        headerValue: canary
-        weightPercent: 0
-    service:
-      create: true
+    create: false
     deployment:
-      create: true
-      image:
-        repository: ghcr.io/pagopa/yourname # TODO
-        tag: "0.0.0"
-        pullPolicy: Always
-      envConfig: { }
-      envSecret: { }
-
+      create: false
