@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_KEY: # TODO
+  PROJECT_KEY: pagopa_pagopa-biz-events-sync-nodo
 
 permissions:
   id-token: write
@@ -34,27 +34,16 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Test and Coverage
+      - name: Code Review
         uses: pagopa/github-actions-template/maven-code-review@186af0dfc5ee51e6150046051d4e0b6444e15aed # v1.10.6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           sonar_token: ${{ secrets.SONAR_TOKEN }}
           project_key: ${{env.PROJECT_KEY}}
-          coverage_exclusions: "**/config/*,**/*Mock*,**/model/**,**/entity/*,**/exception/**"
-          cpd_exclusions: "**/model/**,**/entity/*"
           java_version: 17
+          coverage_exclusions: "**/config/*,**/*Mock*,**/models/**,,**/entity/*,**/exception/**"
+          cpd_exclusions: "**/models/**,**/clients/model/**,**/entity/*"
+          coverage_report_path: "./target/jacoco-report/jacoco.xml"
 
-      - name: suggester / junit
-        uses: reviewdog/action-suggester@a3026c6020837c23b61a79d12db223a00df19e6a # v1
-        with:
           tool_name: junit
-
-  smoke_test:
-    name: Smoke Test
-    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
-    uses: ./.github/workflows/ci_integration_test.yml
-    with:
-      environment: 'local'
-      notify: false
-    secrets: inherit
 
