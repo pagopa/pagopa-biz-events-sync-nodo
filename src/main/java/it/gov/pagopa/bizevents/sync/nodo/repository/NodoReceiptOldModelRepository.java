@@ -19,15 +19,12 @@ public interface NodoReceiptOldModelRepository extends JpaRepository<RT, Long> {
             "WHERE t.ESITO = 'ESEGUITO'  " +
             "AND t.DATA_RICEVUTA >= TO_DATE(@minDate, 'yyyy-mm-dd hh24:mi:ss')  " +
             "AND t.DATA_RICEVUTA < TO_DATE(@maxDateReceipt, 'yyyy-mm-dd hh24:mi:ss')  " +
-            "AND t.INSERTED_TIMESTAMP >= TO_DATE(@minDate, 'yyyy-mm-dd hh24:mi:ss')  " +
-            "AND t.INSERTED_TIMESTAMP < TO_DATE(@minDateInsertion, 'yyyy-mm-dd hh24:mi:ss')  " +
             "AND (r.FLAG_SECONDA = 'N' OR r.FLAG_SECONDA IS NULL or r.FLAG_SECONDA = 'Y')  " +
             "AND t.GENERATA_DA = 'PSP'  " +
             "AND pr.PAYMENT_TOKEN NOT IN @paymentTokenList ")
     List<NodoReceiptInfo> getReceiptFromReceiptDateAndNotInPaymentTokenList(
             @Param("minDate") String minDate,
-            @Param("maxDateReceipt") String maxDateReceipt,
-            @Param("maxDateInsertion") String maxDateInsertion,
+            @Param("maxDate") String maxDate,
             @Param("paymentTokenList") List<String> paymentTokenList
     );
 
@@ -38,8 +35,6 @@ public interface NodoReceiptOldModelRepository extends JpaRepository<RT, Long> {
             "where t.ESITO='ESEGUITO' " +
             "AND t.DATA_RICEVUTA >= TO_DATE(@maxDate,'yyyy-mm-dd hh24:mi:ss') " +
             "AND t.DATA_RICEVUTA < TO_DATE(@maxDateReceipt,'yyyy-mm-dd hh24:mi:ss') " +
-            "AND t.INSERTED_TIMESTAMP >= TO_DATE(@maxDate,'yyyy-mm-dd hh24:mi:ss') " +
-            "AND t.INSERTED_TIMESTAMP < TO_DATE(@minDateInsertion,'yyyy-mm-dd hh24:mi:ss') " +
             "AND (r.FLAG_SECONDA = 'N' OR r.FLAG_SECONDA IS NULL) " +
             "AND t.GENERATA_DA = 'PSP' " +
             "UNION " +
@@ -49,8 +44,6 @@ public interface NodoReceiptOldModelRepository extends JpaRepository<RT, Long> {
             "where t.ESITO='ESEGUITO' " +
             "AND t.DATA_RICEVUTA >= TO_DATE(@maxDate,'yyyy-mm-dd hh24:mi:ss') " +
             "AND t.DATA_RICEVUTA < TO_DATE(@maxDateReceipt,'yyyy-mm-dd hh24:mi:ss') " +
-            "AND t.INSERTED_TIMESTAMP >= TO_DATE(@maxDate,'yyyy-mm-dd hh24:mi:ss') " +
-            "AND t.INSERTED_TIMESTAMP < TO_DATE(@minDateInsertion,'yyyy-mm-dd hh24:mi:ss') " +
             "AND r.FLAG_SECONDA = 'Y' " +
             "AND t.GENERATA_DA = 'PSP') " +
             "select a.numero - b.numero " +
@@ -59,7 +52,6 @@ public interface NodoReceiptOldModelRepository extends JpaRepository<RT, Long> {
             "and b.tipo = 'Da togliere'")
     long countReceiptFromReceiptDate(
             @Param("minDate") String minDate,
-            @Param("maxDateReceipt") String maxDateReceipt,
-            @Param("maxDateInsertion") String maxDateInsertion
+            @Param("maxDate") String maxDate
     );
 }

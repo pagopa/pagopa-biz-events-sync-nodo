@@ -27,19 +27,19 @@ public class BizEventsSyncNodoServiceImpl implements BizEventsSyncNodoService {
     }
 
     @Override
-    public long checkBizEventsDiffNodoToday(String bizEventMinDate, String bizEventMaxDate, String nodoMinDate, String nodoMaxDateReceipt, String nodoMaxDateInsert) {
+    public long checkBizEventsDiffNodoToday(String bizEventMinDate, String bizEventMaxDate, String nodoMinDate, String nodoMaxDate) {
         // Count all biz events from yesterday
         long numberOfBizEvents = this.bizEventsRepository.countBizEventsFromPaymentDateTime(bizEventMinDate, bizEventMaxDate);
 
         // Count all payments from nodo with receipt day yesterday and inserted time max today
-        long numberOfPaymentsNewModelFromNodo = this.nodoReceiptNewModelRepository.countPositionReceiptFromReceiptDate(nodoMinDate, nodoMaxDateReceipt, nodoMaxDateInsert);
-        long numberOfPaymentsOldModelFromNodo = this.nodoReceiptOldModelRepository.countReceiptFromReceiptDate(nodoMinDate, nodoMaxDateReceipt, nodoMaxDateInsert);
+        long numberOfPaymentsNewModelFromNodo = this.nodoReceiptNewModelRepository.countPositionReceiptFromReceiptDate(nodoMinDate, nodoMaxDate);
+        long numberOfPaymentsOldModelFromNodo = this.nodoReceiptOldModelRepository.countReceiptFromReceiptDate(nodoMinDate, nodoMaxDate);
 
         return (numberOfPaymentsNewModelFromNodo + numberOfPaymentsOldModelFromNodo) - numberOfBizEvents;
     }
 
     @Override
-    public List<NodoReceiptInfo> retrieveNotElaboratedNodoReceipts(String bizEventMinDate, String bizEventMaxDate, String nodoMinDate, String nodoMaxDateReceipt, String nodoMaxDateInsert) {
+    public List<NodoReceiptInfo> retrieveNotElaboratedNodoReceipts(String bizEventMinDate, String bizEventMaxDate, String nodoMinDate, String nodoMaxDate) {
         // Retrieve all biz events payment_token from yesterday
         List<String> bizEventPaymentTokenList = this.bizEventsRepository.getBizEventsPaymentTokenFromPaymentDateTime(bizEventMinDate, bizEventMaxDate);
 
@@ -48,15 +48,13 @@ public class BizEventsSyncNodoServiceImpl implements BizEventsSyncNodoService {
         list.addAll(
                 this.nodoReceiptNewModelRepository.getPositionReceiptFromReceiptDateAndNotInPaymentTokenList(
                         nodoMinDate,
-                        nodoMaxDateReceipt,
-                        nodoMaxDateInsert,
+                        nodoMaxDate,
                         bizEventPaymentTokenList
                 ));
         list.addAll(
                 this.nodoReceiptOldModelRepository.getReceiptFromReceiptDateAndNotInPaymentTokenList(
                         nodoMinDate,
-                        nodoMaxDateReceipt,
-                        nodoMaxDateInsert,
+                        nodoMaxDate,
                         bizEventPaymentTokenList
                 ));
 

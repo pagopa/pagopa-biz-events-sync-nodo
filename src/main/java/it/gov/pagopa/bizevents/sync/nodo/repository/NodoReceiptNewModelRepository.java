@@ -14,26 +14,20 @@ public interface NodoReceiptNewModelRepository extends JpaRepository<PositionRec
 
     @Query("SELECT new NodoReceiptInfo(pr.PAYMENT_TOKEN, pr.NOTICE_ID, NodoReceiptInfoVersion.NEW)" +
             "FROM POSITION_RECEIPT pr" +
-            "WHERE pr.INSERTED_TIMESTAMP >= TO_DATE(@minDate) " +
-            "AND pr.INSERTED_TIMESTAMP < TO_DATE(@maxDateInsertion) " +
             "AND pr.PAYMENT_DATE_TIME >= TO_DATE(@minDate) " +
-            "AND pr.PAYMENT_DATE_TIME < TO_DATE(@maxDateReceipt)" +
+            "AND pr.PAYMENT_DATE_TIME < TO_DATE(@maxDate)" +
             "AND pr.PAYMENT_TOKEN NOT IN @paymentTokenList")
     List<NodoReceiptInfo> getPositionReceiptFromReceiptDateAndNotInPaymentTokenList(
             @Param("minDate") String minDate,
-            @Param("maxDateReceipt") String maxDateReceipt,
-            @Param("maxDateInsertion") String maxDateInsertion,
+            @Param("maxDate") String maxDate,
             @Param("paymentTokenList") List<String> paymentTokenList
     );
 
     @Query("SELECT COUNT(1) FROM NODO_ONLINE.POSITION_RECEIPT pr " +
-            "WHERE pr.INSERTED_TIMESTAMP >= TO_DATE(@minDate) " +
-            "AND pr.INSERTED_TIMESTAMP < TO_DATE(@maxDateInsertion) " +
             "AND pr.PAYMENT_DATE_TIME >= TO_DATE(@minDate) " +
-            "AND pr.PAYMENT_DATE_TIME < TO_DATE(@maxDateReceipt)")
+            "AND pr.PAYMENT_DATE_TIME < TO_DATE(@maxDate)")
     long countPositionReceiptFromReceiptDate(
             @Param("minDate") String minDate,
-            @Param("maxDateReceipt") String maxDateReceipt,
-            @Param("maxDateInsertion") String maxDateInsertion
+            @Param("maxDate") String maxDate
     );
 }
