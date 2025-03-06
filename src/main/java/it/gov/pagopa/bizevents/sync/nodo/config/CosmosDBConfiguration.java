@@ -17,6 +17,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.Nullable;
 
+import java.util.ArrayList;
+
 @Configuration
 @EnableCosmosRepositories("it.gov.pagopa.bizevents.sync.nodo.repository")
 @EnableCosmosAuditing
@@ -37,13 +39,19 @@ public class CosmosDBConfiguration extends AbstractCosmosConfiguration {
     @Value("${azure.cosmos.populate-query-metrics}")
     private boolean queryMetricsEnabled;
 
+
     @Bean
     CosmosClientBuilder getCosmosClientBuilder() {
         AzureKeyCredential azureKeyCredential = new AzureKeyCredential(key);
         DirectConnectionConfig directConnectionConfig = new DirectConnectionConfig();
+
+        ArrayList<String> preferredRegions = new ArrayList<>(); // TODO swap to env variable
+        preferredRegions.add( "North EU");
+
         return new CosmosClientBuilder()
                 .endpoint(uri)
                 .credential(azureKeyCredential)
+                .preferredRegions(preferredRegions)
                 .directMode(directConnectionConfig);
     }
 
