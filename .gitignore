@@ -39,4 +39,4 @@ hs_err_pid*
 /helm/charts/*
 **/.terraform/
 
-.env
+*.env
