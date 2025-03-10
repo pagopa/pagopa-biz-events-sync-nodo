@@ -44,7 +44,7 @@ public class BizEventsSyncNodoScheduler {
         String nodoMaxDate = maxDate.format(nodoDatesFormatter);
 
         // Count differences between payments from Nodo & elaborated biz-events
-        long countDiff = this.bizEventsSyncNodoService.checkBizEventsDiffNodoToday(bizEventMinDate,bizEventMaxDate,nodoMinDate,nodoMaxDate);
+        long countDiff = this.bizEventsSyncNodoService.checkBizEventsDiffAtDate(bizEventMinDate,bizEventMaxDate,nodoMinDate,nodoMaxDate);
 
         if(countDiff > 0){
             // Alert

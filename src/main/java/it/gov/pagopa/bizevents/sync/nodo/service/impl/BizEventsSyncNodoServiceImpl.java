@@ -27,7 +27,7 @@ public class BizEventsSyncNodoServiceImpl implements BizEventsSyncNodoService {
     }
 
     @Override
-    public long checkBizEventsDiffNodoToday(String bizEventMinDate, String bizEventMaxDate, String nodoMinDate, String nodoMaxDate) {
+    public long checkBizEventsDiffAtDate(String bizEventMinDate, String bizEventMaxDate, String nodoMinDate, String nodoMaxDate) {
         // Count all biz events from yesterday
         long numberOfBizEvents = this.bizEventsRepository.countBizEventsFromPaymentDateTime(bizEventMinDate, bizEventMaxDate);
 

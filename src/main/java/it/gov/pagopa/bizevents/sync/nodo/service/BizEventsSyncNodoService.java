@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface BizEventsSyncNodoService {
 
-    long checkBizEventsDiffNodoToday(String bizEventMinDate, String bizEventMaxDate, String nodoMinDate, String nodoMaxDateReceipt);
+    long checkBizEventsDiffAtDate(String bizEventMinDate, String bizEventMaxDate, String nodoMinDate, String nodoMaxDateReceipt);
 
     List<NodoReceiptInfo>  retrieveNotElaboratedNodoReceipts(String bizEventMinDate, String bizEventMaxDate, String nodoMinDate, String nodoMaxDateReceipt);
 }
