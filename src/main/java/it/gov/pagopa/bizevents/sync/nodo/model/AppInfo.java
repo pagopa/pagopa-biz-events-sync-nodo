@@ -17,6 +17,8 @@ import lombok.ToString;
 public class AppInfo {
 
   private String name;
+
   private String version;
+
   private String environment;
 }

@@ -19,5 +19,6 @@ import lombok.ToString;
 public class AppCorsConfiguration {
 
   private String[] origins;
+
   private String[] methods;
 }

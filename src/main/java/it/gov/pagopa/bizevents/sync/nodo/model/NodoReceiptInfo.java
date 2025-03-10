@@ -12,7 +12,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class NodoReceiptInfo {
 
-    String iuv;
-    String paymentToken;
-    NodoReceiptInfoVersion version;
+  private String iuv;
+
+  private String paymentToken;
+
+  private NodoReceiptInfoVersion version;
 }

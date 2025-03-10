@@ -1,4 +1,4 @@
-package it.gov.pagopa.bizevents.sync.nodo.entity.bizevents;
+package it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.subject;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,9 +12,14 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class Creditor {
-	private String idPA;
-	private String idBrokerPA;
-	private String idStation;
-	private String companyName;
-	private String officeName;
+
+  private String idPA;
+
+  private String idBrokerPA;
+
+  private String idStation;
+
+  private String companyName;
+
+  private String officeName;
 }
