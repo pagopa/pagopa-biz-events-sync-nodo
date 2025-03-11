@@ -30,7 +30,7 @@ public class BizEventsSyncNodoScheduler {
     this.bizEventsSyncNodoService = bizEventsSyncNodoService;
   }
 
-  @Scheduled(cron = "${cron.job.schedule.expression.biz-sync-nodo}")
+  @Scheduled(cron = "${synchronization-process.schedule.expression}")
   @Async
   @Transactional
   public void synchronizeBizEventsWithNdpReceipts() {
