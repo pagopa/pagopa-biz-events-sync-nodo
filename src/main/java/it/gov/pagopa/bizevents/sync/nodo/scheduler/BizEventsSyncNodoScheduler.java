@@ -2,13 +2,16 @@ package it.gov.pagopa.bizevents.sync.nodo.scheduler;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
 import it.gov.pagopa.bizevents.sync.nodo.model.ReceiptEventInfo;
+import it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion;
 import it.gov.pagopa.bizevents.sync.nodo.service.BizEventsSyncNodoService;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,45 +44,52 @@ public class BizEventsSyncNodoScheduler {
     //
     LocalDateTime todayDate = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
     LocalDateTime lowerLimitDate = todayDate.minusDays(lowerBoundDateBeforeDays);
-    LocalDateTime upperLimitDate = todayDate.minusDays(lowerBoundDateBeforeDays - 1L);
+    // LocalDateTime upperLimitDate = todayDate.minusDays(lowerBoundDateBeforeDays - 1L);
+    // TODO below will be removed, it is set only for debug purposes
+    LocalDateTime upperLimitDate = todayDate.minusDays(lowerBoundDateBeforeDays).plusHours(1);
 
     //
     List<Pair<LocalDateTime, LocalDateTime>> timeSlots =
         getTimeSlotThatRequireSynchronization(lowerLimitDate, upperLimitDate);
 
     //
-    if (!timeSlots.isEmpty()) {
+    for (Pair<LocalDateTime, LocalDateTime> timeSlotToSynchronize : timeSlots) {
 
       //
-      for (Pair<LocalDateTime, LocalDateTime> timeSlotBoundary : timeSlots) {
+      LocalDateTime lowerDateBound = timeSlotToSynchronize.getLeft();
+      LocalDateTime upperDateBound = timeSlotToSynchronize.getRight();
+
+      //
+      // TODO handle errors and exceptions
+      Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents =
+          this.bizEventsSyncNodoService.retrieveReceiptsNotConvertedInBizEvents(
+              lowerDateBound, upperDateBound);
+
+      //
+      if (!receiptsNotConvertedInBizEvents.isEmpty()) {
 
         //
-        LocalDateTime lowerDateBound = timeSlotBoundary.getLeft();
-        LocalDateTime upperDateBound = timeSlotBoundary.getRight();
+        log.error(
+            "[BIZ-EVENTS-SYNC-NODO] Found [{}] payments from NdP not converted as BizEvents in time"
+                + " slot [{} - {}].",
+            receiptsNotConvertedInBizEvents.size(),
+            lowerDateBound,
+            upperDateBound);
 
         //
-        Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents =
-            this.bizEventsSyncNodoService.retrieveReceiptsNotConvertedInBizEvents(
-                lowerDateBound, upperDateBound);
-        if (!receiptsNotConvertedInBizEvents.isEmpty()) {
+        // TODO remove, only for debug purpose
+        receiptsNotConvertedInBizEvents =
+            receiptsNotConvertedInBizEvents.stream().findFirst().stream()
+                .collect(Collectors.toSet());
 
-          //
-          log.error(
-              "[BIZ-EVENTS-SYNC-NODO] Found [{}] payments from Nodo not converted as BizEvents.",
-              receiptsNotConvertedInBizEvents.size());
+        //
+        List<BizEvent> bizEventsToSend =
+            generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
 
-          //
-          List<BizEvent> bizEventsToBeSent =
-              generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
-
-          //
-          sendBizEventsToEventHub(bizEventsToBeSent);
-          log.info("");
-        }
+        //
+        sendBizEventsToEventHub(bizEventsToSend);
+        log.info("");
       }
-
-    } else {
-      log.info("No time slot to be synchronized. All BizEvents were correctly stored!");
     }
   }
 
@@ -125,7 +135,26 @@ public class BizEventsSyncNodoScheduler {
   private List<BizEvent> generateBizEventsFromNodoReceipts(
       Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents) {
 
-    return null;
+    List<BizEvent> generatedBizEvents = new LinkedList<>();
+
+    // TODO handle errors and exceptions
+    for (ReceiptEventInfo receiptEvent : receiptsNotConvertedInBizEvents) {
+
+      if (PaymentModelVersion.OLD.equals(receiptEvent.getVersion())) {
+
+        // TODO execute query on RPT
+
+      } else {
+
+        // TODO execute query on POSITION_PAYMENT
+      }
+
+      // TODO invoke ecommerce helpdesk
+
+      // TODO map entities in BizEvent, then add to generatedBizEvents
+    }
+
+    return generatedBizEvents;
   }
 
   private void sendBizEventsToEventHub(List<BizEvent> bizEventsToBeSent) {}

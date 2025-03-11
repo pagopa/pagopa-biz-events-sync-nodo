@@ -9,11 +9,16 @@ import it.gov.pagopa.bizevents.sync.nodo.util.Constants;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class BizEventsSyncNodoServiceImpl implements BizEventsSyncNodoService {
 
   private final BizEventsRepository bizEventsRepository;
@@ -82,10 +87,23 @@ public class BizEventsSyncNodoServiceImpl implements BizEventsSyncNodoService {
         this.nodoOldModelReceiptsRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
 
     Set<ReceiptEventInfo> bizEvents = new HashSet<>();
-    bizEvents.addAll(
-        this.bizEventsRepository.readBizEventsOfOldModelInTimeSlot(lowerBoundDate, upperBoundDate));
-    bizEvents.addAll(
-        this.bizEventsRepository.readBizEventsOfNewModelInTimeSlot(lowerBoundDate, upperBoundDate));
+    String formattedLowerBoundDate = lowerBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER);
+    String formattedUpperBoundDate = upperBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER);
+
+    try {
+      Set<Map<String, Object>> rawResults =
+          this.bizEventsRepository.readBizEventsInTimeSlot(
+              formattedLowerBoundDate, formattedUpperBoundDate);
+      bizEvents.addAll(rawResults.stream().map(ReceiptEventInfo::new).collect(Collectors.toSet()));
+    } catch (DataAccessException e) {
+      log.error(
+          "An error occurred while searching BizEvents for old payment model (i.e. modelType = 1)"
+              + " on time slot [{} - {}].",
+          lowerBoundDate,
+          upperBoundDate,
+          e);
+      // TODO throw custom exception
+    }
 
     ndpReceipts.removeAll(bizEvents);
     return ndpReceipts;

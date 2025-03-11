@@ -39,7 +39,6 @@ public class BaseController {
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<AppInfo> healthCheck() {
 
-    // Used just for health checking
     scheduler.synchronizeBizEventsWithNdpReceipts();
     AppInfo info = AppInfo.builder().name(name).version(version).environment(environment).build();
     return ResponseEntity.status(HttpStatus.OK).body(info);
