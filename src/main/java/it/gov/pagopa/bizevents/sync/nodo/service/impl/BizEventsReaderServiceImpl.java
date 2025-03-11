@@ -4,7 +4,7 @@ import it.gov.pagopa.bizevents.sync.nodo.model.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.repository.BizEventsRepository;
 import it.gov.pagopa.bizevents.sync.nodo.repository.NodoNewModelReceiptsRepository;
 import it.gov.pagopa.bizevents.sync.nodo.repository.NodoOldModelReceiptsRepository;
-import it.gov.pagopa.bizevents.sync.nodo.service.BizEventsSyncNodoService;
+import it.gov.pagopa.bizevents.sync.nodo.service.BizEventsReaderService;
 import it.gov.pagopa.bizevents.sync.nodo.util.Constants;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class BizEventsSyncNodoServiceImpl implements BizEventsSyncNodoService {
+public class BizEventsReaderServiceImpl implements BizEventsReaderService {
 
   private final BizEventsRepository bizEventsRepository;
 
@@ -28,7 +28,7 @@ public class BizEventsSyncNodoServiceImpl implements BizEventsSyncNodoService {
   private final NodoOldModelReceiptsRepository nodoOldModelReceiptsRepository;
 
   @Autowired
-  public BizEventsSyncNodoServiceImpl(
+  public BizEventsReaderServiceImpl(
       BizEventsRepository bizEventsRepository,
       NodoNewModelReceiptsRepository nodoNewModelReceiptsRepository,
       NodoOldModelReceiptsRepository nodoOldModelReceiptsRepository) {

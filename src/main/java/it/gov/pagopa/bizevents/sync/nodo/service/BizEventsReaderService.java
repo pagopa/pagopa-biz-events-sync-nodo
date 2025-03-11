@@ -4,7 +4,7 @@ import it.gov.pagopa.bizevents.sync.nodo.model.ReceiptEventInfo;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-public interface BizEventsSyncNodoService {
+public interface BizEventsReaderService {
 
   /**
    * Check whether there are any discrepancies between the biz events and the receipts stored by

@@ -3,7 +3,7 @@ package it.gov.pagopa.bizevents.sync.nodo.scheduler;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
 import it.gov.pagopa.bizevents.sync.nodo.model.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion;
-import it.gov.pagopa.bizevents.sync.nodo.service.BizEventsSyncNodoService;
+import it.gov.pagopa.bizevents.sync.nodo.service.BizEventsReaderService;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -25,15 +25,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class BizEventsSyncNodoScheduler {
 
-  private final BizEventsSyncNodoService bizEventsSyncNodoService;
+  private final BizEventsReaderService bizEventsReaderService;
 
   @Value("${synchronization-process.lower-bound-date.before-days}")
   private Integer lowerBoundDateBeforeDays;
 
   @Autowired
-  public BizEventsSyncNodoScheduler(BizEventsSyncNodoService bizEventsSyncNodoService) {
+  public BizEventsSyncNodoScheduler(BizEventsReaderService bizEventsReaderService) {
 
-    this.bizEventsSyncNodoService = bizEventsSyncNodoService;
+    this.bizEventsReaderService = bizEventsReaderService;
   }
 
   @Scheduled(cron = "${synchronization-process.schedule.expression}")
@@ -62,7 +62,7 @@ public class BizEventsSyncNodoScheduler {
       //
       // TODO handle errors and exceptions
       Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents =
-          this.bizEventsSyncNodoService.retrieveReceiptsNotConvertedInBizEvents(
+          this.bizEventsReaderService.retrieveReceiptsNotConvertedInBizEvents(
               lowerDateBound, upperDateBound);
 
       //
@@ -107,7 +107,7 @@ public class BizEventsSyncNodoScheduler {
 
       // Count differences between receipts stored from NdP and elaborated BizEvents
       boolean areThereMissingBizEvent =
-          this.bizEventsSyncNodoService.checkIfMissingBizEventsAtTimeSlot(minDate, maxDate);
+          this.bizEventsReaderService.checkIfMissingBizEventsAtTimeSlot(minDate, maxDate);
 
       // If there are missing BizEvents, add the time slot boundaries in the returned list
       if (areThereMissingBizEvent) {
