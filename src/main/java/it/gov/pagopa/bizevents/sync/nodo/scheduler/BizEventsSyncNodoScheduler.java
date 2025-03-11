@@ -1,11 +1,14 @@
 package it.gov.pagopa.bizevents.sync.nodo.scheduler;
 
+import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
+import it.gov.pagopa.bizevents.sync.nodo.model.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.service.BizEventsSyncNodoService;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,25 +38,44 @@ public class BizEventsSyncNodoScheduler {
   @Transactional
   public void synchronizeBizEventsWithNdpReceipts() {
 
+    //
     LocalDateTime todayDate = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
     LocalDateTime lowerLimitDate = todayDate.minusDays(lowerBoundDateBeforeDays);
     LocalDateTime upperLimitDate = todayDate.minusDays(lowerBoundDateBeforeDays - 1L);
 
+    //
     List<Pair<LocalDateTime, LocalDateTime>> timeSlots =
         getTimeSlotThatRequireSynchronization(lowerLimitDate, upperLimitDate);
 
+    //
     if (!timeSlots.isEmpty()) {
 
+      //
       for (Pair<LocalDateTime, LocalDateTime> timeSlotBoundary : timeSlots) {
 
+        //
         LocalDateTime lowerDateBound = timeSlotBoundary.getLeft();
         LocalDateTime upperDateBound = timeSlotBoundary.getRight();
 
-        /*
-        Set<ReceiptEventInfo> nodoReceiptInfoList = this.bizEventsSyncNodoService.retrieveReceiptsNotConvertedInBizEvents(lowerDateBound, upperDateBound);
-         */
-        // log.error("[BIZ-EVENTS-SYNC-NODO] Found [{}] payments from Nodo not elaborated to
-        // Biz-events", countDiff);
+        //
+        Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents =
+            this.bizEventsSyncNodoService.retrieveReceiptsNotConvertedInBizEvents(
+                lowerDateBound, upperDateBound);
+        if (!receiptsNotConvertedInBizEvents.isEmpty()) {
+
+          //
+          log.error(
+              "[BIZ-EVENTS-SYNC-NODO] Found [{}] payments from Nodo not converted as BizEvents.",
+              receiptsNotConvertedInBizEvents.size());
+
+          //
+          List<BizEvent> bizEventsToBeSent =
+              generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
+
+          //
+          sendBizEventsToEventHub(bizEventsToBeSent);
+          log.info("");
+        }
       }
 
     } else {
@@ -99,4 +121,12 @@ public class BizEventsSyncNodoScheduler {
 
     return timeSlotsInError;
   }
+
+  private List<BizEvent> generateBizEventsFromNodoReceipts(
+      Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents) {
+
+    return null;
+  }
+
+  private void sendBizEventsToEventHub(List<BizEvent> bizEventsToBeSent) {}
 }
