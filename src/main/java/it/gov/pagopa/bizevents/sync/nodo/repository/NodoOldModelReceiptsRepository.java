@@ -17,7 +17,7 @@ public interface NodoOldModelReceiptsRepository extends JpaRepository<RT, Long> 
           rt.ccp AS paymentToken,
           rt.identDominio AS domainId,
           rt.insertedTimestamp AS insertedTimestamp,
-          it.gov.pagopa.bizevents.sync.nodo.model.enumeration.NodoReceiptInfoVersion.OLD AS version
+          it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion.OLD AS version
       )
       FROM RT rt
       JOIN RPT rpt

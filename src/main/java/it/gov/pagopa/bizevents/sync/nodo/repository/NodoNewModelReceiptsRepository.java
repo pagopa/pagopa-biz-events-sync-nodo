@@ -17,7 +17,7 @@ public interface NodoNewModelReceiptsRepository extends JpaRepository<PositionRe
           pr.paymentToken AS paymentToken,
           pr.paFiscalCode AS domainId,
           pr.insertedTimestamp AS insertedTimestamp,
-          it.gov.pagopa.bizevents.sync.nodo.model.enumeration.NodoReceiptInfoVersion.NEW AS version
+          it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion.NEW AS version
       )
       FROM PositionReceipt pr
       WHERE pr.paymentDateTime >= :minDate
