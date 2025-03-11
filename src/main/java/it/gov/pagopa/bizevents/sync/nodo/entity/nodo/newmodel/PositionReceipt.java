@@ -84,6 +84,9 @@ public class PositionReceipt {
   @Column(name = "APPLICATION_DATE")
   private LocalDateTime applicationDate;
 
+  @Column(name = "INSERTED_TIMESTAMP")
+  private LocalDateTime insertedTimestamp;
+
   @Column(name = "METADATA")
   private String metadata;
 

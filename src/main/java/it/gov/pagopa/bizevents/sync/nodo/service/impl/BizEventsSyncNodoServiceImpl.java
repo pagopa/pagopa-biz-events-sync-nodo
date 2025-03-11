@@ -1,14 +1,15 @@
 package it.gov.pagopa.bizevents.sync.nodo.service.impl;
 
-import it.gov.pagopa.bizevents.sync.nodo.model.NdpReceipt;
+import it.gov.pagopa.bizevents.sync.nodo.model.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.repository.BizEventsRepository;
 import it.gov.pagopa.bizevents.sync.nodo.repository.NodoNewModelReceiptsRepository;
 import it.gov.pagopa.bizevents.sync.nodo.repository.NodoOldModelReceiptsRepository;
 import it.gov.pagopa.bizevents.sync.nodo.service.BizEventsSyncNodoService;
 import it.gov.pagopa.bizevents.sync.nodo.util.Constants;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +40,7 @@ public class BizEventsSyncNodoServiceImpl implements BizEventsSyncNodoService {
     // Retrieve the count of BizEvents for the passed time slot
     long numberOfBizEvents = 0;
     List<Long> countOfBizEventByTimeSlot =
-        this.bizEventsRepository.countBizEventsWithPaymentDateTimeInTimeSlot(
+        this.bizEventsRepository.countBizEventsInTimeSlot(
             lowerBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER),
             upperBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER));
     if (!countOfBizEventByTimeSlot.isEmpty()) {
@@ -70,25 +71,23 @@ public class BizEventsSyncNodoServiceImpl implements BizEventsSyncNodoService {
   }
 
   @Override
-  public List<NdpReceipt> retrieveNotElaboratedNodoReceipts(
+  public Set<ReceiptEventInfo> retrieveReceiptsNotConvertedInBizEvents(
       LocalDateTime lowerBoundDate, LocalDateTime upperBoundDate) {
 
-    // Retrieve all biz events payment_token from yesterday
-    List<String> bizEventPaymentTokenList =
-        this.bizEventsRepository.getBizEventsPaymentTokenFromPaymentDateTime(
-            lowerBoundDate, upperBoundDate);
+    //
+    Set<ReceiptEventInfo> ndpReceipts = new HashSet<>();
+    ndpReceipts.addAll(
+        this.nodoNewModelReceiptsRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
+    ndpReceipts.addAll(
+        this.nodoOldModelReceiptsRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
 
-    // Retrieve all payments from nodo with receipt day yesterday and inserted time max today
-    List<NdpReceipt> list = new ArrayList<>();
-    /*
-    list.addAll(
-        this.nodoReceiptNewModelRepository
-            .readExcludedPaymentTokensInTimeSlot(
-                nodoMinDate, nodoMaxDate, bizEventPaymentTokenList));
-    list.addAll(
-        this.nodoReceiptOldModelRepository.getReceiptFromReceiptDateAndNotInPaymentTokenList(
-            nodoMinDate, nodoMaxDate, bizEventPaymentTokenList));
-    */
-    return list;
+    Set<ReceiptEventInfo> bizEvents = new HashSet<>();
+    bizEvents.addAll(
+        this.bizEventsRepository.readBizEventsOfOldModelInTimeSlot(lowerBoundDate, upperBoundDate));
+    bizEvents.addAll(
+        this.bizEventsRepository.readBizEventsOfNewModelInTimeSlot(lowerBoundDate, upperBoundDate));
+
+    ndpReceipts.removeAll(bizEvents);
+    return ndpReceipts;
   }
 }

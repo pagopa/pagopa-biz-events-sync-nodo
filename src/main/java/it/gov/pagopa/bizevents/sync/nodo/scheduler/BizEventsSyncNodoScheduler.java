@@ -50,9 +50,7 @@ public class BizEventsSyncNodoScheduler {
         LocalDateTime upperDateBound = timeSlotBoundary.getRight();
 
         /*
-        List<NodoReceiptInfo> nodoReceiptInfoList =
-            this.bizEventsSyncNodoService.retrieveNotElaboratedNodoReceipts(
-                lowerDateBound, upperDateBound);
+        Set<ReceiptEventInfo> nodoReceiptInfoList = this.bizEventsSyncNodoService.retrieveReceiptsNotConvertedInBizEvents(lowerDateBound, upperDateBound);
          */
         // log.error("[BIZ-EVENTS-SYNC-NODO] Found [{}] payments from Nodo not elaborated to
         // Biz-events", countDiff);
@@ -61,9 +59,6 @@ public class BizEventsSyncNodoScheduler {
     } else {
       log.info("No time slot to be synchronized. All BizEvents were correctly stored!");
     }
-
-    // Alert
-
   }
 
   private List<Pair<LocalDateTime, LocalDateTime>> getTimeSlotThatRequireSynchronization(

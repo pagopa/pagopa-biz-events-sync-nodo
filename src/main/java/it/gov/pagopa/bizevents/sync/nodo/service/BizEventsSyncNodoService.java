@@ -1,8 +1,8 @@
 package it.gov.pagopa.bizevents.sync.nodo.service;
 
-import it.gov.pagopa.bizevents.sync.nodo.model.NdpReceipt;
+import it.gov.pagopa.bizevents.sync.nodo.model.ReceiptEventInfo;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 public interface BizEventsSyncNodoService {
 
@@ -23,6 +23,6 @@ public interface BizEventsSyncNodoService {
    * @param upperBoundDate
    * @return
    */
-  List<NdpReceipt> retrieveNotElaboratedNodoReceipts(
+  Set<ReceiptEventInfo> retrieveReceiptsNotConvertedInBizEvents(
       LocalDateTime lowerBoundDate, LocalDateTime upperBoundDate);
 }
