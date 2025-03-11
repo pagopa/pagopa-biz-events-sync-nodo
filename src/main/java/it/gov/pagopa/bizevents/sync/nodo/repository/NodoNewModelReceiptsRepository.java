@@ -1,7 +1,7 @@
 package it.gov.pagopa.bizevents.sync.nodo.repository;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionReceipt;
-import it.gov.pagopa.bizevents.sync.nodo.model.ReceiptEventInfo;
+import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import java.time.LocalDateTime;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +12,7 @@ public interface NodoNewModelReceiptsRepository extends JpaRepository<PositionRe
 
   @Query(
       """
-      SELECT new it.gov.pagopa.bizevents.sync.nodo.model.ReceiptEventInfo(
+      SELECT new it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo(
           pr.noticeId AS iuv,
           pr.paymentToken AS paymentToken,
           pr.paFiscalCode AS domainId,

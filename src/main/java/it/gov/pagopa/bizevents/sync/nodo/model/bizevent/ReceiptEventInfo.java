@@ -1,4 +1,4 @@
-package it.gov.pagopa.bizevents.sync.nodo.model;
+package it.gov.pagopa.bizevents.sync.nodo.model.bizevent;
 
 import it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion;
 import java.time.LocalDateTime;
@@ -7,7 +7,6 @@ import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 
-// @Builder
 @Getter
 @Setter
 public class ReceiptEventInfo {

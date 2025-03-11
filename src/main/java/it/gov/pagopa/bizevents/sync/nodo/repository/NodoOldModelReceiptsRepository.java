@@ -1,7 +1,7 @@
 package it.gov.pagopa.bizevents.sync.nodo.repository;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RT;
-import it.gov.pagopa.bizevents.sync.nodo.model.ReceiptEventInfo;
+import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +12,7 @@ public interface NodoOldModelReceiptsRepository extends JpaRepository<RT, Long> 
 
   @Query(
       """
-      SELECT DISTINCT new it.gov.pagopa.bizevents.sync.nodo.model.ReceiptEventInfo(
+      SELECT DISTINCT new it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo(
           rt.iuv AS iuv,
           rt.ccp AS paymentToken,
           rt.identDominio AS domainId,

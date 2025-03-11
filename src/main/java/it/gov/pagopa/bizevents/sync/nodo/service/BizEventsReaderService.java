@@ -1,6 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.service;
 
-import it.gov.pagopa.bizevents.sync.nodo.model.ReceiptEventInfo;
+import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import java.time.LocalDateTime;
 import java.util.Set;
 

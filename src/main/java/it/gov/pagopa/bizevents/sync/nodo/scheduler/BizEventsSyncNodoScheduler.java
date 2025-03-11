@@ -1,9 +1,10 @@
 package it.gov.pagopa.bizevents.sync.nodo.scheduler;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
-import it.gov.pagopa.bizevents.sync.nodo.model.ReceiptEventInfo;
+import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion;
 import it.gov.pagopa.bizevents.sync.nodo.service.BizEventsReaderService;
+import it.gov.pagopa.bizevents.sync.nodo.service.PaymentPositionReaderService;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -27,13 +28,18 @@ public class BizEventsSyncNodoScheduler {
 
   private final BizEventsReaderService bizEventsReaderService;
 
+  private final PaymentPositionReaderService paymentPositionReaderService;
+
   @Value("${synchronization-process.lower-bound-date.before-days}")
   private Integer lowerBoundDateBeforeDays;
 
   @Autowired
-  public BizEventsSyncNodoScheduler(BizEventsReaderService bizEventsReaderService) {
+  public BizEventsSyncNodoScheduler(
+      BizEventsReaderService bizEventsReaderService,
+      PaymentPositionReaderService paymentPositionReaderService) {
 
     this.bizEventsReaderService = bizEventsReaderService;
+    this.paymentPositionReaderService = paymentPositionReaderService;
   }
 
   @Scheduled(cron = "${synchronization-process.schedule.expression}")
@@ -76,7 +82,6 @@ public class BizEventsSyncNodoScheduler {
             lowerDateBound,
             upperDateBound);
 
-        //
         // TODO remove, only for debug purpose
         receiptsNotConvertedInBizEvents =
             receiptsNotConvertedInBizEvents.stream().findFirst().stream()
@@ -142,11 +147,11 @@ public class BizEventsSyncNodoScheduler {
 
       if (PaymentModelVersion.OLD.equals(receiptEvent.getVersion())) {
 
-        // TODO execute query on RPT
+        this.paymentPositionReaderService.readOldModelPaymentPosition(receiptEvent);
 
       } else {
 
-        // TODO execute query on POSITION_PAYMENT
+        this.paymentPositionReaderService.readNewModelPaymentPosition(receiptEvent);
       }
 
       // TODO invoke ecommerce helpdesk
