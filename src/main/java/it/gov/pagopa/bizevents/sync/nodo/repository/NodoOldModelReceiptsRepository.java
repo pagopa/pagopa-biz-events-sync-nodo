@@ -1,7 +1,7 @@
 package it.gov.pagopa.bizevents.sync.nodo.repository;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RT;
-import it.gov.pagopa.bizevents.sync.nodo.model.NodoReceiptInfo;
+import it.gov.pagopa.bizevents.sync.nodo.model.NdpReceipt;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,7 +27,7 @@ public interface NodoOldModelReceiptsRepository extends JpaRepository<RT, Long> 
         AND rt.generataDa = 'PSP'
         AND rpt.ccp NOT IN (:paymentTokenList)
       """)
-  List<NodoReceiptInfo> readExcludedPaymentTokensInTimeSlot(
+  List<NdpReceipt> readExcludedPaymentTokensInTimeSlot(
       @Param("minDate") LocalDateTime minDate,
       @Param("maxDate") LocalDateTime maxDate,
       @Param("paymentTokenList") List<String> paymentTokenList);

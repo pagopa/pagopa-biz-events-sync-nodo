@@ -1,6 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.service.impl;
 
-import it.gov.pagopa.bizevents.sync.nodo.model.NodoReceiptInfo;
+import it.gov.pagopa.bizevents.sync.nodo.model.NdpReceipt;
 import it.gov.pagopa.bizevents.sync.nodo.repository.BizEventsRepository;
 import it.gov.pagopa.bizevents.sync.nodo.repository.NodoNewModelReceiptsRepository;
 import it.gov.pagopa.bizevents.sync.nodo.repository.NodoOldModelReceiptsRepository;
@@ -70,7 +70,7 @@ public class BizEventsSyncNodoServiceImpl implements BizEventsSyncNodoService {
   }
 
   @Override
-  public List<NodoReceiptInfo> retrieveNotElaboratedNodoReceipts(
+  public List<NdpReceipt> retrieveNotElaboratedNodoReceipts(
       LocalDateTime lowerBoundDate, LocalDateTime upperBoundDate) {
 
     // Retrieve all biz events payment_token from yesterday
@@ -79,7 +79,7 @@ public class BizEventsSyncNodoServiceImpl implements BizEventsSyncNodoService {
             lowerBoundDate, upperBoundDate);
 
     // Retrieve all payments from nodo with receipt day yesterday and inserted time max today
-    List<NodoReceiptInfo> list = new ArrayList<>();
+    List<NdpReceipt> list = new ArrayList<>();
     /*
     list.addAll(
         this.nodoReceiptNewModelRepository
