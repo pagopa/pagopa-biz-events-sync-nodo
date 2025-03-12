@@ -2,9 +2,12 @@ package it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -80,4 +83,7 @@ public class PositionTransfer {
 
   @Column(name = "FK_PAYMENT_PLAN")
   private Long fkPaymentPlan;
+
+  @OneToMany(mappedBy = "positionTransfer", fetch = FetchType.EAGER)
+  private List<PositionTransferMBD> positionTransferMBDs;
 }

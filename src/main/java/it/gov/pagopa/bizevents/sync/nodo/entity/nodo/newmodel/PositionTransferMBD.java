@@ -3,7 +3,9 @@ package it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -50,6 +52,7 @@ public class PositionTransferMBD {
   @Column(name = "XML_CONTENT")
   private byte[] xmlContent;
 
-  @Column(name = "FK_POSITION_TRANSFER")
-  private Long fkPositionTransfer;
+  @OneToOne
+  @JoinColumn(name = "FK_POSITION_TRANSFER", referencedColumnName = "ID")
+  private PositionTransfer positionTransfer;
 }
