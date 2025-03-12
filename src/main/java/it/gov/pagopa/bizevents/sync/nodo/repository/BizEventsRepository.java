@@ -14,16 +14,17 @@ public interface BizEventsRepository extends CosmosRepository<BizEvent, String> 
 
   @Query(
       """
-SELECT
-  c.debtorPosition.noticeNumber != null ? c.debtorPosition.noticeNumber : c.debtorPosition.iuv as iuv,
-  c.paymentInfo.paymentToken as paymentToken,
-  c.creditor.idPA as domainId,
-  StringToNumber(c.debtorPosition.modelType) = 1 ? "OLD" : "NEW" as version
-FROM c
-WHERE c.paymentInfo.paymentDateTime >= @minDate
-  AND c.paymentInfo.paymentDateTime < @maxDate
-g\
-""")
+      SELECT
+        c.debtorPosition.noticeNumber != null ?
+          c.debtorPosition.noticeNumber :
+          c.debtorPosition.iuv as iuv,
+        c.paymentInfo.paymentToken as paymentToken,
+        c.creditor.idPA as domainId,
+        StringToNumber(c.debtorPosition.modelType) = 1 ? "OLD" : "NEW" as version
+      FROM c
+      WHERE c.paymentInfo.paymentDateTime >= @minDate
+        AND c.paymentInfo.paymentDateTime < @maxDate
+      """)
   Set<Map<String, Object>> readBizEventsInTimeSlot(
       @Param("minDate") String minDate, @Param("maxDate") String maxDate);
 
