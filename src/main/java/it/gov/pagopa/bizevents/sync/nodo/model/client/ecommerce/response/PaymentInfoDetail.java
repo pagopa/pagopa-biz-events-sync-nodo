@@ -1,6 +1,5 @@
 package it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,11 +11,21 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentInfo {
+public class PaymentInfoDetail {
 
-  private String origin;
+  private String subject;
+
+  private String iuv;
+
+  private String rptId;
 
   private String idTransaction;
 
-  private List<PaymentInfoDetail> details;
+  private String paymentToken;
+
+  private String creditorInstitution;
+
+  private Long amount;
+
+  private String paFiscalCode;
 }
