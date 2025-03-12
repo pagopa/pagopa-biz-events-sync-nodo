@@ -22,6 +22,7 @@ SELECT
 FROM c
 WHERE c.paymentInfo.paymentDateTime >= @minDate
   AND c.paymentInfo.paymentDateTime < @maxDate
+g\
 """)
   Set<Map<String, Object>> readBizEventsInTimeSlot(
       @Param("minDate") String minDate, @Param("maxDate") String maxDate);
