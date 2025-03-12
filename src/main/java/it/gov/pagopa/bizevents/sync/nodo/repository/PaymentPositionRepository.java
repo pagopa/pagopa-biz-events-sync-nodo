@@ -17,7 +17,7 @@ public interface PaymentPositionRepository extends JpaRepository<PositionPayment
         AND pp.insertedTimestamp < :maxDate
         AND pp.paymentToken = :paymentToken
       """)
-  Set<PositionPayment> readByPaymentToken(
+  Set<PositionPayment> readByPaymentTokenInTimeSlot(
       @Param("minDate") LocalDateTime minDate,
       @Param("maxDate") LocalDateTime maxDate,
       @Param("paymentToken") String paymentToken);

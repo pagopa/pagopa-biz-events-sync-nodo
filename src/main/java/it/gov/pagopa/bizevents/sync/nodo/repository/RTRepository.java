@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface NodoOldModelReceiptsRepository extends JpaRepository<RT, Long> {
+public interface RTRepository extends JpaRepository<RT, Long> {
 
   @Query(
       """
