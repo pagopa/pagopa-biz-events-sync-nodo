@@ -1,9 +1,11 @@
 package it.gov.pagopa.bizevents.sync.nodo.scheduler;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
+import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.TransactionDetails;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion;
 import it.gov.pagopa.bizevents.sync.nodo.service.BizEventsReaderService;
+import it.gov.pagopa.bizevents.sync.nodo.service.EcommerceHelpdeskReaderService;
 import it.gov.pagopa.bizevents.sync.nodo.service.PaymentPositionReaderService;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import java.time.LocalDateTime;
@@ -30,16 +32,20 @@ public class BizEventsSyncNodoScheduler {
 
   private final PaymentPositionReaderService paymentPositionReaderService;
 
+  private final EcommerceHelpdeskReaderService ecommerceHelpdeskReaderService;
+
   @Value("${synchronization-process.lower-bound-date.before-days}")
   private Integer lowerBoundDateBeforeDays;
 
   @Autowired
   public BizEventsSyncNodoScheduler(
       BizEventsReaderService bizEventsReaderService,
-      PaymentPositionReaderService paymentPositionReaderService) {
+      PaymentPositionReaderService paymentPositionReaderService,
+      EcommerceHelpdeskReaderService ecommerceHelpdeskReaderService) {
 
     this.bizEventsReaderService = bizEventsReaderService;
     this.paymentPositionReaderService = paymentPositionReaderService;
+    this.ecommerceHelpdeskReaderService = ecommerceHelpdeskReaderService;
   }
 
   @Scheduled(cron = "${synchronization-process.schedule.expression}")
@@ -140,26 +146,34 @@ public class BizEventsSyncNodoScheduler {
   private List<BizEvent> generateBizEventsFromNodoReceipts(
       Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents) {
 
-    List<BizEvent> generatedBizEvents = new LinkedList<>();
+    List<BizEvent> newlyGeneratedBizEvents = new LinkedList<>();
 
     // TODO handle errors and exceptions
     for (ReceiptEventInfo receiptEvent : receiptsNotConvertedInBizEvents) {
 
+      BizEvent convertedBizEvent;
       if (PaymentModelVersion.OLD.equals(receiptEvent.getVersion())) {
 
-        this.paymentPositionReaderService.readOldModelPaymentPosition(receiptEvent);
+        //
+        convertedBizEvent =
+            this.paymentPositionReaderService.readOldModelPaymentPosition(receiptEvent);
 
       } else {
 
-        this.paymentPositionReaderService.readNewModelPaymentPosition(receiptEvent);
+        //
+        convertedBizEvent =
+            this.paymentPositionReaderService.readNewModelPaymentPosition(receiptEvent);
       }
 
-      // TODO invoke ecommerce helpdesk
+      //
+      TransactionDetails transactionDetails =
+          this.ecommerceHelpdeskReaderService.getTransactionDetails(receiptEvent.getPaymentToken());
+      convertedBizEvent.setTransactionDetails(transactionDetails);
 
-      // TODO map entities in BizEvent, then add to generatedBizEvents
+      newlyGeneratedBizEvents.add(convertedBizEvent);
     }
 
-    return generatedBizEvents;
+    return newlyGeneratedBizEvents;
   }
 
   private void sendBizEventsToEventHub(List<BizEvent> bizEventsToBeSent) {}
