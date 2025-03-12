@@ -2,8 +2,8 @@ package it.gov.pagopa.bizevents.sync.nodo.service.impl;
 
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.repository.BizEventsRepository;
-import it.gov.pagopa.bizevents.sync.nodo.repository.NodoNewModelReceiptsRepository;
-import it.gov.pagopa.bizevents.sync.nodo.repository.NodoOldModelReceiptsRepository;
+import it.gov.pagopa.bizevents.sync.nodo.repository.receipt.PositionReceiptRepository;
+import it.gov.pagopa.bizevents.sync.nodo.repository.receipt.RTRepository;
 import it.gov.pagopa.bizevents.sync.nodo.service.BizEventsReaderService;
 import it.gov.pagopa.bizevents.sync.nodo.util.Constants;
 import java.time.LocalDateTime;
@@ -23,19 +23,19 @@ public class BizEventsReaderServiceImpl implements BizEventsReaderService {
 
   private final BizEventsRepository bizEventsRepository;
 
-  private final NodoNewModelReceiptsRepository nodoNewModelReceiptsRepository;
+  private final PositionReceiptRepository positionReceiptRepository;
 
-  private final NodoOldModelReceiptsRepository nodoOldModelReceiptsRepository;
+  private final RTRepository rtRepository;
 
   @Autowired
   public BizEventsReaderServiceImpl(
       BizEventsRepository bizEventsRepository,
-      NodoNewModelReceiptsRepository nodoNewModelReceiptsRepository,
-      NodoOldModelReceiptsRepository nodoOldModelReceiptsRepository) {
+      PositionReceiptRepository positionReceiptRepository,
+      RTRepository rtRepository) {
 
     this.bizEventsRepository = bizEventsRepository;
-    this.nodoNewModelReceiptsRepository = nodoNewModelReceiptsRepository;
-    this.nodoOldModelReceiptsRepository = nodoOldModelReceiptsRepository;
+    this.positionReceiptRepository = positionReceiptRepository;
+    this.rtRepository = rtRepository;
   }
 
   @Override
@@ -55,14 +55,12 @@ public class BizEventsReaderServiceImpl implements BizEventsReaderService {
     // Retrieve the count of receipts generated on the first occurrence for old payment models for
     // the time slot passed
     long numberOfFirstPayOldModelReceipts =
-        this.nodoOldModelReceiptsRepository.countFirstRPTsByTimeSlot(
-            lowerBoundDate, upperBoundDate);
+        this.rtRepository.countFirstRPTsByTimeSlot(lowerBoundDate, upperBoundDate);
 
     // Retrieve the count of receipts generated on the retried occurrence for old payment models for
     // the time slot passed
     long numberOfRetriedOldModelReceipts =
-        this.nodoOldModelReceiptsRepository.countRetriedRPTsByTimeSlot(
-            lowerBoundDate, upperBoundDate);
+        this.rtRepository.countRetriedRPTsByTimeSlot(lowerBoundDate, upperBoundDate);
 
     // Calculate the count of receipts useful for old payment models for the time slot passed
     long numberOfOldModelReceipts =
@@ -70,7 +68,7 @@ public class BizEventsReaderServiceImpl implements BizEventsReaderService {
 
     // Retrieve the count of receipts generated for new payment models for the time slot passed
     long numberOfNewModelReceipts =
-        this.nodoNewModelReceiptsRepository.countByTimeSlot(lowerBoundDate, upperBoundDate);
+        this.positionReceiptRepository.countByTimeSlot(lowerBoundDate, upperBoundDate);
 
     return ((numberOfNewModelReceipts + numberOfOldModelReceipts) - numberOfBizEvents) > 0;
   }
@@ -82,9 +80,8 @@ public class BizEventsReaderServiceImpl implements BizEventsReaderService {
     //
     Set<ReceiptEventInfo> ndpReceipts = new HashSet<>();
     ndpReceipts.addAll(
-        this.nodoNewModelReceiptsRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
-    ndpReceipts.addAll(
-        this.nodoOldModelReceiptsRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
+        this.positionReceiptRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
+    ndpReceipts.addAll(this.rtRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
 
     Set<ReceiptEventInfo> bizEvents = new HashSet<>();
     String formattedLowerBoundDate = lowerBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER);

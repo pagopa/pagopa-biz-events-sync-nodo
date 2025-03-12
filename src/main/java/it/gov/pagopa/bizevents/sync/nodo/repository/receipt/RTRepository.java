@@ -1,4 +1,4 @@
-package it.gov.pagopa.bizevents.sync.nodo.repository;
+package it.gov.pagopa.bizevents.sync.nodo.repository.receipt;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RT;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;

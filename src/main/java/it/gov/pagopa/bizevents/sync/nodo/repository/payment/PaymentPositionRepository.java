@@ -1,4 +1,4 @@
-package it.gov.pagopa.bizevents.sync.nodo.repository;
+package it.gov.pagopa.bizevents.sync.nodo.repository.payment;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionPayment;
 import java.time.LocalDateTime;

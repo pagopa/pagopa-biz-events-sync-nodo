@@ -2,7 +2,7 @@ package it.gov.pagopa.bizevents.sync.nodo.service.impl;
 
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.PaymentPositionEvent;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
-import it.gov.pagopa.bizevents.sync.nodo.repository.PaymentPositionRepository;
+import it.gov.pagopa.bizevents.sync.nodo.repository.payment.PaymentPositionRepository;
 import it.gov.pagopa.bizevents.sync.nodo.service.PaymentPositionReaderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
