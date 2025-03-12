@@ -14,7 +14,9 @@ public class EcommerceHelpdeskClientConfig {
   protected String subscriptionKey;
 
   @Autowired
-  public EcommerceHelpdeskClientConfig(@Value("${}") String subscriptionKey) {
+  public EcommerceHelpdeskClientConfig(
+      @Value("${client.ecommerce-helpdesk.subscription-key}") String subscriptionKey) {
+
     this.subscriptionKey = subscriptionKey;
   }
 
