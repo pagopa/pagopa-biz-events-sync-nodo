@@ -1,4 +1,4 @@
-package it.gov.pagopa.bizevents.sync.nodo.model.client;
+package it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EcommerceHelpdeskSearchTransactionRequest {
+public class SearchTransactionRequest {
 
   private String type;
 

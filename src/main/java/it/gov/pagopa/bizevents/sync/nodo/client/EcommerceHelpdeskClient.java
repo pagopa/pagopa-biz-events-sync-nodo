@@ -2,8 +2,8 @@ package it.gov.pagopa.bizevents.sync.nodo.client;
 
 import feign.FeignException;
 import it.gov.pagopa.bizevents.sync.nodo.config.EcommerceHelpdeskClientConfig;
-import it.gov.pagopa.bizevents.sync.nodo.model.client.EcommerceHelpdeskSearchTransactionRequest;
-import it.gov.pagopa.bizevents.sync.nodo.model.client.EcommerceHelpdeskSearchTransactionResponse;
+import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.request.SearchTransactionRequest;
+import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.SearchTransactionResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
@@ -24,6 +24,6 @@ public interface EcommerceHelpdeskClient {
   @PostMapping(
       value = "${client.ecommerce-helpdesk.search-transaction.path}",
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  EcommerceHelpdeskSearchTransactionResponse searchTransactionByPaymentToken(
-      @RequestBody EcommerceHelpdeskSearchTransactionRequest body);
+  SearchTransactionResponse searchTransactionByPaymentToken(
+      @RequestBody SearchTransactionRequest body);
 }

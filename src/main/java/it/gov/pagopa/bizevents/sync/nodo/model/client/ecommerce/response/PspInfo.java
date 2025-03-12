@@ -1,4 +1,4 @@
-package it.gov.pagopa.bizevents.sync.nodo.model.client;
+package it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,4 +11,11 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EcommerceHelpdeskSearchTransactionResponse {}
+public class PspInfo {
+
+  private String pspId;
+
+  private String businessName;
+
+  private String idChannel;
+}
