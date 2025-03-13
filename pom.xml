@@ -161,6 +161,11 @@
       <groupId>org.projectlombok</groupId>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <artifactId>gson</artifactId>
+      <groupId>com.google.code.gson</groupId>
+      <version>2.10.1</version>
+    </dependency>
 
     <dependency>
       <artifactId>logback-ecs-encoder</artifactId>
