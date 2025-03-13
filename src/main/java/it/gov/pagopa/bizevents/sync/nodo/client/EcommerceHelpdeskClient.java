@@ -10,6 +10,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
     value = "ecommerce-helpdesk",
@@ -25,5 +26,7 @@ public interface EcommerceHelpdeskClient {
       value = "${client.ecommerce-helpdesk.search-transaction.path}",
       consumes = MediaType.APPLICATION_JSON_VALUE)
   SearchTransactionResponse searchTransactionByPaymentToken(
+      @RequestParam(value = "pageNumber") Integer pageNumber,
+      @RequestParam(value = "pageSize") Integer pageSize,
       @RequestBody SearchTransactionRequest body);
 }
