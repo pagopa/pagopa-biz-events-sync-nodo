@@ -1,6 +1,7 @@
 package it.gov.pagopa.bizevents.sync.nodo.util;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -56,6 +57,14 @@ public class CommonUtility {
       }
     }
     return slots;
+  }
+
+  public static String formatDate(LocalDateTime date, DateTimeFormatter formatter) {
+    String formattedDate = null;
+    if (date != null && formatter != null) {
+      formattedDate = date.format(formatter);
+    }
+    return formattedDate;
   }
 
   public static long getTimelapse(long startTime) {
