@@ -84,5 +84,5 @@ public class PositionTransfer {
   private Long fkPaymentPlan;
 
   @OneToOne(mappedBy = "positionTransfer", fetch = FetchType.EAGER)
-  private PositionTransferMBD positionTransferMBDs;
+  private PositionTransferMBD positionTransferMBD;
 }

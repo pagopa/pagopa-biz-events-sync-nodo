@@ -26,7 +26,7 @@ public interface PaymentPositionRepository extends JpaRepository<PositionPayment
       """
       SELECT COUNT(pp)
       FROM PositionPayment pp
-      WHERE pp.transactionId >= :transactionId
+      WHERE pp.transactionId = :transactionId
       """)
   Long countPositionPaymentsByTransactionId(@Param("transactionId") String transactionId);
 }

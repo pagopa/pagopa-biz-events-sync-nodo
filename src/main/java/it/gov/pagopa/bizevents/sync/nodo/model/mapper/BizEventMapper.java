@@ -27,7 +27,6 @@ import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.Transac
 import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.UserInfo;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import it.gov.pagopa.bizevents.sync.nodo.util.Constants;
-import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -102,9 +101,9 @@ public class BizEventMapper {
                         CommonUtility.formatDate(
                             ppp.getDueDate(), Constants.BIZ_EVENT_REDUCED_DATE_FORMATTER))
                     .paymentToken(pp.getPaymentToken())
-                    .amount(pp.getAmount().toPlainString())
-                    .fee(pp.getFee().toPlainString())
-                    .primaryCiIncurredFee(pp.getFeePa().toPlainString())
+                    .amount(CommonUtility.toPlainString(pp.getAmount()))
+                    .fee(CommonUtility.toPlainString(pp.getFee()))
+                    .primaryCiIncurredFee(CommonUtility.toPlainString(pp.getFeePa()))
                     .idBundle(pp.getBundleId())
                     .idCiBundle(pp.getBundlePaId())
                     .totalNotice(totalNotices.toString())
@@ -115,7 +114,10 @@ public class BizEventMapper {
                     .metadata(extractMetadata(ppp.getMetadata()))
                     .build())
             .transferList(new LinkedList<>())
-            .properties(Map.of("serviceIdentifier", Constants.REGEN_SERVICE_IDENTIFIER))
+            .properties(
+                Map.of(
+                    Constants.REGEN_SERVICE_IDENTIFIER_KEY,
+                    Constants.REGEN_SERVICE_IDENTIFIER_VALUE))
             .build();
 
     if (debtor != null) {
@@ -162,13 +164,14 @@ public class BizEventMapper {
                   .idTransfer(pt.getTransferIdentifier())
                   .fiscalCodePA(pt.getPaFiscalCodeSecondary())
                   .companyName(null) // TODO from Cache
-                  .amount(pt.getAmount().toString())
+                  .amount(CommonUtility.toPlainString(pt.getAmount()))
                   .transferCategory(pt.getTransferCategory())
                   .remittanceInformation(pt.getRemittanceInformation())
                   .iban(pt.getIban())
                   .mbdAttachment(
-                      new String(
-                          pt.getPositionTransferMBDs().getXmlContent(), StandardCharsets.UTF_8))
+                      pt.getPositionTransferMBD() != null
+                          ? CommonUtility.convertBlob(pt.getPositionTransferMBD().getXmlContent())
+                          : null)
                   .metadata(extractMetadata(pt.getMetadata()))
                   .build());
     }
@@ -317,12 +320,15 @@ public class BizEventMapper {
   @SuppressWarnings({"unchecked", "rawtypes"})
   private static List<MapEntry> extractMetadata(String rawString) {
 
-    List<MapEntry> metadata = new LinkedList<>();
+    List<MapEntry> metadata = null;
     try {
       List rawEntryMap = gson.fromJson(rawString, List.class);
-      for (Object rawEntry : rawEntryMap) {
-        Map<String, String> entry = (Map<String, String>) rawEntry;
-        metadata.add(MapEntry.builder().key(entry.get("key")).value(entry.get("value")).build());
+      if (rawEntryMap != null) {
+        metadata = new LinkedList<>();
+        for (Object rawEntry : rawEntryMap) {
+          Map<String, String> entry = (Map<String, String>) rawEntry;
+          metadata.add(MapEntry.builder().key(entry.get("key")).value(entry.get("value")).build());
+        }
       }
     } catch (ClassCastException | JsonSyntaxException e) {
       // TODO log an error but do not throw exception
