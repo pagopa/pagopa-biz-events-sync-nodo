@@ -67,6 +67,7 @@ public class BizEventMapper {
                     .modelType("2")
                     .noticeNumber(ps.getNoticeId())
                     .iuv(pp.getCreditorReferenceId())
+                    .iur(pp.getPaymentToken())
                     .build())
             .creditor(
                 Creditor.builder()

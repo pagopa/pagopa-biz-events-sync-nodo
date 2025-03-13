@@ -1,5 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.service.impl;
 
+import feign.FeignException;
 import it.gov.pagopa.bizevents.sync.nodo.client.EcommerceHelpdeskClient;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.TransactionDetails;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.request.SearchTransactionRequest;
@@ -28,27 +29,34 @@ public class EcommerceHelpdeskReaderServiceImpl implements EcommerceHelpdeskRead
   @Override
   public TransactionDetails getTransactionDetails(String paymentToken) {
 
+    TransactionDetails transactionDetails = null;
+
     SearchTransactionRequest request =
         SearchTransactionRequest.builder()
             .type(Constants.ECOMMERCE_HELPDESK_TRANSACTION_SEARCH_ID_TYPE)
             .paymentToken(paymentToken)
             .build();
-    SearchTransactionResponse response =
-        this.ecommerceHelpdeskClient.searchTransactionByPaymentToken(0, 10, request);
 
-    if (response == null) {
-      // TODO throw custom exception
+    try {
+      SearchTransactionResponse response =
+          this.ecommerceHelpdeskClient.searchTransactionByPaymentToken(0, 10, request);
+
+      if (response.getTransactions() == null || response.getTransactions().isEmpty()) {
+        // TODO throw custom exception
+      }
+
+      List<TransactionResponse> transactions = response.getTransactions();
+      if (transactions.size() > 1) {
+        // TODO log info
+      }
+
+      transactionDetails = BizEventMapper.fromTransactionResponse(transactions.get(0));
+
+    } catch (FeignException e) {
+      // TODO throw custom exception or skip this BizEvent?
+
     }
 
-    if (response.getTransactions() == null || response.getTransactions().isEmpty()) {
-      // TODO throw custom exception
-    }
-
-    List<TransactionResponse> transactions = response.getTransactions();
-    if (transactions.size() > 1) {
-      // TODO log info
-    }
-
-    return BizEventMapper.fromTransactionResponse(transactions.get(0));
+    return transactionDetails;
   }
 }
