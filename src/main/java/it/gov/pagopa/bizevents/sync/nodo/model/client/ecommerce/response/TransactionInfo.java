@@ -1,8 +1,19 @@
 package it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public class TransactionInfo {
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class TransactionInfo implements Serializable {
 
   private LocalDateTime creationDate;
 
@@ -21,6 +32,10 @@ public class TransactionInfo {
   private String rrn;
 
   private String authorizationCode;
+
+  private String authorizationOperationId;
+
+  private String refundOperationId;
 
   private String paymentMethodName;
 

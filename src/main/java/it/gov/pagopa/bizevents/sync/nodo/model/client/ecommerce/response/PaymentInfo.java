@@ -1,5 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response;
 
+import java.io.Serializable;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,11 +13,11 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentInfo {
+public class PaymentInfo implements Serializable {
 
   private String origin;
 
   private String idTransaction;
 
-  private List<PaymentInfoDetail> details;
+  private List<PaymentDetailInfo> details;
 }

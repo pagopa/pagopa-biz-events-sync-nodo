@@ -11,7 +11,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentInfoDetail {
+public class PaymentDetailInfo {
 
   private String subject;
 
@@ -19,13 +19,11 @@ public class PaymentInfoDetail {
 
   private String rptId;
 
-  private String idTransaction;
+  private Long amount;
 
   private String paymentToken;
 
   private String creditorInstitution;
-
-  private Long amount;
 
   private String paFiscalCode;
 }

@@ -1,5 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response;
 
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserInfo {
+public class UserInfo implements Serializable {
 
   private String userFiscalCode;
 
@@ -22,4 +23,6 @@ public class UserInfo {
   private String name;
 
   private String username;
+
+  private String authenticationType;
 }

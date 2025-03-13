@@ -1,5 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response;
 
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PageInfo {
+public class PageInfo implements Serializable {
 
   private Integer current;
 
