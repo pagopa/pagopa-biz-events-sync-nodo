@@ -7,6 +7,7 @@ import it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion;
 import it.gov.pagopa.bizevents.sync.nodo.model.mapper.BizEventMapper;
 import it.gov.pagopa.bizevents.sync.nodo.service.BizEventsReaderService;
 import it.gov.pagopa.bizevents.sync.nodo.service.EcommerceHelpdeskReaderService;
+import it.gov.pagopa.bizevents.sync.nodo.service.EventHubSenderService;
 import it.gov.pagopa.bizevents.sync.nodo.service.PaymentPositionReaderService;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import java.time.LocalDateTime;
@@ -35,6 +36,8 @@ public class BizEventsSyncNodoScheduler {
 
   private final EcommerceHelpdeskReaderService ecommerceHelpdeskReaderService;
 
+  private final EventHubSenderService eventHubSenderService;
+
   @Value("${synchronization-process.lower-bound-date.before-days}")
   private Integer lowerBoundDateBeforeDays;
 
@@ -42,11 +45,13 @@ public class BizEventsSyncNodoScheduler {
   public BizEventsSyncNodoScheduler(
       BizEventsReaderService bizEventsReaderService,
       PaymentPositionReaderService paymentPositionReaderService,
-      EcommerceHelpdeskReaderService ecommerceHelpdeskReaderService) {
+      EcommerceHelpdeskReaderService ecommerceHelpdeskReaderService,
+      EventHubSenderService eventHubSenderService) {
 
     this.bizEventsReaderService = bizEventsReaderService;
     this.paymentPositionReaderService = paymentPositionReaderService;
     this.ecommerceHelpdeskReaderService = ecommerceHelpdeskReaderService;
+    this.eventHubSenderService = eventHubSenderService;
   }
 
   @Scheduled(cron = "${synchronization-process.schedule.expression}")
@@ -99,7 +104,7 @@ public class BizEventsSyncNodoScheduler {
             generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
 
         //
-        sendBizEventsToEventHub(bizEventsToSend);
+        this.eventHubSenderService.sendBizEventsToEventHub(bizEventsToSend);
         log.info("");
       }
     }
@@ -178,6 +183,4 @@ public class BizEventsSyncNodoScheduler {
 
     return newlyGeneratedBizEvents;
   }
-
-  private void sendBizEventsToEventHub(List<BizEvent> bizEventsToBeSent) {}
 }

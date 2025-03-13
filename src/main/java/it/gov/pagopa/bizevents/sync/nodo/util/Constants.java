@@ -1,5 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.util;
 
+import com.google.gson.Gson;
 import java.time.format.DateTimeFormatter;
 import lombok.experimental.UtilityClass;
 
@@ -15,6 +16,8 @@ public class Constants {
       DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
   public static final String ECOMMERCE_HELPDESK_TRANSACTION_SEARCH_ID_TYPE = "PAYMENT_TOKEN";
+
+  public static final Gson GSON_PARSER = new Gson();
 
   public static final String HEADER_REQUEST_ID = "X-Request-Id";
 

@@ -1,6 +1,5 @@
 package it.gov.pagopa.bizevents.sync.nodo.model.mapper;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.DebtorPosition;
@@ -31,11 +30,10 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class BizEventMapper {
-
-  private static final Gson gson = new Gson();
 
   private BizEventMapper() {}
 
@@ -57,6 +55,7 @@ public class BizEventMapper {
 
     BizEvent bizEvent =
         BizEvent.builder()
+            .id(UUID.randomUUID().toString())
             .version("2")
             .complete(null) // TODO
             .missingInfo(null) // TODO
@@ -115,10 +114,6 @@ public class BizEventMapper {
                     .metadata(extractMetadata(ppp.getMetadata()))
                     .build())
             .transferList(new LinkedList<>())
-            .properties(
-                Map.of(
-                    Constants.REGEN_SERVICE_IDENTIFIER_KEY,
-                    Constants.REGEN_SERVICE_IDENTIFIER_VALUE))
             .build();
 
     if (debtor != null) {
@@ -221,7 +216,10 @@ public class BizEventMapper {
             User.builder()
                 .type(userInfo.getAuthenticationType())
                 .fiscalCode(userInfo.getUserFiscalCode())
-                .fullName(userInfo.getName() + " " + userInfo.getSurname())
+                .fullName(
+                    userInfo.getSurname() != null
+                        ? userInfo.getName() + " " + userInfo.getSurname()
+                        : null)
                 .notificationEmail(userInfo.getNotificationEmail())
                 .build())
         .info(
@@ -323,7 +321,7 @@ public class BizEventMapper {
 
     List<MapEntry> metadata = null;
     try {
-      List rawEntryMap = gson.fromJson(rawString, List.class);
+      List rawEntryMap = Constants.GSON_PARSER.fromJson(rawString, List.class);
       if (rawEntryMap != null) {
         metadata = new LinkedList<>();
         for (Object rawEntry : rawEntryMap) {
