@@ -1,6 +1,5 @@
 package it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.subject;
 
-import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.enumeration.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +15,11 @@ public class User {
 
   private String fullName;
 
-  private UserType type;
+  private String name;
+
+  private String surname;
+
+  private String type;
 
   private String fiscalCode;
 

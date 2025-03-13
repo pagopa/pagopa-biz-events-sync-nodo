@@ -18,4 +18,6 @@ public class DebtorPosition {
   private String noticeNumber;
 
   private String iuv;
+
+  private String iur;
 }

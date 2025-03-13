@@ -16,7 +16,7 @@ import lombok.Setter;
 @Builder
 public class Transfer {
 
-  @Builder.Default private String idTransfer = "0";
+  private String idTransfer;
 
   private String fiscalCodePA;
 
@@ -31,8 +31,11 @@ public class Transfer {
   @JsonProperty(value = "IBAN")
   private String iban;
 
-  @JsonProperty(value = "MBD")
-  private MBD mbd;
+  @JsonProperty(value = "MBDAttachment")
+  private String mbdAttachment;
 
   private List<MapEntry> metadata;
+
+  @JsonProperty(value = "IUR")
+  private String iur;
 }
