@@ -4,6 +4,7 @@ import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.TransactionDetails;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion;
+import it.gov.pagopa.bizevents.sync.nodo.model.mapper.BizEventMapper;
 import it.gov.pagopa.bizevents.sync.nodo.service.BizEventsReaderService;
 import it.gov.pagopa.bizevents.sync.nodo.service.EcommerceHelpdeskReaderService;
 import it.gov.pagopa.bizevents.sync.nodo.service.PaymentPositionReaderService;
@@ -168,7 +169,9 @@ public class BizEventsSyncNodoScheduler {
       //
       TransactionDetails transactionDetails =
           this.ecommerceHelpdeskReaderService.getTransactionDetails(receiptEvent.getPaymentToken());
-      convertedBizEvent.setTransactionDetails(transactionDetails);
+
+      //
+      BizEventMapper.finalize(convertedBizEvent, transactionDetails);
 
       newlyGeneratedBizEvents.add(convertedBizEvent);
     }
