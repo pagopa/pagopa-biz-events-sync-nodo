@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class BizEventsReaderService implements BizEventsReaderService {
+public class BizEventsReaderService {
 
   private final BizEventsRepository bizEventsRepository;
 
@@ -46,7 +46,6 @@ public class BizEventsReaderService implements BizEventsReaderService {
    * @return true if the number of Biz Events are lower than the number of receipts stored by NdP in
    *     the time slot.
    */
-  @Override
   public boolean checkIfMissingBizEventsAtTimeSlot(
       LocalDateTime lowerBoundDate, LocalDateTime upperBoundDate) {
 
@@ -81,7 +80,6 @@ public class BizEventsReaderService implements BizEventsReaderService {
     return ((numberOfNewModelReceipts + numberOfOldModelReceipts) - numberOfBizEvents) > 0;
   }
 
-  @Override
   public Set<ReceiptEventInfo> retrieveReceiptsNotConvertedInBizEvents(
       LocalDateTime lowerBoundDate, LocalDateTime upperBoundDate) {
 

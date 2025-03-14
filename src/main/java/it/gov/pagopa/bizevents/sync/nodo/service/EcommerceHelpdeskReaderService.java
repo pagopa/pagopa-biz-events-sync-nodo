@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class EcommerceHelpdeskReaderService implements EcommerceHelpdeskReaderService {
+public class EcommerceHelpdeskReaderService {
 
   private final EcommerceHelpdeskClient ecommerceHelpdeskClient;
 
@@ -25,7 +25,6 @@ public class EcommerceHelpdeskReaderService implements EcommerceHelpdeskReaderSe
     this.ecommerceHelpdeskClient = ecommerceHelpdeskClient;
   }
 
-  @Override
   public TransactionDetails getTransactionDetails(String paymentToken) {
 
     TransactionDetails transactionDetails = null;

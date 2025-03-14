@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class PaymentPositionReaderService implements PaymentPositionReaderService {
+public class PaymentPositionReaderService {
 
   private final PaymentPositionRepository paymentPositionRepository;
 
@@ -29,7 +29,6 @@ public class PaymentPositionReaderService implements PaymentPositionReaderServic
     this.positionTransferRepository = positionTransferRepository;
   }
 
-  @Override
   public BizEvent readNewModelPaymentPosition(ReceiptEventInfo receiptEvent) {
 
     LocalDateTime insertedTimestamp =
@@ -61,7 +60,6 @@ public class PaymentPositionReaderService implements PaymentPositionReaderServic
     return BizEventMapper.fromNewModel(positionPayment, positionTransfers, totalNotices, null);
   }
 
-  @Override
   public BizEvent readOldModelPaymentPosition(ReceiptEventInfo receiptEvent) {
     return null;
   }

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class EventHubSenderService implements EventHubSenderService {
+public class EventHubSenderService {
 
   private final EventHubProducerClient eventHubProducerClient;
 
