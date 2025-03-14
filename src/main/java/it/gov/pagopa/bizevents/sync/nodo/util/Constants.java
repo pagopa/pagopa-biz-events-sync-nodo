@@ -1,6 +1,9 @@
 package it.gov.pagopa.bizevents.sync.nodo.util;
 
 import com.google.gson.Gson;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.rt.CtRicevutaTelematica;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 import java.time.format.DateTimeFormatter;
 import lombok.experimental.UtilityClass;
 
@@ -28,4 +31,14 @@ public class Constants {
   public static final String REGEN_SERVICE_IDENTIFIER_KEY = "serviceIdentifier";
 
   public static final Object REGEN_SERVICE_IDENTIFIER_VALUE = "NDP003PROD_R";
+
+  public static final JAXBContext RT_JAXB_CONTEXT;
+
+  static {
+    try {
+      RT_JAXB_CONTEXT = JAXBContext.newInstance(CtRicevutaTelematica.class);
+    } catch (JAXBException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }
