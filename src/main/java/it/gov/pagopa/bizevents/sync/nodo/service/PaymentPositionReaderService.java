@@ -22,11 +22,16 @@ public class PaymentPositionReaderService {
 
   private final PositionTransferRepository positionTransferRepository;
 
+  private final ConfigCacheService configCacheService;
+
   public PaymentPositionReaderService(
       PaymentPositionRepository paymentPositionRepository,
-      PositionTransferRepository positionTransferRepository) {
+      PositionTransferRepository positionTransferRepository,
+      ConfigCacheService configCacheService) {
+
     this.paymentPositionRepository = paymentPositionRepository;
     this.positionTransferRepository = positionTransferRepository;
+    this.configCacheService = configCacheService;
   }
 
   public BizEvent readNewModelPaymentPosition(ReceiptEventInfo receiptEvent) {
@@ -57,7 +62,8 @@ public class PaymentPositionReaderService {
       // TODO throw custom exception
     }
 
-    return BizEventMapper.fromNewModel(positionPayment, positionTransfers, totalNotices, null);
+    return BizEventMapper.fromNewModel(
+        positionPayment, positionTransfers, totalNotices, configCacheService.getConfigData());
   }
 
   public BizEvent readOldModelPaymentPosition(ReceiptEventInfo receiptEvent) {
