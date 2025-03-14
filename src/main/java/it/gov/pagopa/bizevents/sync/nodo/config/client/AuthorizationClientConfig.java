@@ -1,24 +1,13 @@
-package it.gov.pagopa.bizevents.sync.nodo.config;
+package it.gov.pagopa.bizevents.sync.nodo.config.client;
 
 import feign.RequestInterceptor;
 import it.gov.pagopa.bizevents.sync.nodo.util.Constants;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 
-@Component
-public class EcommerceHelpdeskClientConfig {
+public abstract class AuthorizationClientConfig {
 
   protected String subscriptionKey;
-
-  @Autowired
-  public EcommerceHelpdeskClientConfig(
-      @Value("${client.ecommerce-helpdesk.subscription-key}") String subscriptionKey) {
-
-    this.subscriptionKey = subscriptionKey;
-  }
 
   @Bean
   public RequestInterceptor requestIdInterceptor() {

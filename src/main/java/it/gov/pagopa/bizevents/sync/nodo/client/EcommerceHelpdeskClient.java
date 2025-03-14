@@ -1,7 +1,7 @@
 package it.gov.pagopa.bizevents.sync.nodo.client;
 
 import feign.FeignException;
-import it.gov.pagopa.bizevents.sync.nodo.config.EcommerceHelpdeskClientConfig;
+import it.gov.pagopa.bizevents.sync.nodo.config.client.EcommerceHelpdeskClientConfig;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.request.SearchTransactionRequest;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.SearchTransactionResponse;
 import org.springframework.cloud.openfeign.FeignClient;
