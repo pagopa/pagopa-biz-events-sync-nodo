@@ -69,6 +69,10 @@ public class CommonUtility {
     return formattedDate;
   }
 
+  public static String toPlainString(Long value) {
+    return value != null ? value.toString() : null;
+  }
+
   public static String toPlainString(BigDecimal value) {
     return value != null ? value.toPlainString() : null;
   }
