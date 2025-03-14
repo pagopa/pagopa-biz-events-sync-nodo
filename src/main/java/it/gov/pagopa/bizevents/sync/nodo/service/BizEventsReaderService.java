@@ -3,7 +3,7 @@ package it.gov.pagopa.bizevents.sync.nodo.service;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.repository.BizEventsRepository;
 import it.gov.pagopa.bizevents.sync.nodo.repository.receipt.PositionReceiptRepository;
-import it.gov.pagopa.bizevents.sync.nodo.repository.receipt.RTRepository;
+import it.gov.pagopa.bizevents.sync.nodo.repository.receipt.RtRepository;
 import it.gov.pagopa.bizevents.sync.nodo.util.Constants;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -24,13 +24,13 @@ public class BizEventsReaderService {
 
   private final PositionReceiptRepository positionReceiptRepository;
 
-  private final RTRepository rtRepository;
+  private final RtRepository rtRepository;
 
   @Autowired
   public BizEventsReaderService(
       BizEventsRepository bizEventsRepository,
       PositionReceiptRepository positionReceiptRepository,
-      RTRepository rtRepository) {
+      RtRepository rtRepository) {
 
     this.bizEventsRepository = bizEventsRepository;
     this.positionReceiptRepository = positionReceiptRepository;
