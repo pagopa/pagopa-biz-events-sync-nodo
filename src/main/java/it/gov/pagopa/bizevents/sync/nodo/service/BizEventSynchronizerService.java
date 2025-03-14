@@ -22,8 +22,11 @@ import org.springframework.stereotype.Service;
 public class BizEventSynchronizerService {
 
   private final BizEventsReaderService bizEventsReaderService;
+
   private final PaymentPositionReaderService paymentPositionReaderService;
+
   private final EcommerceHelpdeskReaderService ecommerceHelpdeskReaderService;
+
   private final EventHubSenderService eventHubSenderService;
 
   @Autowired
