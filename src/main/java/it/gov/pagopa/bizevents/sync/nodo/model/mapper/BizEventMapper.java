@@ -189,25 +189,6 @@ public class BizEventMapper {
     return bizEvent;
   }
 
-  private static Optional<CreditorInstitution> findCI(
-      ConfigDataV1 configData, String paFiscalCode) {
-
-    Optional<CreditorInstitution> ciOpt = Optional.empty();
-    if (paFiscalCode != null && configData.getCreditorInstitutions() != null) {
-      ciOpt = Optional.ofNullable(configData.getCreditorInstitutions().get(paFiscalCode));
-    }
-    return ciOpt;
-  }
-
-  private static Optional<PaymentServiceProvider> findPSP(ConfigDataV1 configData, String pspId) {
-
-    Optional<PaymentServiceProvider> pspOpt = Optional.empty();
-    if (pspId != null && configData.getPsps() != null) {
-      pspOpt = Optional.ofNullable(configData.getPsps().get(pspId));
-    }
-    return pspOpt;
-  }
-
   public static BizEvent fromOldModel() {
 
     return BizEvent.builder().build();
@@ -347,6 +328,25 @@ public class BizEventMapper {
     bizEvent.setMissingInfo(missingInfo);
     bizEvent.setComplete(String.valueOf(missingInfo.isEmpty()));
     return bizEvent;
+  }
+
+  private static Optional<CreditorInstitution> findCI(
+      ConfigDataV1 configData, String paFiscalCode) {
+
+    Optional<CreditorInstitution> ciOpt = Optional.empty();
+    if (paFiscalCode != null && configData.getCreditorInstitutions() != null) {
+      ciOpt = Optional.ofNullable(configData.getCreditorInstitutions().get(paFiscalCode));
+    }
+    return ciOpt;
+  }
+
+  private static Optional<PaymentServiceProvider> findPSP(ConfigDataV1 configData, String pspId) {
+
+    Optional<PaymentServiceProvider> pspOpt = Optional.empty();
+    if (pspId != null && configData.getPsps() != null) {
+      pspOpt = Optional.ofNullable(configData.getPsps().get(pspId));
+    }
+    return pspOpt;
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
