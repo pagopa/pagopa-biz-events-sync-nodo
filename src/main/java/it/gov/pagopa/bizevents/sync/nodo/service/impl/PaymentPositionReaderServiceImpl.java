@@ -59,7 +59,7 @@ public class PaymentPositionReaderServiceImpl implements PaymentPositionReaderSe
       // TODO throw custom exception
     }
 
-    return BizEventMapper.fromNewModel(positionPayment, positionTransfers, totalNotices);
+    return BizEventMapper.fromNewModel(positionPayment, positionTransfers, totalNotices, null);
   }
 
   @Override

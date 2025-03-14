@@ -20,6 +20,9 @@ import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionPaymentPla
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionService;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionSubject;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionTransfer;
+import it.gov.pagopa.bizevents.sync.nodo.model.client.apiconfig.ConfigDataV1;
+import it.gov.pagopa.bizevents.sync.nodo.model.client.apiconfig.CreditorInstitution;
+import it.gov.pagopa.bizevents.sync.nodo.model.client.apiconfig.PaymentServiceProvider;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.PspInfo;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.TransactionInfo;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.TransactionResponse;
@@ -30,6 +33,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -38,7 +42,10 @@ public class BizEventMapper {
   private BizEventMapper() {}
 
   public static BizEvent fromNewModel(
-      PositionPayment pp, List<PositionTransfer> transfers, Long totalNotices) {
+      PositionPayment pp,
+      List<PositionTransfer> transfers,
+      Long totalNotices,
+      ConfigDataV1 configData) {
 
     PositionPaymentPlan ppp = pp.getPaymentPlan();
     PositionService ps = ppp.getPositionService();
@@ -53,12 +60,13 @@ public class BizEventMapper {
       // TODO throw custom exception
     }
 
+    String paFiscalCode = ps.getPaFiscalCode();
+    String pspId = pp.getPspId();
+
     BizEvent bizEvent =
         BizEvent.builder()
             .id(UUID.randomUUID().toString())
             .version("2")
-            .complete(null) // TODO
-            .missingInfo(null) // TODO
             .idPaymentManager(pp.getTransactionId())
             .receiptId(pp.getPaymentToken())
             .debtorPosition(
@@ -70,20 +78,32 @@ public class BizEventMapper {
                     .build())
             .creditor(
                 Creditor.builder()
-                    .idPA(ps.getPaFiscalCode())
+                    .idPA(paFiscalCode)
                     .idBrokerPA(pp.getBrokerPaId())
                     .idStation(pp.getStationId())
-                    .companyName(null) // TODO from Cache
+                    .companyName(
+                        findCI(configData, paFiscalCode)
+                            .map(CreditorInstitution::getBusinessName)
+                            .orElse(null))
                     .officeName(ps.getOfficeName())
                     .build())
             .psp(
                 Psp.builder()
-                    .idPsp(pp.getPspId())
+                    .idPsp(pspId)
                     .idBrokerPsp(pp.getBrokerPspId())
                     .idChannel(pp.getChannelId())
-                    .psp(null) // TODO from Cache
-                    .pspPartitaIVA(null) // TODO from Cache
-                    .pspFiscalCode(null) // TODO from Cache
+                    .psp(
+                        findPSP(configData, pspId)
+                            .map(PaymentServiceProvider::getBusinessName)
+                            .orElse(null))
+                    .pspPartitaIVA(
+                        findPSP(configData, pspId)
+                            .map(PaymentServiceProvider::getVatNumber)
+                            .orElse(null))
+                    .pspFiscalCode(
+                        findPSP(configData, pspId)
+                            .map(PaymentServiceProvider::getTaxCode)
+                            .orElse(null))
                     .channelDescription(pp.getPaymentChannel())
                     .build())
             .paymentInfo(
@@ -159,7 +179,10 @@ public class BizEventMapper {
               Transfer.builder()
                   .idTransfer(pt.getTransferIdentifier())
                   .fiscalCodePA(pt.getPaFiscalCodeSecondary())
-                  .companyName(null) // TODO from Cache
+                  .companyName(
+                      findCI(configData, pt.getPaFiscalCodeSecondary())
+                          .map(CreditorInstitution::getBusinessName)
+                          .orElse(null))
                   .amount(CommonUtility.toPlainString(pt.getAmount()))
                   .transferCategory(pt.getTransferCategory())
                   .remittanceInformation(pt.getRemittanceInformation())
@@ -172,7 +195,32 @@ public class BizEventMapper {
                   .build());
     }
 
+    CreditorInstitution creditorInstitution =
+        configData.getCreditorInstitutions().get(paFiscalCode);
+    if (creditorInstitution != null) {
+      bizEvent.getCreditor().setCompanyName(creditorInstitution.getBusinessName());
+    }
+
     return bizEvent;
+  }
+
+  private static Optional<CreditorInstitution> findCI(
+      ConfigDataV1 configData, String paFiscalCode) {
+
+    Optional<CreditorInstitution> ciOpt = Optional.empty();
+    if (paFiscalCode != null) {
+      ciOpt = Optional.ofNullable(configData.getCreditorInstitutions().get(paFiscalCode));
+    }
+    return ciOpt;
+  }
+
+  private static Optional<PaymentServiceProvider> findPSP(ConfigDataV1 configData, String pspId) {
+
+    Optional<PaymentServiceProvider> pspOpt = Optional.empty();
+    if (pspId != null) {
+      pspOpt = Optional.ofNullable(configData.getPsps().get(pspId));
+    }
+    return pspOpt;
   }
 
   public static BizEvent fromOldModel() {
