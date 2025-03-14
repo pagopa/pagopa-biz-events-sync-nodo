@@ -1,9 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +9,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "RT")
-public class RT {
+public class Rt {
 
   @Id
   @Column(name = "ID")
@@ -65,4 +62,7 @@ public class RT {
 
   @Column(name = "GENERATA_DA")
   private String generataDa;
+
+  @OneToOne(mappedBy = "rt", fetch = FetchType.EAGER)
+  private RtVersamenti rtVersamenti;
 }
