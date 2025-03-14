@@ -7,6 +7,8 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class Constants {
 
+  public static final String APICONFIG_CACHE_REQUIRED_KEYS = "psps,creditorInstitutions";
+
   public static final DateTimeFormatter BIZ_EVENT_DATE_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
   public static final DateTimeFormatter BIZ_EVENT_EXTENDED_DATE_FORMATTER =

@@ -20,6 +20,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ConfigDataV1 implements Serializable {
 
+  private String cacheVersion;
+
   private String version;
 
   private Map<String, CreditorInstitution> creditorInstitutions;
