@@ -1,8 +1,17 @@
 package it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.sql.Timestamp;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "RPT_SOGGETTI")
 public class RptSoggetti {
@@ -52,6 +61,6 @@ public class RptSoggetti {
   private Timestamp updatedTimestamp;
 
   @OneToOne
-  @JoinColumn(name = "RPT_ID", referencedColumnName = "ID")
+  @JoinColumn(name = "RPT_ID", referencedColumnName = "ID", insertable = false, updatable = false)
   private Rpt rpt;
 }

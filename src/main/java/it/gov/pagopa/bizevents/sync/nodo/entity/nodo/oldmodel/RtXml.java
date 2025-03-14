@@ -1,8 +1,18 @@
 package it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.sql.Timestamp;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "RT_XML")
 public class RtXml {
@@ -25,7 +35,7 @@ public class RtXml {
 
   @Lob
   @Column(name = "XML_CONTENT")
-  private String xmlContent;
+  private byte[] xmlContent;
 
   @Column(name = "INSERTED_TIMESTAMP")
   private Timestamp insertedTimestamp;

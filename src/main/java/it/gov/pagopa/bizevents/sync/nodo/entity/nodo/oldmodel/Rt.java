@@ -65,4 +65,7 @@ public class Rt {
 
   @OneToOne(mappedBy = "rt", fetch = FetchType.EAGER)
   private RtVersamenti rtVersamenti;
+
+  @OneToOne(mappedBy = "rt", fetch = FetchType.EAGER)
+  private RtXml rtXml;
 }
