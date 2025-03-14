@@ -15,7 +15,17 @@ import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.Transactio
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.TransactionDetails;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.subject.TransactionPsp;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.subject.User;
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.*;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionPayment;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionPaymentPlan;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionService;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionSubject;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionTransfer;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.Rpt;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RptSoggetti;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RptVersamenti;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.Rt;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.rt.CtDatiSingoloPagamentoRT;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.rt.CtRicevutaTelematica;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.apiconfig.ConfigDataV1;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.apiconfig.CreditorInstitution;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.apiconfig.PaymentServiceProvider;
@@ -25,7 +35,16 @@ import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.Transac
 import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.UserInfo;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import it.gov.pagopa.bizevents.sync.nodo.util.Constants;
-import java.util.*;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class BizEventMapper {
@@ -189,9 +208,173 @@ public class BizEventMapper {
     return bizEvent;
   }
 
-  public static BizEvent fromOldModel() {
+  public static BizEvent fromOldModel(
+      Rpt rpt,
+      Rt rt,
+      List<RptSoggetti> rptSubjects,
+      List<RptVersamenti> rptTransfers,
+      ConfigDataV1 configData) {
 
-    return BizEvent.builder().build();
+    if (rptSubjects.isEmpty()) {
+      // TODO throw custom exception
+    }
+
+    if (rptTransfers.isEmpty()) {
+      // TODO throw custom exception
+    }
+
+    RptSoggetti pagatore =
+        rptSubjects.stream()
+            .filter(e -> "P".equalsIgnoreCase(e.getId().getTipoSoggetto()))
+            .findFirst()
+            .orElse(null);
+
+    RptSoggetti versante =
+        rptSubjects.stream()
+            .filter(e -> "V".equalsIgnoreCase(e.getId().getTipoSoggetto()))
+            .findFirst()
+            .orElse(null);
+
+    RptSoggetti beneficiario =
+        rptSubjects.stream()
+            .filter(e -> "B".equalsIgnoreCase(e.getId().getTipoSoggetto()))
+            .findFirst()
+            .orElse(null);
+
+    CtRicevutaTelematica decodedRT = extractRT(rt.getRtXml().getXmlContent());
+    List<CtDatiSingoloPagamentoRT> datiSingoloPagamento = new ArrayList<>();
+    if (decodedRT != null) {
+      datiSingoloPagamento = decodedRT.getDatiPagamento().getDatiSingoloPagamento();
+    }
+
+    String domainId = rpt.getIdentDominio();
+    String pspId = rpt.getPsp();
+
+    BizEvent bizEvent =
+        BizEvent.builder()
+            .id(UUID.randomUUID().toString())
+            .version("2")
+            .idPaymentManager("Y".equalsIgnoreCase(rpt.getWisp2()) ? rpt.getIdSessione() : "NA")
+            .receiptId(null) // TODO
+            .debtorPosition(
+                DebtorPosition.builder()
+                    .modelType("1")
+                    .noticeNumber(null) // TODO
+                    .iuv(rpt.getIuv())
+                    .iur(null) // TODO
+                    .build())
+            .creditor(
+                Creditor.builder()
+                    .idPA(domainId)
+                    .idBrokerPA(rpt.getIntermediariopa())
+                    .idStation(rpt.getStazIntermediariopa())
+                    .companyName(beneficiario != null ? beneficiario.getAnagrafica() : null)
+                    .officeName(null) // TODO
+                    .build())
+            .psp(
+                Psp.builder()
+                    .idPsp(pspId)
+                    .idBrokerPsp(rpt.getIntermediarioPsp())
+                    .idChannel(rpt.getCanale())
+                    .psp(
+                        findPSP(configData, pspId)
+                            .map(PaymentServiceProvider::getBusinessName)
+                            .orElse(null))
+                    .pspPartitaIVA(
+                        findPSP(configData, pspId)
+                            .map(PaymentServiceProvider::getVatNumber)
+                            .orElse(null))
+                    .pspFiscalCode(
+                        findPSP(configData, pspId)
+                            .map(PaymentServiceProvider::getTaxCode)
+                            .orElse(null))
+                    .channelDescription(null) // TODO
+                    .build())
+            .paymentInfo(
+                PaymentInfo.builder()
+                    .paymentDateTime(
+                        CommonUtility.formatDate(
+                            rt.getDataRicevuta(), Constants.BIZ_EVENT_EXTENDED_DATE_FORMATTER))
+                    .applicationDate(
+                        CommonUtility.formatDate(
+                            null, Constants.BIZ_EVENT_REDUCED_DATE_FORMATTER)) // TODO
+                    .transferDate(
+                        CommonUtility.formatDate(
+                            null, Constants.BIZ_EVENT_REDUCED_DATE_FORMATTER)) // TODO
+                    .dueDate(
+                        CommonUtility.formatDate(
+                            null, Constants.BIZ_EVENT_REDUCED_DATE_FORMATTER)) // TODO
+                    .paymentToken(rpt.getCcp())
+                    .amount(CommonUtility.toPlainString(rpt.getSommaVersamenti()))
+                    .fee(null) // TODO
+                    .primaryCiIncurredFee(CommonUtility.toPlainString(1d)) // TODO
+                    .idBundle(null) // TODO
+                    .idCiBundle(null) // TODO
+                    .totalNotice(null) // TODO
+                    .paymentMethod(rpt.getTipoVersamento())
+                    .touchpoint(null) // TODO
+                    .remittanceInformation(null) // TODO
+                    .iur(datiSingoloPagamento.get(0).getIdentificativoUnivocoRiscossione())
+                    .metadata(null) // TODO
+                    .build())
+            .transferList(new LinkedList<>())
+            .build();
+
+    if (pagatore != null) {
+      bizEvent.setDebtor(
+          Debtor.builder()
+              .fullName(pagatore.getAnagrafica())
+              .entityUniqueIdentifierType(pagatore.getTipoIdentificativoUnivoco())
+              .entityUniqueIdentifierValue(pagatore.getCodiceIdentificativoUnivoco())
+              .streetName(pagatore.getIndirizzo())
+              .civicNumber(pagatore.getCivico())
+              .postalCode(pagatore.getCap())
+              .city(pagatore.getLocalita())
+              .stateProvinceRegion(pagatore.getProvincia())
+              .country(pagatore.getNazione())
+              .eMail(pagatore.getEmail())
+              .build());
+    }
+
+    if (versante != null) {
+      bizEvent.setPayer(
+          Payer.builder()
+              .fullName(versante.getAnagrafica())
+              .entityUniqueIdentifierType(versante.getTipoIdentificativoUnivoco())
+              .entityUniqueIdentifierValue(versante.getCodiceIdentificativoUnivoco())
+              .streetName(versante.getIndirizzo())
+              .civicNumber(versante.getCivico())
+              .postalCode(versante.getCap())
+              .city(versante.getLocalita())
+              .stateProvinceRegion(versante.getProvincia())
+              .country(versante.getNazione())
+              .eMail(versante.getEmail())
+              .build());
+    }
+
+    List<RptVersamenti> rptTransfersSorted =
+        rptTransfers.stream().sorted(Comparator.comparing(RptVersamenti::getProgressivo)).toList();
+    for (RptVersamenti rptvers : rptTransfersSorted) {
+      CtDatiSingoloPagamentoRT ctDatiSingoloPagamento =
+          datiSingoloPagamento.get((int) (rptvers.getProgressivo() - 1));
+      bizEvent
+          .getTransferList()
+          .add(
+              Transfer.builder()
+                  .idTransfer(rptvers.getProgressivo().toString())
+                  .fiscalCodePA(rpt.getIdentDominio())
+                  .companyName(beneficiario != null ? beneficiario.getAnagrafica() : null)
+                  .amount(CommonUtility.toPlainString(rptvers.getImporto()))
+                  .transferCategory(rptvers.getDatiSpecificiRiscossione())
+                  .iur(ctDatiSingoloPagamento.getIdentificativoUnivocoRiscossione())
+                  .remittanceInformation(rptvers.getCausaleVersamento())
+                  .iban(null) // TODO
+                  .mbdAttachment(null) // TODO
+                  .metadata(extractMetadata(null)) // TODO
+                  .build());
+    }
+
+    return bizEvent;
   }
 
   public static TransactionDetails fromTransactionResponse(TransactionResponse transaction) {
@@ -375,5 +558,16 @@ public class BizEventMapper {
     if (Boolean.TRUE.equals(function.get())) {
       missingInfo.add(value);
     }
+  }
+
+  private static CtRicevutaTelematica extractRT(byte[] blob) {
+    CtRicevutaTelematica rt = null;
+    try {
+      Unmarshaller unmarshaller = Constants.RT_JAXB_CONTEXT.createUnmarshaller();
+      rt = (CtRicevutaTelematica) unmarshaller.unmarshal(new StringReader(new String(blob)));
+    } catch (JAXBException e) {
+      // TODO throw exception
+    }
+    return rt;
   }
 }
