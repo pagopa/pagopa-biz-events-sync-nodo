@@ -34,10 +34,9 @@ public class BizEventsSyncNodoScheduler {
     //
     LocalDateTime todayDate = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
     LocalDateTime lowerLimitDate = todayDate.minusDays(lowerBoundDateBeforeDays);
-    // LocalDateTime upperLimitDate = todayDate.minusDays(lowerBoundDateBeforeDays - 1L);
-    // TODO below will be removed, it is set only for debug purposes
-    LocalDateTime upperLimitDate = todayDate.minusDays(lowerBoundDateBeforeDays).plusHours(1);
+    LocalDateTime upperLimitDate = todayDate.minusDays(lowerBoundDateBeforeDays - 1L);
 
+    //
     bizEventSynchronizerService.executeSynchronization(lowerLimitDate, upperLimitDate);
   }
 }

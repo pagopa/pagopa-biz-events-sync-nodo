@@ -15,11 +15,7 @@ import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.Transactio
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.TransactionDetails;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.subject.TransactionPsp;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.subject.User;
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionPayment;
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionPaymentPlan;
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionService;
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionSubject;
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionTransfer;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.*;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.apiconfig.ConfigDataV1;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.apiconfig.CreditorInstitution;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.apiconfig.PaymentServiceProvider;
@@ -29,12 +25,7 @@ import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.Transac
 import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.UserInfo;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import it.gov.pagopa.bizevents.sync.nodo.util.Constants;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class BizEventMapper {
@@ -195,12 +186,6 @@ public class BizEventMapper {
                   .build());
     }
 
-    CreditorInstitution creditorInstitution =
-        configData.getCreditorInstitutions().get(paFiscalCode);
-    if (creditorInstitution != null) {
-      bizEvent.getCreditor().setCompanyName(creditorInstitution.getBusinessName());
-    }
-
     return bizEvent;
   }
 
@@ -208,7 +193,7 @@ public class BizEventMapper {
       ConfigDataV1 configData, String paFiscalCode) {
 
     Optional<CreditorInstitution> ciOpt = Optional.empty();
-    if (paFiscalCode != null) {
+    if (paFiscalCode != null && configData.getCreditorInstitutions() != null) {
       ciOpt = Optional.ofNullable(configData.getCreditorInstitutions().get(paFiscalCode));
     }
     return ciOpt;
@@ -217,7 +202,7 @@ public class BizEventMapper {
   private static Optional<PaymentServiceProvider> findPSP(ConfigDataV1 configData, String pspId) {
 
     Optional<PaymentServiceProvider> pspOpt = Optional.empty();
-    if (pspId != null) {
+    if (pspId != null && configData.getPsps() != null) {
       pspOpt = Optional.ofNullable(configData.getPsps().get(pspId));
     }
     return pspOpt;

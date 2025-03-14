@@ -42,7 +42,10 @@ public class BizEventSynchronizerService {
     this.eventHubSenderService = eventHubSenderService;
   }
 
-  public void executeSynchronization(LocalDateTime lowerLimitDate, LocalDateTime upperLimitDate) {
+  public List<String> executeSynchronization(
+      LocalDateTime lowerLimitDate, LocalDateTime upperLimitDate) {
+
+    List<BizEvent> bizEventsToSend = new LinkedList<>();
 
     //
     List<Pair<LocalDateTime, LocalDateTime>> timeSlots =
@@ -78,14 +81,21 @@ public class BizEventSynchronizerService {
                 .collect(Collectors.toSet());
 
         //
-        List<BizEvent> bizEventsToSend =
-            generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
+        bizEventsToSend = generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
 
         //
         this.eventHubSenderService.sendBizEventsToEventHub(bizEventsToSend);
         log.info("");
       }
     }
+
+    return bizEventsToSend.stream()
+        .map(
+            event ->
+                String.format(
+                    "ID=[%s] PAYMENT_TOKEN=[%s]",
+                    event.getId(), event.getPaymentInfo().getPaymentToken()))
+        .toList();
   }
 
   private List<Pair<LocalDateTime, LocalDateTime>> getTimeSlotThatRequireSynchronization(
