@@ -1,6 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.repository.receipt;
 
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RT;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.Rt;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface RTRepository extends JpaRepository<RT, Long> {
+public interface RTRepository extends JpaRepository<Rt, Long> {
 
   @Query(
       """
