@@ -2,7 +2,7 @@ package it.gov.pagopa.bizevents.sync.nodo.client;
 
 import feign.FeignException;
 import it.gov.pagopa.bizevents.sync.nodo.config.client.APIConfigCacheClientConfig;
-import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.SearchTransactionResponse;
+import it.gov.pagopa.bizevents.sync.nodo.model.client.apiconfig.ConfigDataV1;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
@@ -23,5 +23,5 @@ public interface APIConfigCacheClient {
   @PostMapping(
       value = "${client.apiconfig-cache.get-cache-by-keys.path}",
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  SearchTransactionResponse getCacheByKeys(@RequestParam(value = "keys") String keys);
+  ConfigDataV1 getCacheByKeys(@RequestParam(value = "keys") String keys);
 }
