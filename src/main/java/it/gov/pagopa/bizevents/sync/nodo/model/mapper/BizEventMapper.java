@@ -199,7 +199,7 @@ public class BizEventMapper {
                   .iban(pt.getIban())
                   .mbdAttachment(
                       pt.getPositionTransferMBD() != null
-                          ? CommonUtility.convertBlob(pt.getPositionTransferMBD().getXmlContent())
+                          ? pt.getPositionTransferMBD().getXmlContent()
                           : null)
                   .metadata(extractMetadata(pt.getMetadata()))
                   .build());
@@ -542,11 +542,11 @@ public class BizEventMapper {
     }
   }
 
-  private static CtRicevutaTelematica extractRT(byte[] blob) {
+  private static CtRicevutaTelematica extractRT(String blob) {
     CtRicevutaTelematica rt = null;
     try {
       Unmarshaller unmarshaller = Constants.RT_JAXB_CONTEXT.createUnmarshaller();
-      rt = (CtRicevutaTelematica) unmarshaller.unmarshal(new StringReader(new String(blob)));
+      rt = (CtRicevutaTelematica) unmarshaller.unmarshal(new StringReader(blob));
     } catch (JAXBException e) {
       // TODO throw exception
     }
