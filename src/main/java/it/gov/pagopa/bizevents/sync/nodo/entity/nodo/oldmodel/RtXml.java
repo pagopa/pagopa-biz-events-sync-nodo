@@ -35,7 +35,7 @@ public class RtXml {
 
   @Lob
   @Column(name = "XML_CONTENT")
-  private byte[] xmlContent;
+  private String xmlContent;
 
   @Column(name = "INSERTED_TIMESTAMP")
   private Timestamp insertedTimestamp;
