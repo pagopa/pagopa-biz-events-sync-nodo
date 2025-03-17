@@ -12,7 +12,7 @@ public interface RptVersamentiRepository extends JpaRepository<RptVersamenti, Lo
       """
       SELECT rptv
       FROM RptVersamenti rptv
-      WHERE rptv.fkRpt >= :rptId
+      WHERE rptv.fkRpt = :rptId
       ORDER BY rptv.progressivo ASC
       """)
   List<RptVersamenti> readByRptId(@Param("rptId") Long rptId);

@@ -36,11 +36,12 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
       """
       SELECT rt
       FROM Rt rt
-      WHERE rt.identDominio >= :domainId
+      WHERE rt.identDominio = :domainId
         AND rt.iuv = :iuv
         AND rt.ccp = :ccp
       """)
-  Optional<Rt> readByUniqueIdentifier(String domainId, String iuv, String ccp);
+  Optional<Rt> readByUniqueIdentifier(
+      @Param("domainId") String domainId, @Param("iuv") String iuv, @Param("ccp") String ccp);
 
   @Query(
       """
