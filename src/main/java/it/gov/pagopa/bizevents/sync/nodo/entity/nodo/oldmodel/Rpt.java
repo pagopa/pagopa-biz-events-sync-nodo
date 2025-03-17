@@ -57,7 +57,7 @@ public class Rpt {
   @Column(name = "PSP")
   private String psp;
 
-  @Column(name = "INTERMEDIARIO_PSP")
+  @Column(name = "INTERMEDIARIOPSP")
   private String intermediarioPsp;
 
   @Column(name = "TIPO_VERSAMENTO")

@@ -12,7 +12,7 @@ public interface RptRepository extends JpaRepository<Rpt, Long> {
       """
       SELECT rpt
       FROM Rpt rpt
-      WHERE rpt.identDominio >= :domainId
+      WHERE rpt.identDominio = :domainId
         AND rpt.iuv = :iuv
         AND rpt.ccp = :ccp
       """)
