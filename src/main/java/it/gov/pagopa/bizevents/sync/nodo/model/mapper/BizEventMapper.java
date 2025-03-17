@@ -255,13 +255,11 @@ public class BizEventMapper {
             .id(UUID.randomUUID().toString())
             .version("2")
             .idPaymentManager("Y".equalsIgnoreCase(rpt.getWisp2()) ? rpt.getIdSessione() : "NA")
-            .receiptId(null) // TODO
             .debtorPosition(
                 DebtorPosition.builder()
                     .modelType("1")
-                    .noticeNumber(null) // TODO
                     .iuv(rpt.getIuv())
-                    .iur(null) // TODO
+                    .iur(datiSingoloPagamento.get(0).getIdentificativoUnivocoRiscossione())
                     .build())
             .creditor(
                 Creditor.builder()
@@ -269,7 +267,6 @@ public class BizEventMapper {
                     .idBrokerPA(rpt.getIntermediariopa())
                     .idStation(rpt.getStazIntermediariopa())
                     .companyName(beneficiario != null ? beneficiario.getAnagrafica() : null)
-                    .officeName(null) // TODO
                     .build())
             .psp(
                 Psp.builder()
@@ -288,34 +285,23 @@ public class BizEventMapper {
                         findPSP(configData, pspId)
                             .map(PaymentServiceProvider::getTaxCode)
                             .orElse(null))
-                    .channelDescription(null) // TODO
                     .build())
             .paymentInfo(
                 PaymentInfo.builder()
                     .paymentDateTime(
                         CommonUtility.formatDate(
                             rt.getDataRicevuta(), Constants.BIZ_EVENT_EXTENDED_DATE_FORMATTER))
-                    .applicationDate(
-                        CommonUtility.formatDate(
-                            null, Constants.BIZ_EVENT_REDUCED_DATE_FORMATTER)) // TODO
-                    .transferDate(
-                        CommonUtility.formatDate(
-                            null, Constants.BIZ_EVENT_REDUCED_DATE_FORMATTER)) // TODO
-                    .dueDate(
-                        CommonUtility.formatDate(
-                            null, Constants.BIZ_EVENT_REDUCED_DATE_FORMATTER)) // TODO
                     .paymentToken(rpt.getCcp())
                     .amount(CommonUtility.toPlainString(rpt.getSommaVersamenti()))
-                    .fee(null) // TODO
-                    .primaryCiIncurredFee(CommonUtility.toPlainString(1d)) // TODO
-                    .idBundle(null) // TODO
-                    .idCiBundle(null) // TODO
-                    .totalNotice(null) // TODO
+                    .fee(
+                        CommonUtility.toPlainString(
+                            datiSingoloPagamento.stream()
+                                .mapToDouble(
+                                    paymentData ->
+                                        paymentData.getCommissioniApplicatePSP().doubleValue())
+                                .sum()))
                     .paymentMethod(rpt.getTipoVersamento())
-                    .touchpoint(null) // TODO
-                    .remittanceInformation(null) // TODO
                     .iur(datiSingoloPagamento.get(0).getIdentificativoUnivocoRiscossione())
-                    .metadata(null) // TODO
                     .build())
             .transferList(new LinkedList<>())
             .build();
@@ -361,16 +347,12 @@ public class BizEventMapper {
           .getTransferList()
           .add(
               Transfer.builder()
-                  .idTransfer(rptvers.getProgressivo().toString())
                   .fiscalCodePA(rpt.getIdentDominio())
                   .companyName(beneficiario != null ? beneficiario.getAnagrafica() : null)
                   .amount(CommonUtility.toPlainString(rptvers.getImporto()))
                   .transferCategory(rptvers.getDatiSpecificiRiscossione())
                   .iur(ctDatiSingoloPagamento.getIdentificativoUnivocoRiscossione())
                   .remittanceInformation(rptvers.getCausaleVersamento())
-                  .iban(null) // TODO
-                  .mbdAttachment(null) // TODO
-                  .metadata(extractMetadata(null)) // TODO
                   .build());
     }
 
