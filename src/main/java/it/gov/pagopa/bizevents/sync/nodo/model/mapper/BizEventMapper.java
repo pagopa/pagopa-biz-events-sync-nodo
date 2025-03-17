@@ -35,9 +35,11 @@ import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.Transac
 import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.response.UserInfo;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import it.gov.pagopa.bizevents.sync.nodo.util.Constants;
+import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -46,6 +48,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
+import javax.xml.transform.stream.StreamSource;
 
 public class BizEventMapper {
 
@@ -223,6 +226,16 @@ public class BizEventMapper {
       // TODO throw custom exception
     }
 
+    CtRicevutaTelematica decodedRT = extractRT(rt.getRtXml().getXmlContent());
+    List<CtDatiSingoloPagamentoRT> datiSingoloPagamento = new ArrayList<>();
+    if (decodedRT != null) {
+      datiSingoloPagamento = decodedRT.getDatiPagamento().getDatiSingoloPagamento();
+    }
+
+    if (datiSingoloPagamento.isEmpty()) {
+      // TODO throw custom exception
+    }
+
     RptSoggetti pagatore =
         rptSubjects.stream()
             .filter(e -> "P".equalsIgnoreCase(e.getId().getTipoSoggetto()))
@@ -240,12 +253,6 @@ public class BizEventMapper {
             .filter(e -> "B".equalsIgnoreCase(e.getId().getTipoSoggetto()))
             .findFirst()
             .orElse(null);
-
-    CtRicevutaTelematica decodedRT = extractRT(rt.getRtXml().getXmlContent());
-    List<CtDatiSingoloPagamentoRT> datiSingoloPagamento = new ArrayList<>();
-    if (decodedRT != null) {
-      datiSingoloPagamento = decodedRT.getDatiPagamento().getDatiSingoloPagamento();
-    }
 
     String domainId = rpt.getIdentDominio();
     String pspId = rpt.getPsp();
@@ -298,7 +305,10 @@ public class BizEventMapper {
                             datiSingoloPagamento.stream()
                                 .mapToDouble(
                                     paymentData ->
-                                        paymentData.getCommissioniApplicatePSP().doubleValue())
+                                        Optional.ofNullable(
+                                                paymentData.getCommissioniApplicatePSP())
+                                            .orElse(BigDecimal.ZERO)
+                                            .doubleValue())
                                 .sum()))
                     .paymentMethod(rpt.getTipoVersamento())
                     .iur(datiSingoloPagamento.get(0).getIdentificativoUnivocoRiscossione())
@@ -353,6 +363,7 @@ public class BizEventMapper {
                   .transferCategory(rptvers.getDatiSpecificiRiscossione())
                   .iur(ctDatiSingoloPagamento.getIdentificativoUnivocoRiscossione())
                   .remittanceInformation(rptvers.getCausaleVersamento())
+                  .iban(rptvers.getIban())
                   .build());
     }
 
@@ -545,8 +556,12 @@ public class BizEventMapper {
   private static CtRicevutaTelematica extractRT(String blob) {
     CtRicevutaTelematica rt = null;
     try {
+      String formattedBlob = blob.replaceAll("xmlns=[\"'][^\"']+[\"']", "");
       Unmarshaller unmarshaller = Constants.RT_JAXB_CONTEXT.createUnmarshaller();
-      rt = (CtRicevutaTelematica) unmarshaller.unmarshal(new StringReader(blob));
+      StringReader reader = new StringReader(formattedBlob);
+      JAXBElement<CtRicevutaTelematica> root =
+          unmarshaller.unmarshal(new StreamSource(reader), CtRicevutaTelematica.class);
+      rt = root.getValue();
     } catch (JAXBException e) {
       // TODO throw exception
     }
