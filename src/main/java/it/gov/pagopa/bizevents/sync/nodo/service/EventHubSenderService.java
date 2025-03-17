@@ -35,43 +35,46 @@ public class EventHubSenderService {
 
   public void sendBizEventsToEventHub(List<BizEvent> bizEvents) {
 
-    List<EventData> evhEvents =
-        bizEvents.stream()
-            .map(bizEvent -> new EventData(Constants.GSON_PARSER.toJson(bizEvent)))
-            .toList();
-    evhEvents.forEach(
-        eventData ->
-            eventData
-                .getProperties()
-                .put(
-                    Constants.REGEN_SERVICE_IDENTIFIER_KEY,
-                    Constants.REGEN_SERVICE_IDENTIFIER_VALUE));
+    if (!bizEvents.isEmpty()) {
 
-    //
-    EventDataBatch evhEventBatch = this.eventHubProducerClient.createBatch();
+      List<EventData> evhEvents =
+          bizEvents.stream()
+              .map(bizEvent -> new EventData(Constants.GSON_PARSER.toJson(bizEvent)))
+              .toList();
+      evhEvents.forEach(
+          eventData ->
+              eventData
+                  .getProperties()
+                  .put(
+                      Constants.REGEN_SERVICE_IDENTIFIER_KEY,
+                      Constants.REGEN_SERVICE_IDENTIFIER_VALUE));
 
-    int batchMaxSize = evhEventBatch.getMaxSizeInBytes();
-    log.debug("Defining batches with maximum dimension of [" + batchMaxSize + "] bytes.");
+      //
+      EventDataBatch evhEventBatch = this.eventHubProducerClient.createBatch();
 
-    for (EventData evhEvent : evhEvents) {
+      int batchMaxSize = evhEventBatch.getMaxSizeInBytes();
+      log.debug("Defining batches with maximum dimension of [" + batchMaxSize + "] bytes.");
 
-      // Try to add the event from the array to the batch
-      if (!evhEventBatch.tryAdd(evhEvent)) {
+      for (EventData evhEvent : evhEvents) {
 
-        // If the batch is full, send it and then create a new batch
-        this.eventHubProducerClient.send(evhEventBatch);
-        evhEventBatch = this.eventHubProducerClient.createBatch();
-
-        // Try to add that event that couldn't fit before.
+        // Try to add the event from the array to the batch
         if (!evhEventBatch.tryAdd(evhEvent)) {
-          log.error("Event is too large for an empty batch. Max size: [" + batchMaxSize + "].");
-          // TODO throw custom exception
+
+          // If the batch is full, send it and then create a new batch
+          this.eventHubProducerClient.send(evhEventBatch);
+          evhEventBatch = this.eventHubProducerClient.createBatch();
+
+          // Try to add that event that couldn't fit before.
+          if (!evhEventBatch.tryAdd(evhEvent)) {
+            log.error("Event is too large for an empty batch. Max size: [" + batchMaxSize + "].");
+            // TODO throw custom exception
+          }
         }
       }
-    }
-    // send the last batch of remaining events
-    if (evhEventBatch.getCount() > 0) {
-      this.eventHubProducerClient.send(evhEventBatch);
+      // send the last batch of remaining events
+      if (evhEventBatch.getCount() > 0) {
+        this.eventHubProducerClient.send(evhEventBatch);
+      }
     }
   }
 }
