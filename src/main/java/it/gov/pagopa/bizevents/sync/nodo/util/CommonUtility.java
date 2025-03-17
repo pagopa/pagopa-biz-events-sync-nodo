@@ -1,7 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.util;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -79,14 +78,6 @@ public class CommonUtility {
 
   public static String toPlainString(Double value) {
     return value != null ? value.toString() : null;
-  }
-
-  public static String convertBlob(byte[] blobContent) {
-    String convertedBlob = null;
-    if (blobContent.length > 0) {
-      convertedBlob = new String(blobContent, StandardCharsets.UTF_8);
-    }
-    return convertedBlob;
   }
 
   public static long getTimelapse(long startTime) {

@@ -77,7 +77,10 @@ public class BizEventSynchronizerService {
 
         // TODO remove, only for debug purpose
         receiptsNotConvertedInBizEvents =
-            receiptsNotConvertedInBizEvents.stream().findFirst().stream()
+            receiptsNotConvertedInBizEvents.stream()
+                .filter(receiptEvent -> PaymentModelVersion.OLD.equals(receiptEvent.getVersion()))
+                .findFirst()
+                .stream()
                 .collect(Collectors.toSet());
 
         //
