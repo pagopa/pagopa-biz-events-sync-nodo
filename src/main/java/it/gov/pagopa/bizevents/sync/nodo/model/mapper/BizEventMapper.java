@@ -261,7 +261,7 @@ public class BizEventMapper {
         BizEvent.builder()
             .id(UUID.randomUUID().toString())
             .version("2")
-            .idPaymentManager("Y".equalsIgnoreCase(rpt.getWisp2()) ? rpt.getIdSessione() : "NA")
+            .idPaymentManager("Y".equalsIgnoreCase(rpt.getWisp2()) ? rpt.getIdSessione() : null)
             .debtorPosition(
                 DebtorPosition.builder()
                     .modelType("1")
@@ -499,6 +499,9 @@ public class BizEventMapper {
         () -> paymentInfo.getRemittanceInformation() == null);
     addOnMissingInfoIfTrue(
         missingInfo, "paymentInfo.metadata", () -> paymentInfo.getMetadata() == null);
+
+    //
+    addOnMissingInfoIfTrue(missingInfo, "transactionDetails", () -> transactionDetails == null);
 
     bizEvent.setTransactionDetails(transactionDetails);
     bizEvent.setMissingInfo(missingInfo);
