@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,6 +29,9 @@ public class BizEventSynchronizerService {
   private final EcommerceHelpdeskReaderService ecommerceHelpdeskReaderService;
 
   private final EventHubSenderService eventHubSenderService;
+
+  @Value("${synchronization-process.send-to-eventhub.activation}")
+  private boolean mustSendEventToEvent;
 
   @Autowired
   public BizEventSynchronizerService(
@@ -87,7 +91,10 @@ public class BizEventSynchronizerService {
         bizEventsToSend = generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
 
         //
-        this.eventHubSenderService.sendBizEventsToEventHub(bizEventsToSend);
+        if (mustSendEventToEvent) {
+          log.info("");
+          this.eventHubSenderService.sendBizEventsToEventHub(bizEventsToSend);
+        }
         log.info("");
       }
     }
