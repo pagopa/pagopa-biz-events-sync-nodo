@@ -99,7 +99,9 @@ public class BizEventSynchronizerService {
 
           //
           if (mustSendEventToEvent) {
-            log.info("");
+            log.info(
+                "[BIZ-EVENTS-SYNC-NODO] Sending [{}] BizEvents to event hub.",
+                bizEventsToSend.size());
             this.eventHubSenderService.sendBizEventsToEventHub(bizEventsToSend);
           }
         }
