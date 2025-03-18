@@ -21,6 +21,9 @@ public class SyncReport {
   @JsonProperty("sent_to_event_hub")
   private boolean sentToEventHub;
 
+  @JsonProperty("error_during_computation")
+  private boolean errorDuringComputation;
+
   @JsonProperty("total_records")
   private int totalRecords;
 

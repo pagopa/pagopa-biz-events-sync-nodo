@@ -56,6 +56,7 @@ public class BizEventSynchronizerService {
 
     List<BizEvent> bizEventsToSend = new LinkedList<>();
     Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents = new HashSet<>();
+    boolean errorDuringComputation = false;
 
     //
     List<Pair<LocalDateTime, LocalDateTime>> timeSlots =
@@ -107,6 +108,7 @@ public class BizEventSynchronizerService {
         }
       } catch (BizEventSyncException e) {
         log.error(e.getCustomMessage(), e);
+        errorDuringComputation = true;
       }
     }
 
@@ -118,7 +120,8 @@ public class BizEventSynchronizerService {
         lowerLimitDate,
         upperLimitDate,
         mustSendEventToEvent,
-        showEventData);
+        showEventData,
+        errorDuringComputation);
   }
 
   private List<Pair<LocalDateTime, LocalDateTime>> getTimeSlotThatRequireSynchronization(
@@ -168,6 +171,11 @@ public class BizEventSynchronizerService {
     // TODO handle errors and exceptions
     for (ReceiptEventInfo receiptEvent : receiptsNotConvertedInBizEvents) {
 
+      try {
+
+      } catch (Exception e) {
+        // TODO log it but do not throw it!
+      }
       BizEvent convertedBizEvent;
       if (PaymentModelVersion.OLD.equals(receiptEvent.getVersion())) {
 
@@ -201,7 +209,8 @@ public class BizEventSynchronizerService {
       LocalDateTime lowerLimitDate,
       LocalDateTime upperLimitDate,
       boolean sentToEventHub,
-      boolean showEventData) {
+      boolean showEventData,
+      boolean errorDuringComputation) {
 
     List<SyncReportRecord> records = new LinkedList<>();
     for (BizEvent bizEvent : events) {
@@ -234,7 +243,7 @@ public class BizEventSynchronizerService {
                           .from(relatedInfo.getLowerBoundTimeSlot())
                           .to(relatedInfo.getUpperBoundTimeSlot())
                           .build())
-              .syncStatus(sentToEventHub ? "SENT" : "INSERTED")
+              .syncStatus("GENERATED")
               .build());
     }
 
@@ -265,6 +274,7 @@ public class BizEventSynchronizerService {
             SyncReportTimeSlot.builder().from(lowerLimitDate).to(upperLimitDate).build())
         .totalRecords(records.size())
         .sentToEventHub(sentToEventHub)
+        .errorDuringComputation(errorDuringComputation)
         .records(records)
         .build();
   }
