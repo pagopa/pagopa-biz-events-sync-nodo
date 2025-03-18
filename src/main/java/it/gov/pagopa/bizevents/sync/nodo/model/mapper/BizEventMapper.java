@@ -26,6 +26,7 @@ import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RptVersamenti;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.Rt;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.rt.CtDatiSingoloPagamentoRT;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.rt.CtRicevutaTelematica;
+import it.gov.pagopa.bizevents.sync.nodo.exception.BizEventSyncException;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.apiconfig.ConfigDataV1;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.apiconfig.CreditorInstitution;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.apiconfig.PaymentServiceProvider;
@@ -66,146 +67,166 @@ public class BizEventMapper {
     PositionSubject payer = pp.getPayer();
 
     if (ppp == null) {
-      // TODO throw custom exception
+      String msg =
+          String.format(
+              "No valid record found in POSITION_PAYMENT_PLAN table for related to PAYMENT_POSITION"
+                  + " with ID=[%s]",
+              pp.getId());
+      throw new BizEventSyncException(msg);
     }
 
     if (ps == null) {
-      // TODO throw custom exception
+      String msg =
+          String.format(
+              "No valid record found in POSITION_service table for related to PAYMENT_POSITION with"
+                  + " ID=[%s]",
+              pp.getId());
+      throw new BizEventSyncException(msg);
     }
 
     String paFiscalCode = ps.getPaFiscalCode();
     String pspId = pp.getPspId();
 
-    BizEvent bizEvent =
-        BizEvent.builder()
-            .id(UUID.randomUUID().toString())
-            .version("2")
-            .idPaymentManager(pp.getTransactionId())
-            .receiptId(pp.getPaymentToken())
-            .debtorPosition(
-                DebtorPosition.builder()
-                    .modelType("2")
-                    .noticeNumber(ps.getNoticeId())
-                    .iuv(pp.getCreditorReferenceId())
-                    .iur(pp.getPaymentToken())
-                    .build())
-            .creditor(
-                Creditor.builder()
-                    .idPA(paFiscalCode)
-                    .idBrokerPA(pp.getBrokerPaId())
-                    .idStation(pp.getStationId())
+    BizEvent bizEvent;
+    try {
+      bizEvent =
+          BizEvent.builder()
+              .id(UUID.randomUUID().toString())
+              .version("2")
+              .idPaymentManager(pp.getTransactionId())
+              .receiptId(pp.getPaymentToken())
+              .debtorPosition(
+                  DebtorPosition.builder()
+                      .modelType("2")
+                      .noticeNumber(ps.getNoticeId())
+                      .iuv(pp.getCreditorReferenceId())
+                      .iur(pp.getPaymentToken())
+                      .build())
+              .creditor(
+                  Creditor.builder()
+                      .idPA(paFiscalCode)
+                      .idBrokerPA(pp.getBrokerPaId())
+                      .idStation(pp.getStationId())
+                      .companyName(
+                          findCI(configData, paFiscalCode)
+                              .map(CreditorInstitution::getBusinessName)
+                              .orElse(null))
+                      .officeName(ps.getOfficeName())
+                      .build())
+              .psp(
+                  Psp.builder()
+                      .idPsp(pspId)
+                      .idBrokerPsp(pp.getBrokerPspId())
+                      .idChannel(pp.getChannelId())
+                      .psp(
+                          findPSP(configData, pspId)
+                              .map(PaymentServiceProvider::getBusinessName)
+                              .orElse(null))
+                      .pspPartitaIVA(
+                          findPSP(configData, pspId)
+                              .map(PaymentServiceProvider::getVatNumber)
+                              .orElse(null))
+                      .pspFiscalCode(
+                          findPSP(configData, pspId)
+                              .map(PaymentServiceProvider::getTaxCode)
+                              .orElse(null))
+                      .channelDescription(pp.getPaymentChannel())
+                      .build())
+              .paymentInfo(
+                  PaymentInfo.builder()
+                      .paymentDateTime(
+                          CommonUtility.formatDate(
+                              pp.getInsertedTimestamp(),
+                              Constants.BIZ_EVENT_EXTENDED_DATE_FORMATTER))
+                      .applicationDate(
+                          CommonUtility.formatDate(
+                              pp.getApplicationDate(), Constants.BIZ_EVENT_REDUCED_DATE_FORMATTER))
+                      .transferDate(
+                          CommonUtility.formatDate(
+                              pp.getTransferDate(), Constants.BIZ_EVENT_REDUCED_DATE_FORMATTER))
+                      .dueDate(
+                          CommonUtility.formatDate(
+                              ppp.getDueDate(), Constants.BIZ_EVENT_REDUCED_DATE_FORMATTER))
+                      .paymentToken(pp.getPaymentToken())
+                      .amount(CommonUtility.toPlainString(pp.getAmount()))
+                      .fee(CommonUtility.toPlainString(pp.getFee()))
+                      .primaryCiIncurredFee(CommonUtility.toPlainString(pp.getFeePa()))
+                      .idBundle(pp.getBundleId())
+                      .idCiBundle(pp.getBundlePaId())
+                      .totalNotice(totalNotices.toString())
+                      .paymentMethod(pp.getPaymentMethod())
+                      .touchpoint(pp.getPaymentChannel())
+                      .remittanceInformation(ps.getDescription())
+                      .iur(pp.getPaymentToken())
+                      .metadata(extractMetadata(ppp.getMetadata()))
+                      .build())
+              .transferList(new LinkedList<>())
+              .build();
+
+      if (debtor != null) {
+        bizEvent.setDebtor(
+            Debtor.builder()
+                .fullName(debtor.getFullName())
+                .entityUniqueIdentifierType(debtor.getEntityUniqueIdentifierType())
+                .entityUniqueIdentifierValue(debtor.getEntityUniqueIdentifierValue())
+                .streetName(debtor.getStreetName())
+                .civicNumber(debtor.getCivicNumber())
+                .postalCode(debtor.getPostalCode())
+                .city(debtor.getCity())
+                .stateProvinceRegion(debtor.getStateProvinceRegion())
+                .country(debtor.getCountry())
+                .eMail(debtor.getEmail())
+                .build());
+      }
+
+      if (payer != null) {
+        bizEvent.setPayer(
+            Payer.builder()
+                .fullName(payer.getFullName())
+                .entityUniqueIdentifierType(payer.getEntityUniqueIdentifierType())
+                .entityUniqueIdentifierValue(payer.getEntityUniqueIdentifierValue())
+                .streetName(payer.getStreetName())
+                .civicNumber(payer.getCivicNumber())
+                .postalCode(payer.getPostalCode())
+                .city(payer.getCity())
+                .stateProvinceRegion(payer.getStateProvinceRegion())
+                .country(payer.getCountry())
+                .eMail(payer.getEmail())
+                .build());
+      }
+
+      List<PositionTransfer> pts =
+          transfers.stream()
+              .sorted(Comparator.comparing(PositionTransfer::getTransferIdentifier))
+              .toList();
+      for (PositionTransfer pt : pts) {
+        bizEvent
+            .getTransferList()
+            .add(
+                Transfer.builder()
+                    .idTransfer(pt.getTransferIdentifier())
+                    .fiscalCodePA(pt.getPaFiscalCodeSecondary())
                     .companyName(
-                        findCI(configData, paFiscalCode)
+                        findCI(configData, pt.getPaFiscalCodeSecondary())
                             .map(CreditorInstitution::getBusinessName)
                             .orElse(null))
-                    .officeName(ps.getOfficeName())
-                    .build())
-            .psp(
-                Psp.builder()
-                    .idPsp(pspId)
-                    .idBrokerPsp(pp.getBrokerPspId())
-                    .idChannel(pp.getChannelId())
-                    .psp(
-                        findPSP(configData, pspId)
-                            .map(PaymentServiceProvider::getBusinessName)
-                            .orElse(null))
-                    .pspPartitaIVA(
-                        findPSP(configData, pspId)
-                            .map(PaymentServiceProvider::getVatNumber)
-                            .orElse(null))
-                    .pspFiscalCode(
-                        findPSP(configData, pspId)
-                            .map(PaymentServiceProvider::getTaxCode)
-                            .orElse(null))
-                    .channelDescription(pp.getPaymentChannel())
-                    .build())
-            .paymentInfo(
-                PaymentInfo.builder()
-                    .paymentDateTime(
-                        CommonUtility.formatDate(
-                            pp.getInsertedTimestamp(), Constants.BIZ_EVENT_EXTENDED_DATE_FORMATTER))
-                    .applicationDate(
-                        CommonUtility.formatDate(
-                            pp.getApplicationDate(), Constants.BIZ_EVENT_REDUCED_DATE_FORMATTER))
-                    .transferDate(
-                        CommonUtility.formatDate(
-                            pp.getTransferDate(), Constants.BIZ_EVENT_REDUCED_DATE_FORMATTER))
-                    .dueDate(
-                        CommonUtility.formatDate(
-                            ppp.getDueDate(), Constants.BIZ_EVENT_REDUCED_DATE_FORMATTER))
-                    .paymentToken(pp.getPaymentToken())
-                    .amount(CommonUtility.toPlainString(pp.getAmount()))
-                    .fee(CommonUtility.toPlainString(pp.getFee()))
-                    .primaryCiIncurredFee(CommonUtility.toPlainString(pp.getFeePa()))
-                    .idBundle(pp.getBundleId())
-                    .idCiBundle(pp.getBundlePaId())
-                    .totalNotice(totalNotices.toString())
-                    .paymentMethod(pp.getPaymentMethod())
-                    .touchpoint(pp.getPaymentChannel())
-                    .remittanceInformation(ps.getDescription())
-                    .iur(pp.getPaymentToken())
-                    .metadata(extractMetadata(ppp.getMetadata()))
-                    .build())
-            .transferList(new LinkedList<>())
-            .build();
-
-    if (debtor != null) {
-      bizEvent.setDebtor(
-          Debtor.builder()
-              .fullName(debtor.getFullName())
-              .entityUniqueIdentifierType(debtor.getEntityUniqueIdentifierType())
-              .entityUniqueIdentifierValue(debtor.getEntityUniqueIdentifierValue())
-              .streetName(debtor.getStreetName())
-              .civicNumber(debtor.getCivicNumber())
-              .postalCode(debtor.getPostalCode())
-              .city(debtor.getCity())
-              .stateProvinceRegion(debtor.getStateProvinceRegion())
-              .country(debtor.getCountry())
-              .eMail(debtor.getEmail())
-              .build());
-    }
-
-    if (payer != null) {
-      bizEvent.setPayer(
-          Payer.builder()
-              .fullName(payer.getFullName())
-              .entityUniqueIdentifierType(payer.getEntityUniqueIdentifierType())
-              .entityUniqueIdentifierValue(payer.getEntityUniqueIdentifierValue())
-              .streetName(payer.getStreetName())
-              .civicNumber(payer.getCivicNumber())
-              .postalCode(payer.getPostalCode())
-              .city(payer.getCity())
-              .stateProvinceRegion(payer.getStateProvinceRegion())
-              .country(payer.getCountry())
-              .eMail(payer.getEmail())
-              .build());
-    }
-
-    List<PositionTransfer> pts =
-        transfers.stream()
-            .sorted(Comparator.comparing(PositionTransfer::getTransferIdentifier))
-            .toList();
-    for (PositionTransfer pt : pts) {
-      bizEvent
-          .getTransferList()
-          .add(
-              Transfer.builder()
-                  .idTransfer(pt.getTransferIdentifier())
-                  .fiscalCodePA(pt.getPaFiscalCodeSecondary())
-                  .companyName(
-                      findCI(configData, pt.getPaFiscalCodeSecondary())
-                          .map(CreditorInstitution::getBusinessName)
-                          .orElse(null))
-                  .amount(CommonUtility.toPlainString(pt.getAmount()))
-                  .transferCategory(pt.getTransferCategory())
-                  .remittanceInformation(pt.getRemittanceInformation())
-                  .iban(pt.getIban())
-                  .mbdAttachment(
-                      pt.getPositionTransferMBD() != null
-                          ? pt.getPositionTransferMBD().getXmlContent()
-                          : null)
-                  .metadata(extractMetadata(pt.getMetadata()))
-                  .build());
+                    .amount(CommonUtility.toPlainString(pt.getAmount()))
+                    .transferCategory(pt.getTransferCategory())
+                    .remittanceInformation(pt.getRemittanceInformation())
+                    .iban(pt.getIban())
+                    .mbdAttachment(
+                        pt.getPositionTransferMBD() != null
+                            ? pt.getPositionTransferMBD().getXmlContent()
+                            : null)
+                    .metadata(extractMetadata(pt.getMetadata()))
+                    .build());
+      }
+    } catch (Exception e) {
+      String msg =
+          String.format(
+              "An error occurred during mapping of new model payment with ID=[%s] to Biz Event",
+              pp.getId());
+      throw new BizEventSyncException(msg, e);
     }
 
     return bizEvent;
@@ -219,11 +240,16 @@ public class BizEventMapper {
       ConfigDataV1 configData) {
 
     if (rptSubjects.isEmpty()) {
-      // TODO throw custom exception
+      String msg =
+          String.format("No valid record found in RPT_SOGGETTI table for RPT_ID=[%s]", rpt.getId());
+      throw new BizEventSyncException(msg);
     }
 
     if (rptTransfers.isEmpty()) {
-      // TODO throw custom exception
+      String msg =
+          String.format(
+              "No valid record found in RPT_VERSAMENTI table for FK_RPT=[%s]", rpt.getId());
+      throw new BizEventSyncException(msg);
     }
 
     CtRicevutaTelematica decodedRT = extractRT(rt.getRtXml().getXmlContent());
@@ -233,138 +259,153 @@ public class BizEventMapper {
     }
 
     if (datiSingoloPagamento.isEmpty()) {
-      // TODO throw custom exception
+      String msg =
+          String.format(
+              "No valid CtDatiSingoloPagamentoRT extracted from RT_XML table for ID=[%s]",
+              rpt.getId());
+      throw new BizEventSyncException(msg);
     }
 
-    RptSoggetti pagatore =
-        rptSubjects.stream()
-            .filter(e -> "P".equalsIgnoreCase(e.getId().getTipoSoggetto()))
-            .findFirst()
-            .orElse(null);
+    BizEvent bizEvent;
+    try {
+      RptSoggetti pagatore =
+          rptSubjects.stream()
+              .filter(e -> "P".equalsIgnoreCase(e.getId().getTipoSoggetto()))
+              .findFirst()
+              .orElse(null);
 
-    RptSoggetti versante =
-        rptSubjects.stream()
-            .filter(e -> "V".equalsIgnoreCase(e.getId().getTipoSoggetto()))
-            .findFirst()
-            .orElse(null);
+      RptSoggetti versante =
+          rptSubjects.stream()
+              .filter(e -> "V".equalsIgnoreCase(e.getId().getTipoSoggetto()))
+              .findFirst()
+              .orElse(null);
 
-    RptSoggetti beneficiario =
-        rptSubjects.stream()
-            .filter(e -> "B".equalsIgnoreCase(e.getId().getTipoSoggetto()))
-            .findFirst()
-            .orElse(null);
+      RptSoggetti beneficiario =
+          rptSubjects.stream()
+              .filter(e -> "B".equalsIgnoreCase(e.getId().getTipoSoggetto()))
+              .findFirst()
+              .orElse(null);
 
-    String domainId = rpt.getIdentDominio();
-    String pspId = rpt.getPsp();
+      String domainId = rpt.getIdentDominio();
+      String pspId = rpt.getPsp();
 
-    BizEvent bizEvent =
-        BizEvent.builder()
-            .id(UUID.randomUUID().toString())
-            .version("2")
-            .idPaymentManager("Y".equalsIgnoreCase(rpt.getWisp2()) ? rpt.getIdSessione() : null)
-            .debtorPosition(
-                DebtorPosition.builder()
-                    .modelType("1")
-                    .iuv(rpt.getIuv())
-                    .iur(datiSingoloPagamento.get(0).getIdentificativoUnivocoRiscossione())
-                    .build())
-            .creditor(
-                Creditor.builder()
-                    .idPA(domainId)
-                    .idBrokerPA(rpt.getIntermediariopa())
-                    .idStation(rpt.getStazIntermediariopa())
+      bizEvent =
+          BizEvent.builder()
+              .id(UUID.randomUUID().toString())
+              .version("2")
+              .idPaymentManager("Y".equalsIgnoreCase(rpt.getWisp2()) ? rpt.getIdSessione() : null)
+              .debtorPosition(
+                  DebtorPosition.builder()
+                      .modelType("1")
+                      .iuv(rpt.getIuv())
+                      .iur(datiSingoloPagamento.get(0).getIdentificativoUnivocoRiscossione())
+                      .build())
+              .creditor(
+                  Creditor.builder()
+                      .idPA(domainId)
+                      .idBrokerPA(rpt.getIntermediariopa())
+                      .idStation(rpt.getStazIntermediariopa())
+                      .companyName(beneficiario != null ? beneficiario.getAnagrafica() : null)
+                      .build())
+              .psp(
+                  Psp.builder()
+                      .idPsp(pspId)
+                      .idBrokerPsp(rpt.getIntermediarioPsp())
+                      .idChannel(rpt.getCanale())
+                      .psp(
+                          findPSP(configData, pspId)
+                              .map(PaymentServiceProvider::getBusinessName)
+                              .orElse(null))
+                      .pspPartitaIVA(
+                          findPSP(configData, pspId)
+                              .map(PaymentServiceProvider::getVatNumber)
+                              .orElse(null))
+                      .pspFiscalCode(
+                          findPSP(configData, pspId)
+                              .map(PaymentServiceProvider::getTaxCode)
+                              .orElse(null))
+                      .build())
+              .paymentInfo(
+                  PaymentInfo.builder()
+                      .paymentDateTime(
+                          CommonUtility.formatDate(
+                              rt.getDataRicevuta(), Constants.BIZ_EVENT_EXTENDED_DATE_FORMATTER))
+                      .paymentToken(rpt.getCcp())
+                      .amount(CommonUtility.toPlainString(rpt.getSommaVersamenti()))
+                      .fee(
+                          CommonUtility.toPlainString(
+                              datiSingoloPagamento.stream()
+                                  .mapToDouble(
+                                      paymentData ->
+                                          Optional.ofNullable(
+                                                  paymentData.getCommissioniApplicatePSP())
+                                              .orElse(BigDecimal.ZERO)
+                                              .doubleValue())
+                                  .sum()))
+                      .paymentMethod(rpt.getTipoVersamento())
+                      .iur(datiSingoloPagamento.get(0).getIdentificativoUnivocoRiscossione())
+                      .build())
+              .transferList(new LinkedList<>())
+              .build();
+
+      if (pagatore != null) {
+        bizEvent.setDebtor(
+            Debtor.builder()
+                .fullName(pagatore.getAnagrafica())
+                .entityUniqueIdentifierType(pagatore.getTipoIdentificativoUnivoco())
+                .entityUniqueIdentifierValue(pagatore.getCodiceIdentificativoUnivoco())
+                .streetName(pagatore.getIndirizzo())
+                .civicNumber(pagatore.getCivico())
+                .postalCode(pagatore.getCap())
+                .city(pagatore.getLocalita())
+                .stateProvinceRegion(pagatore.getProvincia())
+                .country(pagatore.getNazione())
+                .eMail(pagatore.getEmail())
+                .build());
+      }
+
+      if (versante != null) {
+        bizEvent.setPayer(
+            Payer.builder()
+                .fullName(versante.getAnagrafica())
+                .entityUniqueIdentifierType(versante.getTipoIdentificativoUnivoco())
+                .entityUniqueIdentifierValue(versante.getCodiceIdentificativoUnivoco())
+                .streetName(versante.getIndirizzo())
+                .civicNumber(versante.getCivico())
+                .postalCode(versante.getCap())
+                .city(versante.getLocalita())
+                .stateProvinceRegion(versante.getProvincia())
+                .country(versante.getNazione())
+                .eMail(versante.getEmail())
+                .build());
+      }
+
+      List<RptVersamenti> rptTransfersSorted =
+          rptTransfers.stream()
+              .sorted(Comparator.comparing(RptVersamenti::getProgressivo))
+              .toList();
+      for (RptVersamenti rptvers : rptTransfersSorted) {
+        CtDatiSingoloPagamentoRT ctDatiSingoloPagamento =
+            datiSingoloPagamento.get((int) (rptvers.getProgressivo() - 1));
+        bizEvent
+            .getTransferList()
+            .add(
+                Transfer.builder()
+                    .fiscalCodePA(rpt.getIdentDominio())
                     .companyName(beneficiario != null ? beneficiario.getAnagrafica() : null)
-                    .build())
-            .psp(
-                Psp.builder()
-                    .idPsp(pspId)
-                    .idBrokerPsp(rpt.getIntermediarioPsp())
-                    .idChannel(rpt.getCanale())
-                    .psp(
-                        findPSP(configData, pspId)
-                            .map(PaymentServiceProvider::getBusinessName)
-                            .orElse(null))
-                    .pspPartitaIVA(
-                        findPSP(configData, pspId)
-                            .map(PaymentServiceProvider::getVatNumber)
-                            .orElse(null))
-                    .pspFiscalCode(
-                        findPSP(configData, pspId)
-                            .map(PaymentServiceProvider::getTaxCode)
-                            .orElse(null))
-                    .build())
-            .paymentInfo(
-                PaymentInfo.builder()
-                    .paymentDateTime(
-                        CommonUtility.formatDate(
-                            rt.getDataRicevuta(), Constants.BIZ_EVENT_EXTENDED_DATE_FORMATTER))
-                    .paymentToken(rpt.getCcp())
-                    .amount(CommonUtility.toPlainString(rpt.getSommaVersamenti()))
-                    .fee(
-                        CommonUtility.toPlainString(
-                            datiSingoloPagamento.stream()
-                                .mapToDouble(
-                                    paymentData ->
-                                        Optional.ofNullable(
-                                                paymentData.getCommissioniApplicatePSP())
-                                            .orElse(BigDecimal.ZERO)
-                                            .doubleValue())
-                                .sum()))
-                    .paymentMethod(rpt.getTipoVersamento())
-                    .iur(datiSingoloPagamento.get(0).getIdentificativoUnivocoRiscossione())
-                    .build())
-            .transferList(new LinkedList<>())
-            .build();
-
-    if (pagatore != null) {
-      bizEvent.setDebtor(
-          Debtor.builder()
-              .fullName(pagatore.getAnagrafica())
-              .entityUniqueIdentifierType(pagatore.getTipoIdentificativoUnivoco())
-              .entityUniqueIdentifierValue(pagatore.getCodiceIdentificativoUnivoco())
-              .streetName(pagatore.getIndirizzo())
-              .civicNumber(pagatore.getCivico())
-              .postalCode(pagatore.getCap())
-              .city(pagatore.getLocalita())
-              .stateProvinceRegion(pagatore.getProvincia())
-              .country(pagatore.getNazione())
-              .eMail(pagatore.getEmail())
-              .build());
-    }
-
-    if (versante != null) {
-      bizEvent.setPayer(
-          Payer.builder()
-              .fullName(versante.getAnagrafica())
-              .entityUniqueIdentifierType(versante.getTipoIdentificativoUnivoco())
-              .entityUniqueIdentifierValue(versante.getCodiceIdentificativoUnivoco())
-              .streetName(versante.getIndirizzo())
-              .civicNumber(versante.getCivico())
-              .postalCode(versante.getCap())
-              .city(versante.getLocalita())
-              .stateProvinceRegion(versante.getProvincia())
-              .country(versante.getNazione())
-              .eMail(versante.getEmail())
-              .build());
-    }
-
-    List<RptVersamenti> rptTransfersSorted =
-        rptTransfers.stream().sorted(Comparator.comparing(RptVersamenti::getProgressivo)).toList();
-    for (RptVersamenti rptvers : rptTransfersSorted) {
-      CtDatiSingoloPagamentoRT ctDatiSingoloPagamento =
-          datiSingoloPagamento.get((int) (rptvers.getProgressivo() - 1));
-      bizEvent
-          .getTransferList()
-          .add(
-              Transfer.builder()
-                  .fiscalCodePA(rpt.getIdentDominio())
-                  .companyName(beneficiario != null ? beneficiario.getAnagrafica() : null)
-                  .amount(CommonUtility.toPlainString(rptvers.getImporto()))
-                  .transferCategory(rptvers.getDatiSpecificiRiscossione())
-                  .iur(ctDatiSingoloPagamento.getIdentificativoUnivocoRiscossione())
-                  .remittanceInformation(rptvers.getCausaleVersamento())
-                  .iban(rptvers.getIban())
-                  .build());
+                    .amount(CommonUtility.toPlainString(rptvers.getImporto()))
+                    .transferCategory(rptvers.getDatiSpecificiRiscossione())
+                    .iur(ctDatiSingoloPagamento.getIdentificativoUnivocoRiscossione())
+                    .remittanceInformation(rptvers.getCausaleVersamento())
+                    .iban(rptvers.getIban())
+                    .build());
+      }
+    } catch (Exception e) {
+      String msg =
+          String.format(
+              "An error occurred during mapping of old model payment with ID=[%s] to Biz Event",
+              rpt.getId());
+      throw new BizEventSyncException(msg, e);
     }
 
     return bizEvent;

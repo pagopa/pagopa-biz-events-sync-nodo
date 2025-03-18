@@ -167,37 +167,36 @@ public class BizEventSynchronizerService {
       Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents) {
 
     List<BizEvent> newlyGeneratedBizEvents = new LinkedList<>();
-
-    // TODO handle errors and exceptions
     for (ReceiptEventInfo receiptEvent : receiptsNotConvertedInBizEvents) {
 
       try {
 
-      } catch (Exception e) {
-        // TODO log it but do not throw it!
-      }
-      BizEvent convertedBizEvent;
-      if (PaymentModelVersion.OLD.equals(receiptEvent.getVersion())) {
+        BizEvent convertedBizEvent;
+        if (PaymentModelVersion.OLD.equals(receiptEvent.getVersion())) {
+
+          //
+          convertedBizEvent =
+              this.paymentPositionReaderService.readOldModelPaymentPosition(receiptEvent);
+
+        } else {
+
+          //
+          convertedBizEvent =
+              this.paymentPositionReaderService.readNewModelPaymentPosition(receiptEvent);
+        }
 
         //
-        convertedBizEvent =
-            this.paymentPositionReaderService.readOldModelPaymentPosition(receiptEvent);
-
-      } else {
+        TransactionDetails transactionDetails =
+            this.ecommerceHelpdeskReaderService.getTransactionDetails(
+                receiptEvent.getPaymentToken());
 
         //
-        convertedBizEvent =
-            this.paymentPositionReaderService.readNewModelPaymentPosition(receiptEvent);
+        BizEventMapper.finalize(convertedBizEvent, transactionDetails);
+        newlyGeneratedBizEvents.add(convertedBizEvent);
+
+      } catch (BizEventSyncException e) {
+        log.error(e.getCustomMessage(), e);
       }
-
-      //
-      TransactionDetails transactionDetails =
-          this.ecommerceHelpdeskReaderService.getTransactionDetails(receiptEvent.getPaymentToken());
-
-      //
-      BizEventMapper.finalize(convertedBizEvent, transactionDetails);
-
-      newlyGeneratedBizEvents.add(convertedBizEvent);
     }
 
     return newlyGeneratedBizEvents;
@@ -213,6 +212,7 @@ public class BizEventSynchronizerService {
       boolean errorDuringComputation) {
 
     List<SyncReportRecord> records = new LinkedList<>();
+    boolean onError = errorDuringComputation;
     for (BizEvent bizEvent : events) {
 
       String paymentToken = bizEvent.getPaymentInfo().getPaymentToken();
@@ -258,6 +258,7 @@ public class BizEventSynchronizerService {
                           && receiptEvent.getPaymentToken().equals(rec.getPaymentToken()))
               .count();
       if (bizEventsInsertedWithThisTriple == 0) {
+        onError = true;
         records.add(
             SyncReportRecord.builder()
                 .iuv(receiptEvent.getIuv())
@@ -274,7 +275,7 @@ public class BizEventSynchronizerService {
             SyncReportTimeSlot.builder().from(lowerLimitDate).to(upperLimitDate).build())
         .totalRecords(records.size())
         .sentToEventHub(sentToEventHub)
-        .errorDuringComputation(errorDuringComputation)
+        .errorDuringComputation(onError)
         .records(records)
         .build();
   }

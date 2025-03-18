@@ -40,19 +40,27 @@ public class EcommerceHelpdeskReaderService {
           this.ecommerceHelpdeskClient.searchTransactionByPaymentToken(0, 10, request);
 
       if (response.getTransactions() == null || response.getTransactions().isEmpty()) {
-        // TODO throw custom exception
+        log.error(
+            "[BIZ-EVENTS-SYNC-NODO] No valid response received from eCommerce Helpdesk using"
+                + " request [{}]",
+            request);
+      } else {
+        List<TransactionResponse> transactions = response.getTransactions();
+        if (transactions.size() > 1) {
+          log.info(
+              "Multiple transaction found in response received from eCommerce Helpdesk using"
+                  + " request [{}]",
+              request);
+        }
+        transactionDetails = BizEventMapper.fromTransactionResponse(transactions.get(0));
       }
-
-      List<TransactionResponse> transactions = response.getTransactions();
-      if (transactions.size() > 1) {
-        // TODO log info
-      }
-
-      transactionDetails = BizEventMapper.fromTransactionResponse(transactions.get(0));
 
     } catch (FeignException e) {
-      // TODO throw custom exception or skip this BizEvent?
-
+      log.error(
+          "[BIZ-EVENTS-SYNC-NODO] An error occurred while communicating with eCommerce Helpdesk"
+              + " using request [{}]",
+          request,
+          e);
     }
 
     return transactionDetails;

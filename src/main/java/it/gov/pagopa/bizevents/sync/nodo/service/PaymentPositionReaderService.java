@@ -7,6 +7,7 @@ import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.Rpt;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RptSoggetti;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RptVersamenti;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.Rt;
+import it.gov.pagopa.bizevents.sync.nodo.exception.BizEventSyncException;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.model.mapper.BizEventMapper;
 import it.gov.pagopa.bizevents.sync.nodo.repository.payment.PaymentPositionRepository;
@@ -69,7 +70,12 @@ public class PaymentPositionReaderService {
     Optional<PositionPayment> positionPaymentOpt =
         this.paymentPositionRepository.readByPaymentTokenInTimeSlot(minDate, maxDate, paymentToken);
     if (positionPaymentOpt.isEmpty()) {
-      // TODO throw custom exception
+      String msg =
+          String.format(
+              "No valid record found in POSITION_PAYMENT table for paymentToken=[%s] in"
+                  + " range=[%s-%s]",
+              paymentToken, minDate, maxDate);
+      throw new BizEventSyncException(msg);
     }
 
     PositionPayment positionPayment = positionPaymentOpt.get();
@@ -83,7 +89,12 @@ public class PaymentPositionReaderService {
     List<PositionTransfer> positionTransfers =
         positionTransferRepository.readByPositionPayment(positionPayment.getId(), minDate);
     if (positionTransfers.isEmpty()) {
-      // TODO throw custom exception
+      String msg =
+          String.format(
+              "No valid record found in POSITION_TRANSFER table for FK_POSITION_PAYMENT=[%s] with"
+                  + " inserted timestamp > [%s]",
+              positionPayment.getId(), minDate);
+      throw new BizEventSyncException(msg);
     }
 
     return BizEventMapper.fromNewModel(
@@ -92,24 +103,27 @@ public class PaymentPositionReaderService {
 
   public BizEvent readOldModelPaymentPosition(ReceiptEventInfo receiptEvent) {
 
-    // leggi rpt via IDENT_DOMINIO, IUV, CCP
-    // leggi rpt_soggetti via RPT_ID e TIPO_SOGGETTO
-    // leggi rpt_versamenti via FK_RPT (order by progressivo)
-    // leggi rt + rt_versamenti + rt_xml via IDENT_DOMINIO, IUV, CCP
-
     String domainId = receiptEvent.getDomainId();
     String iuv = receiptEvent.getIuv();
     String ccp = receiptEvent.getPaymentToken();
 
     Optional<Rpt> rptOpt = this.rptRepository.readByUniqueIdentifier(domainId, iuv, ccp);
     if (rptOpt.isEmpty()) {
-      // TODO throw custom exception
+      String msg =
+          String.format(
+              "No valid record found in RPT table for domainId=[%s] iuv=[%s] ccp=[%s]",
+              domainId, iuv, ccp);
+      throw new BizEventSyncException(msg);
     }
     Rpt rpt = rptOpt.get();
 
     Optional<Rt> rtOpt = this.rtRepository.readByUniqueIdentifier(domainId, iuv, ccp);
     if (rtOpt.isEmpty()) {
-      // TODO throw custom exception
+      String msg =
+          String.format(
+              "No valid record found in RT table for domainId=[%s] iuv=[%s] ccp=[%s]",
+              domainId, iuv, ccp);
+      throw new BizEventSyncException(msg);
     }
     Rt rt = rtOpt.get();
 

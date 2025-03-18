@@ -9,6 +9,10 @@ public class BizEventSyncException extends RuntimeException {
     this.customMessage = msg;
   }
 
+  public BizEventSyncException(String msg) {
+    this.customMessage = msg;
+  }
+
   public String getCustomMessage() {
     return this.customMessage;
   }
