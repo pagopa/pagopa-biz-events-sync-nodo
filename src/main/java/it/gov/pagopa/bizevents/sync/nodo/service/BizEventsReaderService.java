@@ -1,5 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.service;
 
+import it.gov.pagopa.bizevents.sync.nodo.exception.BizEventSyncException;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.repository.BizEventsRepository;
 import it.gov.pagopa.bizevents.sync.nodo.repository.receipt.PositionReceiptRepository;
@@ -83,37 +84,45 @@ public class BizEventsReaderService {
   public Set<ReceiptEventInfo> retrieveReceiptsNotConvertedInBizEvents(
       LocalDateTime lowerBoundDate, LocalDateTime upperBoundDate) {
 
-    //
     Set<ReceiptEventInfo> ndpReceipts = new HashSet<>();
-    ndpReceipts.addAll(
-        this.positionReceiptRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
-    ndpReceipts.addAll(this.rtRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
-    ndpReceipts.forEach(
-        e -> {
-          e.setLowerBoundTimeSlot(lowerBoundDate);
-          e.setUpperBoundTimeSlot(upperBoundDate);
-        });
-
-    Set<ReceiptEventInfo> bizEvents = new HashSet<>();
-    String formattedLowerBoundDate = lowerBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER);
-    String formattedUpperBoundDate = upperBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER);
+    Set<ReceiptEventInfo> bizEvents;
 
     try {
+
+      //
+      ndpReceipts.addAll(
+          this.positionReceiptRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
+      ndpReceipts.addAll(this.rtRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
+
+      //
+      ndpReceipts.forEach(
+          e -> {
+            e.setLowerBoundTimeSlot(lowerBoundDate);
+            e.setUpperBoundTimeSlot(upperBoundDate);
+          });
+
+      //
+      String formattedLowerBoundDate = lowerBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER);
+      String formattedUpperBoundDate = upperBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER);
+
+      //
       Set<Map<String, Object>> rawResults =
           this.bizEventsRepository.readBizEventsInTimeSlot(
               formattedLowerBoundDate, formattedUpperBoundDate);
-      bizEvents.addAll(rawResults.stream().map(ReceiptEventInfo::new).collect(Collectors.toSet()));
+      bizEvents = rawResults.stream().map(ReceiptEventInfo::new).collect(Collectors.toSet());
+
+      //
+      ndpReceipts.removeAll(bizEvents);
+
     } catch (DataAccessException e) {
-      log.error(
-          "An error occurred while searching BizEvents for old payment model (i.e. modelType = 1)"
-              + " on time slot [{} - {}].",
-          lowerBoundDate,
-          upperBoundDate,
-          e);
-      // TODO throw custom exception
+      String msg =
+          String.format(
+              "An error occurred while searching BizEvents for old payment model (i.e. modelType ="
+                  + " 1) on time slot [%s - %s].",
+              lowerBoundDate, upperBoundDate);
+      throw new BizEventSyncException(msg, e);
     }
 
-    ndpReceipts.removeAll(bizEvents);
     return ndpReceipts;
   }
 }

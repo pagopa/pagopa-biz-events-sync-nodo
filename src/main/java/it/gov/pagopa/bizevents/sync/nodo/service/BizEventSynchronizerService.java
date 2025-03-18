@@ -2,6 +2,7 @@ package it.gov.pagopa.bizevents.sync.nodo.service;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.TransactionDetails;
+import it.gov.pagopa.bizevents.sync.nodo.exception.BizEventSyncException;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion;
 import it.gov.pagopa.bizevents.sync.nodo.model.mapper.BizEventMapper;
@@ -63,47 +64,52 @@ public class BizEventSynchronizerService {
     //
     for (Pair<LocalDateTime, LocalDateTime> timeSlotToSynchronize : timeSlots) {
 
-      //
-      LocalDateTime lowerDateBound = timeSlotToSynchronize.getLeft();
-      LocalDateTime upperDateBound = timeSlotToSynchronize.getRight();
-
-      //
-      // TODO handle errors and exceptions
-      receiptsNotConvertedInBizEvents =
-          this.bizEventsReaderService.retrieveReceiptsNotConvertedInBizEvents(
-              lowerDateBound, upperDateBound);
-
-      //
-      if (!receiptsNotConvertedInBizEvents.isEmpty()) {
+      try {
 
         //
-        log.error(
-            "[BIZ-EVENTS-SYNC-NODO] Found [{}] payments from NdP not converted as BizEvents in time"
-                + " slot [{} - {}].",
-            receiptsNotConvertedInBizEvents.size(),
-            lowerDateBound,
-            upperDateBound);
+        LocalDateTime lowerDateBound = timeSlotToSynchronize.getLeft();
+        LocalDateTime upperDateBound = timeSlotToSynchronize.getRight();
 
-        // TODO remove, only for debug purpose
+        //
         receiptsNotConvertedInBizEvents =
-            receiptsNotConvertedInBizEvents.stream()
-                .filter(receiptEvent -> PaymentModelVersion.OLD.equals(receiptEvent.getVersion()))
-                .findFirst()
-                .stream()
-                .collect(Collectors.toSet());
+            this.bizEventsReaderService.retrieveReceiptsNotConvertedInBizEvents(
+                lowerDateBound, upperDateBound);
 
         //
-        bizEventsToSend = generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
+        if (!receiptsNotConvertedInBizEvents.isEmpty()) {
 
-        //
-        if (mustSendEventToEvent) {
-          log.info("");
-          this.eventHubSenderService.sendBizEventsToEventHub(bizEventsToSend);
+          //
+          log.error(
+              "[BIZ-EVENTS-SYNC-NODO] Found [{}] payments from NdP not converted as BizEvents in"
+                  + " time slot [{} - {}].",
+              receiptsNotConvertedInBizEvents.size(),
+              lowerDateBound,
+              upperDateBound);
+
+          // TODO remove, only for debug purpose
+          receiptsNotConvertedInBizEvents =
+              receiptsNotConvertedInBizEvents.stream()
+                  .filter(receiptEvent -> PaymentModelVersion.OLD.equals(receiptEvent.getVersion()))
+                  .findFirst()
+                  .stream()
+                  .collect(Collectors.toSet());
+
+          //
+          bizEventsToSend = generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
+
+          //
+          if (mustSendEventToEvent) {
+            log.info("");
+            this.eventHubSenderService.sendBizEventsToEventHub(bizEventsToSend);
+          }
         }
-        log.info("");
+      } catch (BizEventSyncException e) {
+        log.error(e.getCustomMessage(), e);
       }
     }
 
+    //
+    log.info("");
     return generateReport(
         bizEventsToSend,
         receiptsNotConvertedInBizEvents,
