@@ -5,9 +5,13 @@ import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.Transactio
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion;
 import it.gov.pagopa.bizevents.sync.nodo.model.mapper.BizEventMapper;
+import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReport;
+import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReportRecord;
+import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReportTimeSlot;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -46,10 +50,11 @@ public class BizEventSynchronizerService {
     this.eventHubSenderService = eventHubSenderService;
   }
 
-  public List<String> executeSynchronization(
-      LocalDateTime lowerLimitDate, LocalDateTime upperLimitDate) {
+  public SyncReport executeSynchronization(
+      LocalDateTime lowerLimitDate, LocalDateTime upperLimitDate, boolean showEventData) {
 
     List<BizEvent> bizEventsToSend = new LinkedList<>();
+    Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents = new HashSet<>();
 
     //
     List<Pair<LocalDateTime, LocalDateTime>> timeSlots =
@@ -64,7 +69,7 @@ public class BizEventSynchronizerService {
 
       //
       // TODO handle errors and exceptions
-      Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents =
+      receiptsNotConvertedInBizEvents =
           this.bizEventsReaderService.retrieveReceiptsNotConvertedInBizEvents(
               lowerDateBound, upperDateBound);
 
@@ -99,13 +104,13 @@ public class BizEventSynchronizerService {
       }
     }
 
-    return bizEventsToSend.stream()
-        .map(
-            event ->
-                String.format(
-                    "ID=[%s] PAYMENT_TOKEN=[%s]",
-                    event.getId(), event.getPaymentInfo().getPaymentToken()))
-        .toList();
+    return generateReport(
+        bizEventsToSend,
+        receiptsNotConvertedInBizEvents,
+        lowerLimitDate,
+        upperLimitDate,
+        mustSendEventToEvent,
+        showEventData);
   }
 
   private List<Pair<LocalDateTime, LocalDateTime>> getTimeSlotThatRequireSynchronization(
@@ -180,5 +185,70 @@ public class BizEventSynchronizerService {
     }
 
     return newlyGeneratedBizEvents;
+  }
+
+  private SyncReport generateReport(
+      List<BizEvent> events,
+      Set<ReceiptEventInfo> receiptEvents,
+      LocalDateTime lowerLimitDate,
+      LocalDateTime upperLimitDate,
+      boolean sentToEventHub,
+      boolean showEventData) {
+
+    List<SyncReportRecord> records = new LinkedList<>();
+    for (BizEvent bizEvent : events) {
+
+      String paymentToken = bizEvent.getPaymentInfo().getPaymentToken();
+      String domainId = bizEvent.getCreditor().getIdPA();
+      String iuv = bizEvent.getDebtorPosition().getIuv();
+      ReceiptEventInfo relatedInfo =
+          receiptEvents.stream()
+              .filter(
+                  e ->
+                      paymentToken.equals(e.getPaymentToken())
+                          && domainId.equals(e.getDomainId())
+                          && iuv.equals(e.getIuv()))
+              .findFirst()
+              .orElse(null);
+
+      records.add(
+          SyncReportRecord.builder()
+              .bizEventId(bizEvent.getId())
+              .iuv(iuv)
+              .domainId(domainId)
+              .paymentToken(paymentToken)
+              .event(showEventData ? bizEvent : null)
+              .modelVersion(relatedInfo != null ? relatedInfo.getVersion() : null)
+              .build());
+    }
+
+    // if no Biz Event was inserted with the tuple defined by receiptEvent, it was not inserted
+    for (ReceiptEventInfo receiptEvent : receiptEvents) {
+      long bizEventsInsertedWithThisTriple =
+          records.stream()
+              .filter(
+                  r ->
+                      receiptEvent.getIuv().equals(r.getIuv())
+                          && receiptEvent.getDomainId().equals(r.getDomainId())
+                          && receiptEvent.getPaymentToken().equals(r.getPaymentToken()))
+              .count();
+      if (bizEventsInsertedWithThisTriple == 0) {
+        records.add(
+            SyncReportRecord.builder()
+                .iuv(receiptEvent.getIuv())
+                .domainId(receiptEvent.getDomainId())
+                .paymentToken(receiptEvent.getPaymentToken())
+                .modelVersion(receiptEvent.getVersion())
+                .syncStatus("NOT_INSERTED")
+                .build());
+      }
+    }
+
+    return SyncReport.builder()
+        .timeSlot(SyncReportTimeSlot.builder().from(lowerLimitDate).to(upperLimitDate).build())
+        .totalRecords(records.size())
+        .sentToEventHub(sentToEventHub)
+        .records(records)
+        .build();
   }
 }

@@ -2,15 +2,18 @@ package it.gov.pagopa.bizevents.sync.nodo.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
+import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReport;
 import it.gov.pagopa.bizevents.sync.nodo.service.BizEventSynchronizerService;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController()
 @Slf4j
@@ -27,7 +30,7 @@ public class SyncController {
   @Operation()
   @GetMapping(value = "/sync")
   @ResponseStatus(HttpStatus.OK)
-  public ResponseEntity<Map<String, Object>> manuallySynchronize(
+  public ResponseEntity<SyncReport> manuallySynchronize(
       @NotNull
           @RequestParam(name = "dateFrom")
           @Schema(example = "2025-01-01T12:00:00", description = "Lower limit date")
@@ -35,13 +38,13 @@ public class SyncController {
       @NotNull
           @RequestParam(name = "dateTo")
           @Schema(example = "2025-01-01T21:00:00", description = "Upper limit date")
-          LocalDateTime dateTo) {
+          LocalDateTime dateTo,
+      @RequestParam(name = "showBizEvents", defaultValue = "true")
+          @Schema(example = "true", description = "Show generated biz events data in final report")
+          boolean showBizEvents) {
 
-    List<String> analyzedBizEvents =
-        bizEventSynchronizerService.executeSynchronization(dateFrom, dateTo);
-    Map<String, Object> response =
-        Map.of(
-            "time_slot", String.format("[%s - %s]", dateFrom, dateTo), "events", analyzedBizEvents);
-    return ResponseEntity.status(HttpStatus.OK).body(response);
+    SyncReport report =
+        bizEventSynchronizerService.executeSynchronization(dateFrom, dateTo, showBizEvents);
+    return ResponseEntity.status(HttpStatus.OK).body(report);
   }
 }
