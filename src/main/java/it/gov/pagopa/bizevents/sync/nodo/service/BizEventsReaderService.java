@@ -88,6 +88,11 @@ public class BizEventsReaderService {
     ndpReceipts.addAll(
         this.positionReceiptRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
     ndpReceipts.addAll(this.rtRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
+    ndpReceipts.forEach(
+        e -> {
+          e.setLowerBoundTimeSlot(lowerBoundDate);
+          e.setUpperBoundTimeSlot(upperBoundDate);
+        });
 
     Set<ReceiptEventInfo> bizEvents = new HashSet<>();
     String formattedLowerBoundDate = lowerBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER);

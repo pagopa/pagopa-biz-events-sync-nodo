@@ -204,10 +204,10 @@ public class BizEventSynchronizerService {
       ReceiptEventInfo relatedInfo =
           receiptEvents.stream()
               .filter(
-                  e ->
-                      paymentToken.equals(e.getPaymentToken())
-                          && domainId.equals(e.getDomainId())
-                          && iuv.equals(e.getIuv()))
+                  event ->
+                      paymentToken.equals(event.getPaymentToken())
+                          && domainId.equals(event.getDomainId())
+                          && iuv.equals(event.getIuv()))
               .findFirst()
               .orElse(null);
 
@@ -219,6 +219,14 @@ public class BizEventSynchronizerService {
               .paymentToken(paymentToken)
               .event(showEventData ? bizEvent : null)
               .modelVersion(relatedInfo != null ? relatedInfo.getVersion() : null)
+              .timeSlot(
+                  relatedInfo == null
+                      ? null
+                      : SyncReportTimeSlot.builder()
+                          .from(relatedInfo.getLowerBoundTimeSlot())
+                          .to(relatedInfo.getUpperBoundTimeSlot())
+                          .build())
+              .syncStatus(sentToEventHub ? "SENT" : "INSERTED")
               .build());
     }
 
@@ -227,10 +235,10 @@ public class BizEventSynchronizerService {
       long bizEventsInsertedWithThisTriple =
           records.stream()
               .filter(
-                  r ->
-                      receiptEvent.getIuv().equals(r.getIuv())
-                          && receiptEvent.getDomainId().equals(r.getDomainId())
-                          && receiptEvent.getPaymentToken().equals(r.getPaymentToken()))
+                  rec ->
+                      receiptEvent.getIuv().equals(rec.getIuv())
+                          && receiptEvent.getDomainId().equals(rec.getDomainId())
+                          && receiptEvent.getPaymentToken().equals(rec.getPaymentToken()))
               .count();
       if (bizEventsInsertedWithThisTriple == 0) {
         records.add(
@@ -245,7 +253,8 @@ public class BizEventSynchronizerService {
     }
 
     return SyncReport.builder()
-        .timeSlot(SyncReportTimeSlot.builder().from(lowerLimitDate).to(upperLimitDate).build())
+        .executionTimeSlot(
+            SyncReportTimeSlot.builder().from(lowerLimitDate).to(upperLimitDate).build())
         .totalRecords(records.size())
         .sentToEventHub(sentToEventHub)
         .records(records)

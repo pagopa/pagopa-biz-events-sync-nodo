@@ -19,6 +19,9 @@ public class SyncReportRecord {
   @JsonProperty("biz_event_id")
   private String bizEventId;
 
+  @JsonProperty("time_slot")
+  private SyncReportTimeSlot timeSlot;
+
   @JsonProperty("iuv")
   private String iuv;
 

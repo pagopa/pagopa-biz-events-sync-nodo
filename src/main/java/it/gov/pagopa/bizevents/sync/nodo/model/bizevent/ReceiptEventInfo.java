@@ -21,6 +21,10 @@ public class ReceiptEventInfo {
 
   private LocalDateTime insertedTimestamp;
 
+  private LocalDateTime lowerBoundTimeSlot;
+
+  private LocalDateTime upperBoundTimeSlot;
+
   public ReceiptEventInfo(
       String iuv,
       String paymentToken,

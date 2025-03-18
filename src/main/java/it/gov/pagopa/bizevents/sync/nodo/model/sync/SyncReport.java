@@ -15,8 +15,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SyncReport {
 
-  @JsonProperty("time_slot")
-  private SyncReportTimeSlot timeSlot;
+  @JsonProperty("execution_time_slot")
+  private SyncReportTimeSlot executionTimeSlot;
 
   @JsonProperty("sent_to_event_hub")
   private boolean sentToEventHub;
