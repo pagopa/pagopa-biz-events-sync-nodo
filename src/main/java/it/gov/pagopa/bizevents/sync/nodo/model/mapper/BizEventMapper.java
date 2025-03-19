@@ -50,7 +50,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 import javax.xml.transform.stream.StreamSource;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class BizEventMapper {
 
   private BizEventMapper() {}
@@ -583,7 +585,10 @@ public class BizEventMapper {
         }
       }
     } catch (ClassCastException | JsonSyntaxException e) {
-      // TODO log an error but do not throw exception
+      log.error(
+          "Impossible to generate metadata from string [{}]. Skipping metadata generation.",
+          rawString,
+          e);
     }
 
     return metadata;
