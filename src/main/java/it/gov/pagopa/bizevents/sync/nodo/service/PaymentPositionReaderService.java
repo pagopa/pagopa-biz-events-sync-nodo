@@ -62,44 +62,58 @@ public class PaymentPositionReaderService {
 
   public BizEvent readNewModelPaymentPosition(ReceiptEventInfo receiptEvent) {
 
+    BizEvent bizEvent;
     LocalDateTime insertedTimestamp =
         receiptEvent.getInsertedTimestamp().truncatedTo(ChronoUnit.DAYS);
     LocalDateTime minDate = LocalDateTime.from(insertedTimestamp);
     LocalDateTime maxDate = LocalDateTime.from(insertedTimestamp.plusDays(1));
     String paymentToken = receiptEvent.getPaymentToken();
 
-    Optional<PositionPayment> positionPaymentOpt =
-        this.paymentPositionRepository.readByPaymentTokenInTimeSlot(minDate, maxDate, paymentToken);
-    if (positionPaymentOpt.isEmpty()) {
+    try {
+      Optional<PositionPayment> positionPaymentOpt =
+          this.paymentPositionRepository.readByPaymentTokenInTimeSlot(
+              minDate, maxDate, paymentToken);
+      if (positionPaymentOpt.isEmpty()) {
+        String msg =
+            String.format(
+                "No valid record found in POSITION_PAYMENT table for paymentToken=[%s] in"
+                    + " range=[%s-%s]",
+                paymentToken, minDate, maxDate);
+        throw new BizEventSyncException(msg);
+      }
+
+      PositionPayment positionPayment = positionPaymentOpt.get();
+      Long totalNotices = 1L;
+      if ("v2".equalsIgnoreCase(positionPayment.getCloseVersion())) {
+        totalNotices =
+            this.paymentPositionRepository.countPositionPaymentsByTransactionId(
+                positionPayment.getTransactionId());
+      }
+
+      List<PositionTransfer> positionTransfers =
+          positionTransferRepository.readByPositionPayment(positionPayment.getId(), minDate);
+      if (positionTransfers.isEmpty()) {
+        String msg =
+            String.format(
+                "No valid record found in POSITION_TRANSFER table for FK_POSITION_PAYMENT=[%s] with"
+                    + " inserted timestamp > [%s]",
+                positionPayment.getId(), minDate);
+        throw new BizEventSyncException(msg);
+      }
+
+      bizEvent =
+          BizEventMapper.fromNewModel(
+              positionPayment, positionTransfers, totalNotices, configCacheService.getConfigData());
+
+    } catch (DataAccessException e) {
       String msg =
           String.format(
-              "No valid record found in POSITION_PAYMENT table for paymentToken=[%s] in"
-                  + " range=[%s-%s]",
-              paymentToken, minDate, maxDate);
-      throw new BizEventSyncException(msg);
+              "An error occurred during read operation on tables for paymentToken=[%s]",
+              paymentToken);
+      throw new BizEventSyncException(msg, e);
     }
 
-    PositionPayment positionPayment = positionPaymentOpt.get();
-    Long totalNotices = 1L;
-    if ("v2".equalsIgnoreCase(positionPayment.getCloseVersion())) {
-      totalNotices =
-          this.paymentPositionRepository.countPositionPaymentsByTransactionId(
-              positionPayment.getTransactionId());
-    }
-
-    List<PositionTransfer> positionTransfers =
-        positionTransferRepository.readByPositionPayment(positionPayment.getId(), minDate);
-    if (positionTransfers.isEmpty()) {
-      String msg =
-          String.format(
-              "No valid record found in POSITION_TRANSFER table for FK_POSITION_PAYMENT=[%s] with"
-                  + " inserted timestamp > [%s]",
-              positionPayment.getId(), minDate);
-      throw new BizEventSyncException(msg);
-    }
-
-    return BizEventMapper.fromNewModel(
-        positionPayment, positionTransfers, totalNotices, configCacheService.getConfigData());
+    return bizEvent;
   }
 
   public BizEvent readOldModelPaymentPosition(ReceiptEventInfo receiptEvent) {
