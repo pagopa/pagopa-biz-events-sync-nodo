@@ -21,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -103,35 +104,48 @@ public class PaymentPositionReaderService {
 
   public BizEvent readOldModelPaymentPosition(ReceiptEventInfo receiptEvent) {
 
+    BizEvent bizEvent;
     String domainId = receiptEvent.getDomainId();
     String iuv = receiptEvent.getIuv();
     String ccp = receiptEvent.getPaymentToken();
 
-    Optional<Rpt> rptOpt = this.rptRepository.readByUniqueIdentifier(domainId, iuv, ccp);
-    if (rptOpt.isEmpty()) {
+    try {
+      Optional<Rpt> rptOpt = this.rptRepository.readByUniqueIdentifier(domainId, iuv, ccp);
+      if (rptOpt.isEmpty()) {
+        String msg =
+            String.format(
+                "No valid record found in RPT table for domainId=[%s] iuv=[%s] ccp=[%s]",
+                domainId, iuv, ccp);
+        throw new BizEventSyncException(msg);
+      }
+      Rpt rpt = rptOpt.get();
+
+      Optional<Rt> rtOpt = this.rtRepository.readByUniqueIdentifier(domainId, iuv, ccp);
+      if (rtOpt.isEmpty()) {
+        String msg =
+            String.format(
+                "No valid record found in RT table for domainId=[%s] iuv=[%s] ccp=[%s]",
+                domainId, iuv, ccp);
+        throw new BizEventSyncException(msg);
+      }
+      Rt rt = rtOpt.get();
+
+      Long rptId = rpt.getId();
+      List<RptSoggetti> rptSubjects = this.rptSoggettiRepository.readByRptId(rptId);
+      List<RptVersamenti> rptTransfers = this.rptVersamentiRepository.readByRptId(rptId);
+
+      bizEvent =
+          BizEventMapper.fromOldModel(
+              rpt, rt, rptSubjects, rptTransfers, configCacheService.getConfigData());
+
+    } catch (DataAccessException e) {
       String msg =
           String.format(
-              "No valid record found in RPT table for domainId=[%s] iuv=[%s] ccp=[%s]",
+              "An error occurred during read operation on tables for domainId=[%s] iuv=[%s]"
+                  + " ccp=[%s]",
               domainId, iuv, ccp);
-      throw new BizEventSyncException(msg);
+      throw new BizEventSyncException(msg, e);
     }
-    Rpt rpt = rptOpt.get();
-
-    Optional<Rt> rtOpt = this.rtRepository.readByUniqueIdentifier(domainId, iuv, ccp);
-    if (rtOpt.isEmpty()) {
-      String msg =
-          String.format(
-              "No valid record found in RT table for domainId=[%s] iuv=[%s] ccp=[%s]",
-              domainId, iuv, ccp);
-      throw new BizEventSyncException(msg);
-    }
-    Rt rt = rtOpt.get();
-
-    Long rptId = rpt.getId();
-    List<RptSoggetti> rptSubjects = this.rptSoggettiRepository.readByRptId(rptId);
-    List<RptVersamenti> rptTransfers = this.rptVersamentiRepository.readByRptId(rptId);
-
-    return BizEventMapper.fromOldModel(
-        rpt, rt, rptSubjects, rptTransfers, configCacheService.getConfigData());
+    return bizEvent;
   }
 }
