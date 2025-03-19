@@ -223,6 +223,9 @@ public class BizEventMapper {
                     .metadata(extractMetadata(pt.getMetadata()))
                     .build());
       }
+
+      // TODO if not null, convert PM_INFO and generate TransacitonDetail
+
     } catch (Exception e) {
       String msg =
           String.format(
@@ -468,6 +471,11 @@ public class BizEventMapper {
 
     List<String> missingInfo = new LinkedList<>();
 
+    //
+    if (bizEvent.getTransactionDetails() == null) {
+      bizEvent.setTransactionDetails(transactionDetails);
+    }
+
     addOnMissingInfoIfTrue(
         missingInfo, "idPaymentManager", () -> bizEvent.getIdPaymentManager() == null);
     addOnMissingInfoIfTrue(missingInfo, "receiptId", () -> bizEvent.getReceiptId() == null);
@@ -544,11 +552,13 @@ public class BizEventMapper {
         missingInfo, "paymentInfo.metadata", () -> paymentInfo.getMetadata() == null);
 
     //
-    addOnMissingInfoIfTrue(missingInfo, "transactionDetails", () -> transactionDetails == null);
+    addOnMissingInfoIfTrue(
+        missingInfo, "transactionDetails", () -> bizEvent.getTransactionDetails() == null);
 
-    bizEvent.setTransactionDetails(transactionDetails);
+    //
     bizEvent.setMissingInfo(missingInfo);
     bizEvent.setComplete(String.valueOf(missingInfo.isEmpty()));
+
     return bizEvent;
   }
 

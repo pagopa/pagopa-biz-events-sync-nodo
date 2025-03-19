@@ -191,9 +191,12 @@ public class BizEventSynchronizerService {
         }
 
         //
-        TransactionDetails transactionDetails =
-            this.ecommerceHelpdeskReaderService.getTransactionDetails(
-                receiptEvent.getPaymentToken());
+        TransactionDetails transactionDetails = null;
+        if (convertedBizEvent.getTransactionDetails() == null) {
+          transactionDetails =
+              this.ecommerceHelpdeskReaderService.getTransactionDetails(
+                  receiptEvent.getPaymentToken());
+        }
 
         //
         BizEventMapper.finalize(convertedBizEvent, transactionDetails);
