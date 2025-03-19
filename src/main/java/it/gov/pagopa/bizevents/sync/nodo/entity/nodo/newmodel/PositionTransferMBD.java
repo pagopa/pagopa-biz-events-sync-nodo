@@ -50,7 +50,7 @@ public class PositionTransferMBD {
 
   @Lob
   @Column(name = "XML_CONTENT")
-  private String xmlContent;
+  private byte[] xmlContent;
 
   @OneToOne
   @JoinColumn(name = "FK_POSITION_TRANSFER", referencedColumnName = "ID")

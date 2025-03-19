@@ -1,6 +1,7 @@
 package it.gov.pagopa.bizevents.sync.nodo.model.mapper;
 
 import com.google.gson.JsonSyntaxException;
+import com.nimbusds.jose.util.Base64;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.DebtorPosition;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.MapEntry;
@@ -216,7 +217,11 @@ public class BizEventMapper {
                     .iban(pt.getIban())
                     .mbdAttachment(
                         pt.getPositionTransferMBD() != null
-                            ? pt.getPositionTransferMBD().getXmlContent()
+                                && pt.getPositionTransferMBD().getXmlContent() != null
+                            ? Base64.encode(
+                                    CommonUtility.convertBlob(
+                                        pt.getPositionTransferMBD().getXmlContent()))
+                                .toString()
                             : null)
                     .metadata(extractMetadata(pt.getMetadata()))
                     .build());

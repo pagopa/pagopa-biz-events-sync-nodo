@@ -129,7 +129,7 @@ public class PositionPayment {
 
   @Lob
   @Column(name = "PM_INFO")
-  private String pmInfo;
+  private byte[] pmInfo;
 
   @Column(name = "MBD")
   private String mbd;
