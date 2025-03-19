@@ -3,8 +3,8 @@ package it.gov.pagopa.bizevents.sync.nodo.repository.receipt;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.Rt;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,7 +29,7 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
         AND (rpt.flagSeconda = 'N' OR rpt.flagSeconda IS NULL OR rpt.flagSeconda = 'Y')
         AND rt.generataDa = 'PSP'
       """)
-  List<ReceiptEventInfo> readReceiptsInTimeSlot(
+  Set<ReceiptEventInfo> readReceiptsInTimeSlot(
       @Param("minDate") LocalDateTime minDate, @Param("maxDate") LocalDateTime maxDate);
 
   @Query(

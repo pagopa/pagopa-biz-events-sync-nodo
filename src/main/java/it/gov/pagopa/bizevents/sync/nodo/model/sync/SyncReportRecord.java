@@ -1,6 +1,7 @@
 package it.gov.pagopa.bizevents.sync.nodo.model.sync;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
 import it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,16 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonPropertyOrder({
+  "biz_event_id",
+  "time_slot",
+  "iuv",
+  "domain_id",
+  "payment_token",
+  "model_version",
+  "sync_status",
+  "biz_event"
+})
 public class SyncReportRecord {
 
   @JsonProperty("biz_event_id")

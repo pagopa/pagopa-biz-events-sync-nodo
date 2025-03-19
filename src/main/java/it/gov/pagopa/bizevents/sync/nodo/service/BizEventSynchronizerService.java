@@ -61,6 +61,7 @@ public class BizEventSynchronizerService {
     //
     List<Pair<LocalDateTime, LocalDateTime>> timeSlots =
         getTimeSlotThatRequireSynchronization(lowerLimitDate, upperLimitDate);
+    log.debug("Found [{}] time slots to be synchronized: [{}]", timeSlots.size(), timeSlots);
 
     //
     for (Pair<LocalDateTime, LocalDateTime> timeSlotToSynchronize : timeSlots) {
@@ -70,6 +71,7 @@ public class BizEventSynchronizerService {
         //
         LocalDateTime lowerDateBound = timeSlotToSynchronize.getLeft();
         LocalDateTime upperDateBound = timeSlotToSynchronize.getRight();
+        log.info("Analyzing time slot [{} - {}]...", lowerDateBound, upperDateBound);
 
         //
         receiptsNotConvertedInBizEvents =
@@ -90,7 +92,7 @@ public class BizEventSynchronizerService {
           // TODO remove, only for debug purpose
           receiptsNotConvertedInBizEvents =
               receiptsNotConvertedInBizEvents.stream()
-                  .filter(receiptEvent -> PaymentModelVersion.OLD.equals(receiptEvent.getVersion()))
+                  .filter(receiptEvent -> PaymentModelVersion.NEW.equals(receiptEvent.getVersion()))
                   .findFirst()
                   .stream()
                   .collect(Collectors.toSet());
@@ -100,12 +102,15 @@ public class BizEventSynchronizerService {
 
           //
           if (mustSendEventToEvent) {
-            log.info(
-                "[BIZ-EVENTS-SYNC-NODO] Sending [{}] BizEvents to event hub.",
-                bizEventsToSend.size());
+            log.info("Sending [{}] BizEvents to the EventHub...", bizEventsToSend.size());
             this.eventHubSenderService.sendBizEventsToEventHub(bizEventsToSend);
+          } else {
+            log.info(
+                "Skipped sending BizEvents to the EventHub because the 'send-to-eventhub' flag is"
+                    + " false!");
           }
         }
+
       } catch (BizEventSyncException e) {
         log.error(e.getCustomMessage(), e);
         errorDuringComputation = true;
@@ -113,7 +118,7 @@ public class BizEventSynchronizerService {
     }
 
     //
-    log.info("");
+    log.debug("Synchronization ended! Generating report...");
     return generateReport(
         bizEventsToSend,
         receiptsNotConvertedInBizEvents,
@@ -218,13 +223,14 @@ public class BizEventSynchronizerService {
       String paymentToken = bizEvent.getPaymentInfo().getPaymentToken();
       String domainId = bizEvent.getCreditor().getIdPA();
       String iuv = bizEvent.getDebtorPosition().getIuv();
+      String noticeNumber = bizEvent.getDebtorPosition().getNoticeNumber();
       ReceiptEventInfo relatedInfo =
           receiptEvents.stream()
               .filter(
                   event ->
                       paymentToken.equals(event.getPaymentToken())
                           && domainId.equals(event.getDomainId())
-                          && iuv.equals(event.getIuv()))
+                          && (event.getIuv().equals(iuv) || event.getIuv().equals(noticeNumber)))
               .findFirst()
               .orElse(null);
 

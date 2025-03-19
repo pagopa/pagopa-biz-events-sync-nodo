@@ -4,8 +4,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReport;
 import it.gov.pagopa.bizevents.sync.nodo.service.BizEventSynchronizerService;
+import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.Calendar;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,8 +45,13 @@ public class SyncController {
           @Schema(example = "true", description = "Show generated biz events data in final report")
           boolean showBizEvents) {
 
+    log.info("Invoking BizEvent-to-Nodo synchronization via HTTP manual trigger!");
+    long start = Calendar.getInstance().getTimeInMillis();
     SyncReport report =
         bizEventSynchronizerService.executeSynchronization(dateFrom, dateTo, showBizEvents);
+    log.info(
+        "Invoked BizEvent-to-Nodo synchronization via HTTP manual trigger completed in [{}] ms!",
+        CommonUtility.getTimelapse(start));
     return ResponseEntity.status(HttpStatus.OK).body(report);
   }
 }

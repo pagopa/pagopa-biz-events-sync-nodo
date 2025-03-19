@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -90,11 +89,16 @@ public class BizEventsReaderService {
     try {
 
       //
-      ndpReceipts.addAll(
-          this.positionReceiptRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
-      ndpReceipts.addAll(this.rtRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate));
+      Set<ReceiptEventInfo> newModelReceipts =
+          this.positionReceiptRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate);
+      log.debug("Found [{}] new model receipts in analyzed time slot...", newModelReceipts.size());
+      Set<ReceiptEventInfo> oldModelReceipts =
+          this.rtRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate);
+      log.debug("Found [{}] old model receipts in analyzed time slot...", newModelReceipts.size());
 
       //
+      ndpReceipts.addAll(oldModelReceipts);
+      ndpReceipts.addAll(newModelReceipts);
       ndpReceipts.forEach(
           e -> {
             e.setLowerBoundTimeSlot(lowerBoundDate);
@@ -110,15 +114,19 @@ public class BizEventsReaderService {
           this.bizEventsRepository.readBizEventsInTimeSlot(
               formattedLowerBoundDate, formattedUpperBoundDate);
       bizEvents = rawResults.stream().map(ReceiptEventInfo::new).collect(Collectors.toSet());
+      log.debug("Found [{}] BizEvents in analyzed time slot...", bizEvents.size());
 
       //
       ndpReceipts.removeAll(bizEvents);
+      log.debug(
+          "Removed all extracted BizEvents from NdP new-and-old receipts: found [{}] receipts that"
+              + " must be synchronized as BizEvents!",
+          ndpReceipts.size());
 
-    } catch (DataAccessException e) {
+    } catch (Exception e) {
       String msg =
           String.format(
-              "An error occurred while searching BizEvents for old payment model (i.e. modelType ="
-                  + " 1) on time slot [%s - %s].",
+              "An error occurred while searching receipts/BizEvents on time slot [%s - %s].",
               lowerBoundDate, upperBoundDate);
       throw new BizEventSyncException(msg, e);
     }
