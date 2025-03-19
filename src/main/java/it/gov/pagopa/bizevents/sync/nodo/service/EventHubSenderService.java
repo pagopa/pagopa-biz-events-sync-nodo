@@ -4,10 +4,12 @@ import com.azure.messaging.eventhubs.EventData;
 import com.azure.messaging.eventhubs.EventDataBatch;
 import com.azure.messaging.eventhubs.EventHubClientBuilder;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
 import it.gov.pagopa.bizevents.sync.nodo.exception.BizEventSyncException;
 import it.gov.pagopa.bizevents.sync.nodo.util.Constants;
 import jakarta.annotation.PreDestroy;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -39,19 +41,24 @@ public class EventHubSenderService {
 
     if (!bizEvents.isEmpty()) {
 
-      List<EventData> evhEvents =
-          bizEvents.stream()
-              .map(bizEvent -> new EventData(Constants.GSON_PARSER.toJson(bizEvent)))
-              .toList();
-      evhEvents.forEach(
-          eventData ->
-              eventData
-                  .getProperties()
-                  .put(
-                      Constants.REGEN_SERVICE_IDENTIFIER_KEY,
-                      Constants.REGEN_SERVICE_IDENTIFIER_VALUE));
-
       try {
+
+        //
+        ObjectMapper mapper = new ObjectMapper();
+        List<String> rawJsonBizEvents = new LinkedList<>();
+        for (BizEvent event : bizEvents) {
+          rawJsonBizEvents.add(mapper.writeValueAsString(event));
+        }
+
+        List<EventData> evhEvents = rawJsonBizEvents.stream().map(EventData::new).toList();
+        evhEvents.forEach(
+            eventData ->
+                eventData
+                    .getProperties()
+                    .put(
+                        Constants.REGEN_SERVICE_IDENTIFIER_KEY,
+                        Constants.REGEN_SERVICE_IDENTIFIER_VALUE));
+
         //
         EventDataBatch evhEventBatch = this.eventHubProducerClient.createBatch();
         int batchMaxSize = evhEventBatch.getMaxSizeInBytes();
