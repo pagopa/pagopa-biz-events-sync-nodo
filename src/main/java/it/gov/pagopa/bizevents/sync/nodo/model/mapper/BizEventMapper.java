@@ -1,5 +1,7 @@
 package it.gov.pagopa.bizevents.sync.nodo.model.mapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonSyntaxException;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.DebtorPosition;
@@ -224,7 +226,7 @@ public class BizEventMapper {
                     .build());
       }
 
-      // TODO if not null, convert PM_INFO and generate TransacitonDetail
+      generateTransactionDetailFromPMInfo(pp, bizEvent);
 
     } catch (Exception e) {
       String msg =
@@ -613,7 +615,7 @@ public class BizEventMapper {
   }
 
   private static CtRicevutaTelematica extractRT(String blob) {
-    CtRicevutaTelematica rt = null;
+    CtRicevutaTelematica rt;
     try {
       String formattedBlob = blob.replaceAll("xmlns=[\"'][^\"']+[\"']", "");
       Unmarshaller unmarshaller = Constants.RT_JAXB_CONTEXT.createUnmarshaller();
@@ -622,8 +624,21 @@ public class BizEventMapper {
           unmarshaller.unmarshal(new StreamSource(reader), CtRicevutaTelematica.class);
       rt = root.getValue();
     } catch (JAXBException e) {
-      // TODO throw exception
+      throw new BizEventSyncException(
+          "Error while extracting CtRicevutaTelematica from blob string", e);
     }
     return rt;
+  }
+
+  private static void generateTransactionDetailFromPMInfo(PositionPayment pp, BizEvent bizEvent) {
+    try {
+      String pmInfo = CommonUtility.convertBlob(pp.getPmInfo());
+      if (pmInfo != null) {
+        bizEvent.setTransactionDetails(
+            new ObjectMapper().readValue(pmInfo, TransactionDetails.class));
+      }
+    } catch (JsonProcessingException e) {
+      log.warn("Failed to generate transaction details from PM_INFO. Skipping it.");
+    }
   }
 }
