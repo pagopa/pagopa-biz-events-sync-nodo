@@ -1,6 +1,12 @@
 package it.gov.pagopa.bizevents.sync.nodo.util;
 
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -32,7 +38,58 @@ public class CommonUtility {
     return Optional.ofNullable(value).orElse(false);
   }
 
+  /**
+   * Split the time duration in between bounds in several slots of fixed size.
+   *
+   * @param lowerBound the lower bound of the time duration
+   * @param upperBound the lower bound of the time duration
+   * @param slotSizeInHours the fixed size of the time slots
+   * @return the list of newly created time slots
+   */
+  public static List<LocalDateTime> splitInSlots(
+      LocalDateTime lowerBound, LocalDateTime upperBound, int slotSizeInHours) {
+
+    List<LocalDateTime> slots = new ArrayList<>();
+    if (lowerBound.isBefore(upperBound)) {
+      LocalDateTime currentSlot = LocalDateTime.from(lowerBound);
+      slots.add(currentSlot);
+      while (!currentSlot.isEqual(upperBound)) {
+        currentSlot = currentSlot.plusHours(slotSizeInHours);
+        slots.add(currentSlot);
+      }
+    }
+    return slots;
+  }
+
+  public static String formatDate(LocalDateTime date, DateTimeFormatter formatter) {
+    String formattedDate = null;
+    if (date != null && formatter != null) {
+      formattedDate = date.format(formatter);
+    }
+    return formattedDate;
+  }
+
+  public static String toPlainString(Long value) {
+    return value != null ? value.toString() : null;
+  }
+
+  public static String toPlainString(BigDecimal value) {
+    return value != null ? value.toPlainString() : null;
+  }
+
+  public static String toPlainString(Double value) {
+    return value != null ? value.toString() : null;
+  }
+
   public static long getTimelapse(long startTime) {
     return Calendar.getInstance().getTimeInMillis() - startTime;
+  }
+
+  public static String convertBlob(byte[] blobContent) {
+    String convertedBlob = null;
+    if (blobContent.length > 0) {
+      convertedBlob = new String(blobContent, StandardCharsets.UTF_8);
+    }
+    return convertedBlob;
   }
 }

@@ -24,4 +24,6 @@ public class InfoTransaction {
   private String paymentMethodName;
 
   private String type;
+
+  private String maskedEmail;
 }

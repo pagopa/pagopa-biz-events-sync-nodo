@@ -30,4 +30,6 @@ public class WalletItemInfo {
   private String issuerName;
 
   private String label;
+
+  private String hashPan;
 }

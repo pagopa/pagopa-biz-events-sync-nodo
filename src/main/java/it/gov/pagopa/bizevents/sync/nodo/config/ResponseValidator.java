@@ -25,7 +25,6 @@ public class ResponseValidator {
    * @param joinPoint not used
    * @param result the response to validate
    */
-  // TODO: set your package
   @AfterReturning(
       pointcut = "execution(* it.gov.pagopa.bizevents.sync.nodo.controller.*.*(..))",
       returning = "result")
