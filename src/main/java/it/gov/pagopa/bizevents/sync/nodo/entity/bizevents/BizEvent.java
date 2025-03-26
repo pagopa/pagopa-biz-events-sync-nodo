@@ -12,6 +12,7 @@ import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.subject.Creditor;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.subject.Psp;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.TransactionDetails;
 import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -58,8 +59,16 @@ public class BizEvent {
 
   private TransactionDetails transactionDetails;
 
+  private Long timestamp; // to be valued with ZonedDateTime.now().toInstant().toEpochMilli();
+
+  private Map<String, Object> properties;
+
   // internal management fields
   private StatusType eventStatus;
 
   private Integer eventRetryEnrichmentCount;
+
+  private boolean eventTriggeredBySchedule;
+
+  private String eventErrorMessage;
 }

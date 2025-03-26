@@ -4,7 +4,9 @@ resource "github_repository_environment" "github_repository_environment" {
   # filter teams reviewers from github_organization_teams
   # if reviewers_teams is null no reviewers will be configured for environment
   dynamic "reviewers" {
-    for_each = (var.github_repository_environment.reviewers_teams == null || var.env_short != "p" ? [] : [1])
+    for_each = (var.github_repository_environment.reviewers_teams == null || var.env_short != "p" ? [] : [
+      1
+    ])
     content {
       teams = matchkeys(
         data.github_organization_teams.all.teams.*.id,
@@ -32,7 +34,7 @@ locals {
     "CLUSTER_NAME" : local.aks_cluster.name,
     "CLUSTER_RESOURCE_GROUP" : local.aks_cluster.resource_group_name,
     "NAMESPACE" : local.domain,
-    "WORKLOAD_IDENTITY_ID": data.azurerm_user_assigned_identity.workload_identity_clientid.client_id
+    "WORKLOAD_IDENTITY_ID" : data.azurerm_user_assigned_identity.workload_identity_clientid.client_id
   }
   repo_secrets = {
     "SONAR_TOKEN" : data.azurerm_key_vault_secret.key_vault_sonar.value,
@@ -40,22 +42,6 @@ locals {
     "CUCUMBER_PUBLISH_TOKEN" : data.azurerm_key_vault_secret.key_vault_cucumber_token.value,
   }
   special_repo_secrets = {
-    "CLIENT_ID" : {
-      "key" : "${upper(var.env)}_CLIENT_ID",
-      "value" : data.azurerm_user_assigned_identity.identity_pr_01.client_id
-    },
-    "TENANT_ID" : {
-      "key" : "${upper(var.env)}_TENANT_ID",
-      "value" : data.azurerm_user_assigned_identity.identity_pr_01.tenant_id
-    },
-    "SUBSCRIPTION_ID" : {
-      "key" : "${upper(var.env)}_SUBSCRIPTION_ID",
-      "value" : data.azurerm_subscription.current.subscription_id
-    },
-    "SUBKEY" : {
-      "key" : "${upper(var.env)}_SUBKEY",
-      "value" : data.azurerm_key_vault_secret.key_vault_integration_test_subkey.value
-    },
   }
 }
 

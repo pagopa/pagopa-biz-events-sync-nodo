@@ -1,6 +1,5 @@
 package it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction;
 
-import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.authorization.PaymentAuthorizationRequest;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.subject.User;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.wallet.WalletItem;
 import lombok.AllArgsConstructor;
@@ -16,15 +15,13 @@ import lombok.Setter;
 @Builder
 public class TransactionDetails {
 
-  private User user;
-
-  private PaymentAuthorizationRequest paymentAuthorizationRequest;
-
-  private WalletItem wallet;
-
   private String origin;
 
+  private User user;
+
   private Transaction transaction;
+
+  private WalletItem wallet;
 
   private InfoTransaction info;
 }

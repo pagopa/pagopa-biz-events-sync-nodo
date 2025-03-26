@@ -3,8 +3,8 @@ microservice-chart: &microservice-chart
   nameOverride: ""
   fullnameOverride: ""
   image:
-    repository: ghcr.io/pagopa/pagopa-biz-events-service
-    tag: "0.0.0"
+    repository: ghcr.io/pagopa/pagopa-biz-events-sync-nodo
+    tag: "0.0.0-5-PIDM-265"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -33,7 +33,9 @@ microservice-chart: &microservice-chart
     path: /pagopa-biz-events-sync-nodo/(.*)
     servicePort: 8080
   serviceAccount:
-    create: false
+    name: "bizevents-workload-identity"
+  azure:
+    workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
   podAnnotations: {}
   podSecurityContext:
     seccompProfile:
@@ -46,7 +48,7 @@ microservice-chart: &microservice-chart
         - all
   resources:
     requests:
-      memory: "512Mi"
+      memory: "256Mi"
       cpu: "0.25"
     limits:
       memory: "512Mi"
@@ -54,7 +56,7 @@ microservice-chart: &microservice-chart
   autoscaling:
     enable: true
     minReplica: 1
-    maxReplica: 10
+    maxReplica: 1
     pollingInterval: 10 # seconds
     cooldownPeriod: 50 # seconds
     triggers:
@@ -64,28 +66,41 @@ microservice-chart: &microservice-chart
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
           value: "75"
   envConfig: &envConfig
-    APP_NAME: "yourProjectName" # TODO
     APP_ENVIRONMENT: "dev"
-    # TODO: set your name
     WEBSITE_SITE_NAME: 'pagopabizeventssyncnodo' # required to show cloud role name in application insights
     ENV: 'azure-dev'
     APP_LOGGING_LEVEL: 'DEBUG'
     DEFAULT_LOGGING_LEVEL: 'INFO'
-
-    SPRING_DATASOURCE_URL: "jdbc:oracle:thin:@(DESCRIPTION=(ENABLE=BROKEN)(ADDRESS=(PROTOCOL=tcp)(PORT=1521)(HOST=db-nodo-pagamenti.p.db-nodo-pagamenti.com))(CONNECT_DATA=(SERVICE_NAME=NDPSPCP_NODO_ONLINE))(SO_KEEPALIVE=true)(TCP_KEEPIDLE=60)(TCP_KEEPINTVL=30)(TCP_KEEPCNT=15))"
-    SPRING_DATASOURCE_USERNAME: 'nodo-oracle-db-name'
-    SPRING_DATASOURCE_DRIVER: 'oracle.jdbc.OracleDriver'
-    SPRING_JPA_DB_PLATFORM: 'org.hibernate.dialect.Oracle12cDialect'
-    DATABASE_SCHEMA: 'NODO_ONLINE'
-
-    COSMOS_DB_URI: 'https://pagopa-d-weu-bizevents-ds-cosmos-account.documents.azure.com:443/'
-    COSMOS_DB_NAME: 'db'
+    CACHE_READ_JOB_SCHEDULE: '0 0 */12 * * *'
+    CLIENT_APICONFIG_CACHE_GETCACHEBYKEYS_PATH: 'api-config-cache/p/v1/cache'
+    CLIENT_APICONFIG_CACHE_GETCACHELATESTVERSION_PATH: 'api-config-cache/p/v1/cache/id'
+    CLIENT_APICONFIG_CACHE_HOST: 'https://api.dev.platform.pagopa.it'
+    CLIENT_CONNECTION_TIMEOUT: '10000'
+    CLIENT_ECOMMERCE_HELPDESK_HOST: 'https://api.dev.platform.pagopa.it'
+    CLIENT_ECOMMERCE_HELPDESK_MAXDELAY: '5000'
+    CLIENT_ECOMMERCE_HELPDESK_SEARCHTRANSACTION_PATH: 'ecommerce/helpdesk-service/v2/ecommerce/searchTransaction'
     COSMOS_DB_CONTAINER_NAME: 'biz-events'
+    COSMOS_DB_NAME: 'db'
+    COSMOS_DB_URI: 'https://pagopa-d-weu-bizevents-ds-cosmos-account.documents.azure.com:443/'
     COSMOS_QUERY_METRICS: 'false'
+    COSMOS_READ_REGION: 'North EU'
+    CRONJOB_SCHEDULE_ENABLED: 'false'
+    DATABASE_SCHEMA: 'NODO_ONLINE'
+    EVENTHUB_PRODUCER_NAME: 'nodo-dei-pagamenti-biz-evt'
+    SPRING_DATASOURCE_DRIVER: 'oracle.jdbc.OracleDriver'
+    SPRING_DATASOURCE_URL: "jdbc:oracle:thin:@(DESCRIPTION=(ENABLE=BROKEN)(ADDRESS=(PROTOCOL=tcp)(PORT=1521)(HOST=db-nodo-pagamenti.d.db-nodo-pagamenti.com))(CONNECT_DATA=(SERVICE_NAME=NDPSPCP_NODO_ONLINE))(SO_KEEPALIVE=true)(TCP_KEEPIDLE=60)(TCP_KEEPINTVL=30)(TCP_KEEPCNT=15))"
+    SPRING_DATASOURCE_USERNAME: 'PAGOPA_READER'
+    SPRING_JPA_DB_PLATFORM: 'org.hibernate.dialect.Oracle12cDialect'
+    SYNCHRONIZATION_JOB_LOWER_BOUND_DATE_BEFORE_DAYS: '2'
+    SYNCHRONIZATION_JOB_SCHEDULE: '0 0 2 * * *'
+    SYNCHRONIZATION_JOB_SEND_TO_EVENTHUB: 'false'
   envSecret: &envSecret
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-d-connection-string'
+    CLIENT_APICONFIG_CACHE_SUBKEY: 'api-config-cache-subscription-key'
+    CLIENT_ECOMMERCE_HELPDESK_SUBKEY: 'ecommerce-helpdesk-subscription-key'
     COSMOS_DB_PRIMARY_KEY: 'cosmos-d-biz-key'
+    EVENTHUB_PRODUCER_CONNECTION_STRING: 'ehub-d-biz-connection-string'
     SPRING_DATASOURCE_PASSWORD: 'nodo-oracle-db-password'
   keyvault:
     name: "pagopa-d-bizevents-kv"

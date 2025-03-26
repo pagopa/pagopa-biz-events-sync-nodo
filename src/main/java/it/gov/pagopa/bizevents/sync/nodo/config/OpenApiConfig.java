@@ -37,18 +37,15 @@ public class OpenApiConfig {
             List.of(
                 new Server().url("http://localhost:8080"),
                 new Server()
-                    .url("https://{host}{basePath}")
+                    .url("{host}")
                     .variables(
                         new ServerVariables()
                             .addServerVariable(
                                 "host",
                                 new ServerVariable()
-                                    ._enum(List.of("dev", "uat", "prod")) // TODO: set server hosts
-                                    ._default("")) // TODO: set default server host
-                            .addServerVariable(
-                                "basePath",
-                                new ServerVariable()._default("")) // TODO: set app base path
-                        )))
+                                    ._enum(List.of("dev", "uat", "prod"))
+                                    ._default(""))
+                            .addServerVariable("basePath", new ServerVariable()._default("")))))
         .components(
             new Components()
                 .addSecuritySchemes(

@@ -1,56 +1,51 @@
 locals {
-  repo_name = "TODO" # TODO add the name of the repository
-
-  display_name = "TODO" # TODO
-  description  = "TODO" # TODO
-  path  = "TODO" # TODO add your base path
-
-  host         = "api.${var.apim_dns_zone_prefix}.${var.external_domain}"
-  hostname     = var.hostname
+  apim_bizevents_sync_nodo_api = {
+    display_name          = "Biz Events-NdP Sync"
+    description           = "API to handle manual sync from NdP to Biz Events"
+    path                  = "bizevents/nodo-sync"
+    subscription_required = true
+    service_url           = null
+  }
 }
 
-resource "azurerm_api_management_group" "api_group" {
-  name                = local.apim.product_id
-  resource_group_name = local.apim.rg
-  api_management_name = local.apim.name
-  display_name        = local.display_name
-  description         = local.description
-}
 
-resource "azurerm_api_management_api_version_set" "api_version_set" {
-  name                = format("%s-${local.repo_name}", var.env_short)
+##################
+##  API FdR PSP ##
+##################
+
+resource "azurerm_api_management_api_version_set" "api_bizevents_sync_nodo_manual_operation" {
+  name                = "${var.env_short}-bizevents-sync-nodo-manual-operation"
   resource_group_name = local.apim.rg
   api_management_name = local.apim.name
-  display_name        = local.display_name
+  display_name        = local.apim_bizevents_sync_nodo_api.display_name
   versioning_scheme   = "Segment"
 }
 
-module "api_v1" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//api_management_api?ref=v6.7.0"
 
-  name                  = format("%s-${local.repo_name}", var.env_short)
+module "apim_bizevents_sync_nodo_manual_operation_v1" {
+  source = "./.terraform/modules/__v3__/api_management_api"
+
+  name                  = "${local.project}-bizevents-sync-nodo-manual-operation"
   api_management_name   = local.apim.name
   resource_group_name   = local.apim.rg
   product_ids           = [local.apim.product_id]
-  subscription_required = true
+  subscription_required = local.apim_bizevents_sync_nodo_api.subscription_required
+  version_set_id        = azurerm_api_management_api_version_set.api_bizevents_sync_nodo_manual_operation.id
+  api_version           = "v1"
 
-  version_set_id = azurerm_api_management_api_version_set.api_version_set.id
-  api_version    = "v1"
-
-  description  = local.description
-  display_name = local.display_name
-  path         = local.path
+  description  = local.apim_bizevents_sync_nodo_api.description
+  display_name = local.apim_bizevents_sync_nodo_api.display_name
+  path         = local.apim_bizevents_sync_nodo_api.path
   protocols    = ["https"]
-
-  service_url = null
+  service_url  = local.apim_bizevents_sync_nodo_api.service_url
 
   content_format = "openapi"
-  content_value  = templatefile("../openapi/openapi.json", {
-    host = local.host
+
+  content_value = templatefile("../openapi/openapi.json", {
+    host = local.apim_hostname
   })
 
-  xml_content = templatefile("./policy/_base_policy.xml", {
-    hostname = var.hostname
+  xml_content = templatefile("./policy/v1/_base_policy.xml.tpl", {
+    hostname = local.hostname
   })
 }
-

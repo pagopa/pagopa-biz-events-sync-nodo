@@ -56,13 +56,17 @@ public class LoggingAspect {
   private static String getDetail(ResponseEntity<ProblemJson> result) {
     if (result != null && result.getBody() != null && result.getBody().getDetail() != null) {
       return result.getBody().getDetail();
-    } else return AppError.UNKNOWN.getDetails();
+    } else {
+      return AppError.UNKNOWN.getDetails();
+    }
   }
 
   private static String getTitle(ResponseEntity<ProblemJson> result) {
     if (result != null && result.getBody() != null && result.getBody().getTitle() != null) {
       return result.getBody().getTitle();
-    } else return AppError.UNKNOWN.getTitle();
+    } else {
+      return AppError.UNKNOWN.getTitle();
+    }
   }
 
   public static String getExecutionTime() {
@@ -143,14 +147,5 @@ public class LoggingAspect {
     MDC.put(FAULT_DETAIL, getDetail(result));
     log.info("Failed API operation {} - error: {}", MDC.get(METHOD), result);
     MDC.clear();
-  }
-
-  @Around(value = "repository() || service()")
-  public Object logTrace(ProceedingJoinPoint joinPoint) throws Throwable {
-    Map<String, String> params = getParams(joinPoint);
-    log.debug("Call method {} - args: {}", joinPoint.getSignature().toShortString(), params);
-    Object result = joinPoint.proceed();
-    log.debug("Return method {} - result: {}", joinPoint.getSignature().toShortString(), result);
-    return result;
   }
 }
