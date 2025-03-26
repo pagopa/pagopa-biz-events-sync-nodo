@@ -29,8 +29,11 @@ public class SyncController {
     this.bizEventSynchronizerService = bizEventSynchronizerService;
   }
 
-  @Operation()
-  @GetMapping(value = "/sync")
+  @Operation(
+      summary = "Manually synchronize BizEvents by time slot",
+      description = "Execute a synchronization, manually starting the operation",
+      tags = {"Manual"})
+  @GetMapping(value = "/synchronize")
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<SyncReport> manuallySynchronize(
       @NotNull

@@ -1,7 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import it.gov.pagopa.bizevents.sync.nodo.model.AppInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +26,6 @@ public class BaseController {
   @Operation(
       summary = "health check",
       description = "Return OK if application is started",
-      security = {@SecurityRequirement(name = "JWT")},
       tags = {"Home"})
   @GetMapping(value = "/info")
   @ResponseStatus(HttpStatus.OK)
