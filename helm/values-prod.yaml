@@ -33,7 +33,9 @@ microservice-chart: &microservice-chart
     path: /pagopa-biz-events-sync-nodo/(.*)
     servicePort: 8080
   serviceAccount:
-    create: false
+    name: "bizevent-workload-identity"
+  azure:
+    workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
   podAnnotations: { }
   podSecurityContext:
     seccompProfile:
@@ -86,7 +88,7 @@ microservice-chart: &microservice-chart
     DATABASE_SCHEMA: 'NODO_ONLINE'
     EVENTHUB_PRODUCER_NAME: 'nodo-dei-pagamenti-biz-evt'
     SPRING_DATASOURCE_DRIVER: 'oracle.jdbc.OracleDriver'
-    SPRING_DATASOURCE_URL: "jdbc:oracle:thin:@(DESCRIPTION=(ENABLE=BROKEN)(ADDRESS=(PROTOCOL=tcp)(PORT=1521)(HOST=db-nodo-pagamenti.p.db-nodo-pagamenti.com))(CONNECT_DATA=(SERVICE_NAME=NDPSPCP_NODO_ONLINE))(SO_KEEPALIVE=true)(TCP_KEEPIDLE=60)(TCP_KEEPINTVL=30)(TCP_KEEPCNT=15))"
+    SPRING_DATASOURCE_URL: "jdbc:oracle:thin:@(DESCRIPTION=(ENABLE=BROKEN)(ADDRESS=(PROTOCOL=tcp)(PORT=1521)(HOST=db-nodo-pagamenti-dr.p.db-nodo-pagamenti.com))(CONNECT_DATA=(SERVICE_NAME=NDPSPCP_NODO_ONLINE))(SO_KEEPALIVE=true)(TCP_KEEPIDLE=60)(TCP_KEEPINTVL=30)(TCP_KEEPCNT=15))"
     SPRING_DATASOURCE_USERNAME: 'PAGOPA_READER'
     SPRING_JPA_DB_PLATFORM: 'org.hibernate.dialect.Oracle12cDialect'
     SYNCHRONIZATION_JOB_LOWER_BOUND_DATE_BEFORE_DAYS: 2
