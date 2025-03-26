@@ -3,7 +3,7 @@ microservice-chart: &microservice-chart
   nameOverride: ""
   fullnameOverride: ""
   image:
-    repository: ghcr.io/pagopa/pagopa-biz-events-service
+    repository: ghcr.io/pagopa/pagopa-biz-events-sync-nodo
     tag: "0.0.0-2-PIDM-265"
     pullPolicy: Always
   livenessProbe:
