@@ -36,7 +36,7 @@ microservice-chart: &microservice-chart
     name: "bizevents-workload-identity"
   azure:
     workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
-  podAnnotations: {}
+  podAnnotations: { }
   podSecurityContext:
     seccompProfile:
       type: RuntimeDefault
@@ -51,8 +51,8 @@ microservice-chart: &microservice-chart
       memory: "512Mi"
       cpu: "0.25"
     limits:
-      memory: "756Mi"
-      cpu: "0.50"
+      memory: "1024Mi"
+      cpu: "0.80"
   autoscaling:
     enable: true
     minReplica: 1
@@ -105,8 +105,8 @@ microservice-chart: &microservice-chart
   keyvault:
     name: "pagopa-p-bizevents-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
-  nodeSelector: {}
-  tolerations: []
+  nodeSelector: { }
+  tolerations: [ ]
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
