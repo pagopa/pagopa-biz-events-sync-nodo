@@ -1,4 +1,4 @@
-data "azurerm_storage_account" "tf_storage_account"{
+data "azurerm_storage_account" "tf_storage_account" {
   name                = "pagopainfraterraform${var.env}"
   resource_group_name = "io-infra-rg"
 }
@@ -23,13 +23,8 @@ data "azurerm_key_vault" "key_vault" {
 }
 
 
-data "azurerm_user_assigned_identity" "identity_cd_01"{
-  name = "${local.prefix}-${var.env_short}-${local.domain}-01-github-cd-identity"
-  resource_group_name = "${local.prefix}-${var.env_short}-identity-rg"
-}
-
-data "azurerm_user_assigned_identity" "identity_pr_01" {
-  name                = "${local.prefix}-${var.env_short}-${local.domain}-01-pr-github-cd-identity"
+data "azurerm_user_assigned_identity" "identity_cd_01" {
+  name                = "${local.prefix}-${var.env_short}-${local.domain}-01-github-cd-identity"
   resource_group_name = "${local.prefix}-${var.env_short}-identity-rg"
 }
 
