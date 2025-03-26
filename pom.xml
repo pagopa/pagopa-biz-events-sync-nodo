@@ -21,7 +21,7 @@
         <ojdbc8-version>21.4.0.0</ojdbc8-version>
     </properties>
 
-    <version>0.0.0-5-PIDM-265</version>
+    <version>0.1.0</version>
 
     <dependencies>
         <dependency>
