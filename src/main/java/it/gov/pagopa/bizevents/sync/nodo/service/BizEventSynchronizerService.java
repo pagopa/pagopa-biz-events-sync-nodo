@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,14 +87,6 @@ public class BizEventSynchronizerService {
               receiptsNotConvertedInBizEvents.size(),
               lowerDateBound,
               upperDateBound);
-
-          // TODO remove, only for debug purpose
-          receiptsNotConvertedInBizEvents =
-              receiptsNotConvertedInBizEvents.stream()
-                  .filter(receiptEvent -> PaymentModelVersion.NEW.equals(receiptEvent.getVersion()))
-                  .findFirst()
-                  .stream()
-                  .collect(Collectors.toSet());
 
           //
           bizEventsToSend = generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
