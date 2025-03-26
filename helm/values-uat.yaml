@@ -33,10 +33,10 @@ microservice-chart: &microservice-chart
     path: /pagopa-biz-events-sync-nodo/(.*)
     servicePort: 8080
   serviceAccount:
-    name: "bizevent-workload-identity"
+    name: "bizevents-workload-identity"
   azure:
     workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
-  podAnnotations: {}
+  podAnnotations: { }
   podSecurityContext:
     seccompProfile:
       type: RuntimeDefault
@@ -105,8 +105,8 @@ microservice-chart: &microservice-chart
   keyvault:
     name: "pagopa-u-bizevents-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
-  nodeSelector: {}
-  tolerations: []
+  nodeSelector: { }
+  tolerations: [ ]
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
