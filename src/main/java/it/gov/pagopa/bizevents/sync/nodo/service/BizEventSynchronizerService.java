@@ -37,6 +37,9 @@ public class BizEventSynchronizerService {
   @Value("${synchronization-process.send-to-eventhub.activation}")
   private boolean mustSendEventToEvent;
 
+  @Value("${synchronization-process.time-slot.size.minutes}")
+  private int slotSizeInMinutes;
+
   @Autowired
   public BizEventSynchronizerService(
       BizEventsReaderService bizEventsReaderService,
@@ -125,7 +128,8 @@ public class BizEventSynchronizerService {
 
     List<Pair<LocalDateTime, LocalDateTime>> timeSlotsInError = new ArrayList<>();
 
-    List<LocalDateTime> timeSlots = CommonUtility.splitInSlots(lowerLimitDate, upperLimitDate, 1);
+    List<LocalDateTime> timeSlots =
+        CommonUtility.splitInSlots(lowerLimitDate, upperLimitDate, slotSizeInMinutes);
     for (int index = 0; index < timeSlots.size() - 1; index++) {
 
       // Extracting upper and lower date boundaries

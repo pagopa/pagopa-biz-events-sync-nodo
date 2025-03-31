@@ -43,18 +43,18 @@ public class CommonUtility {
    *
    * @param lowerBound the lower bound of the time duration
    * @param upperBound the lower bound of the time duration
-   * @param slotSizeInHours the fixed size of the time slots
+   * @param slotSizeInMinutes the fixed size of the time slots
    * @return the list of newly created time slots
    */
   public static List<LocalDateTime> splitInSlots(
-      LocalDateTime lowerBound, LocalDateTime upperBound, int slotSizeInHours) {
+      LocalDateTime lowerBound, LocalDateTime upperBound, int slotSizeInMinutes) {
 
     List<LocalDateTime> slots = new ArrayList<>();
     if (lowerBound.isBefore(upperBound)) {
       LocalDateTime currentSlot = LocalDateTime.from(lowerBound);
       slots.add(currentSlot);
       while (!currentSlot.isEqual(upperBound)) {
-        currentSlot = currentSlot.plusHours(slotSizeInHours);
+        currentSlot = currentSlot.plusMinutes(slotSizeInMinutes);
         slots.add(currentSlot);
       }
     }

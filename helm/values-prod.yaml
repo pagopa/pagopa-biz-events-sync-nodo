@@ -36,7 +36,7 @@ microservice-chart: &microservice-chart
     name: "bizevents-workload-identity"
   azure:
     workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
-  podAnnotations: {}
+  podAnnotations: { }
   podSecurityContext:
     seccompProfile:
       type: RuntimeDefault
@@ -94,6 +94,7 @@ microservice-chart: &microservice-chart
     SYNCHRONIZATION_JOB_LOWER_BOUND_DATE_BEFORE_DAYS: '2'
     SYNCHRONIZATION_JOB_SCHEDULE: '0 0 2 * * *'
     SYNCHRONIZATION_JOB_SEND_TO_EVENTHUB: 'false'
+    SYNCHRONIZATION_JOB_TIMESLOT_SIZE_MINUTES: '60'
   envSecret: &envSecret
     # required
     APPLICATIONINSIGHTS_CONNECTION_STRING: 'ai-p-connection-string'
@@ -105,8 +106,8 @@ microservice-chart: &microservice-chart
   keyvault:
     name: "pagopa-p-bizevents-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
-  nodeSelector: {}
-  tolerations: []
+  nodeSelector: { }
+  tolerations: [ ]
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
