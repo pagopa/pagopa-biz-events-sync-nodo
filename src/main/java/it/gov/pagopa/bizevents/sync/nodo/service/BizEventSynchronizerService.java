@@ -63,7 +63,7 @@ public class BizEventSynchronizerService {
     //
     List<Pair<LocalDateTime, LocalDateTime>> timeSlots =
         getTimeSlotThatRequireSynchronization(lowerLimitDate, upperLimitDate);
-    log.debug("Found [{}] time slots to be synchronized: [{}]", timeSlots.size(), timeSlots);
+    log.info("Found [{}] time slots to be synchronized: [{}]", timeSlots.size(), timeSlots);
 
     //
     for (Pair<LocalDateTime, LocalDateTime> timeSlotToSynchronize : timeSlots) {
@@ -112,7 +112,7 @@ public class BizEventSynchronizerService {
     }
 
     //
-    log.debug("Synchronization ended! Generating report...");
+    log.info("Synchronization ended! Generating report...");
     return generateReport(
         bizEventsToSend,
         receiptsNotConvertedInBizEvents,

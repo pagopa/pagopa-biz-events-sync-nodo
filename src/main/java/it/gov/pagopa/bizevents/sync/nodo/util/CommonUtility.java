@@ -53,10 +53,13 @@ public class CommonUtility {
     if (lowerBound.isBefore(upperBound)) {
       LocalDateTime currentSlot = LocalDateTime.from(lowerBound);
       slots.add(currentSlot);
-      while (!currentSlot.isEqual(upperBound)) {
+      while (currentSlot.isBefore(upperBound)) {
         currentSlot = currentSlot.plusMinutes(slotSizeInMinutes);
         slots.add(currentSlot);
       }
+    } else {
+      slots.add(lowerBound);
+      slots.add(upperBound);
     }
     return slots;
   }
