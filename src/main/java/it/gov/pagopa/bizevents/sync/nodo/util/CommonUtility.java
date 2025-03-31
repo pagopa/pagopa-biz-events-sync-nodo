@@ -90,7 +90,7 @@ public class CommonUtility {
 
   public static String convertBlob(byte[] blobContent) {
     String convertedBlob = null;
-    if (blobContent.length > 0) {
+    if (blobContent != null && blobContent.length > 0) {
       convertedBlob = new String(blobContent, StandardCharsets.UTF_8);
     }
     return convertedBlob;
