@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-biz-events-sync-nodo
-    tag: "0.1.0-4-fix-first-run"
+    tag: "0.1.0-5-fix-first-run"
     pullPolicy: Always
   livenessProbe:
     httpGet:
