@@ -130,6 +130,11 @@ public class BizEventSynchronizerService {
 
     List<LocalDateTime> timeSlots =
         CommonUtility.splitInSlots(lowerLimitDate, upperLimitDate, slotSizeInMinutes);
+    log.info(
+        "Split [{} - {}] time slot in different sections: {}",
+        lowerLimitDate,
+        upperLimitDate,
+        timeSlots);
     for (int index = 0; index < timeSlots.size() - 1; index++) {
 
       // Extracting upper and lower date boundaries
@@ -137,14 +142,15 @@ public class BizEventSynchronizerService {
       LocalDateTime maxDate = timeSlots.get(index + 1);
 
       // Count differences between receipts stored from NdP and elaborated BizEvents
+      log.info("Searching missing BizEvents for time slot [{} - {}]", minDate, maxDate);
       boolean areThereMissingBizEvent =
           this.bizEventsReaderService.checkIfMissingBizEventsAtTimeSlot(minDate, maxDate);
 
       // If there are missing BizEvents, add the time slot boundaries in the returned list
       if (areThereMissingBizEvent) {
 
-        log.debug(
-            "Time slot [{} - {}] has missing BizEvents. They will be synchronized in the next"
+        log.info(
+            "Time slot [{} - {}] has missing BizEvents! They will be synchronized in the next"
                 + " step.",
             minDate,
             maxDate);
