@@ -88,7 +88,7 @@ public class BizEventsReaderService {
         this.positionReceiptRepository.countByTimeSlot(lowerBoundDate, upperBoundDate);
     log.info(
         "Found [{}] receipts for new model in time slot [{} - {}]",
-        numberOfOldModelReceipts,
+        numberOfNewModelReceipts,
         lowerBoundDate,
         upperBoundDate);
 
@@ -109,7 +109,7 @@ public class BizEventsReaderService {
       log.info("Found [{}] new model receipts in analyzed time slot...", newModelReceipts.size());
       Set<ReceiptEventInfo> oldModelReceipts =
           this.rtRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate);
-      log.info("Found [{}] old model receipts in analyzed time slot...", newModelReceipts.size());
+      log.info("Found [{}] old model receipts in analyzed time slot...", oldModelReceipts.size());
 
       //
       ndpReceipts.addAll(oldModelReceipts);
