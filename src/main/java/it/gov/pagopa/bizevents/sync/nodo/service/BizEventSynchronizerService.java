@@ -263,7 +263,10 @@ public class BizEventSynchronizerService {
           records.stream()
               .filter(
                   rec ->
-                      receiptEvent.getIuv().equals(rec.getIuv())
+                      (receiptEvent
+                                  .getIuv()
+                                  .equals(rec.getEvent().getDebtorPosition().getNoticeNumber())
+                              || receiptEvent.getIuv().equals(rec.getIuv()))
                           && receiptEvent.getDomainId().equals(rec.getDomainId())
                           && receiptEvent.getPaymentToken().equals(rec.getPaymentToken()))
               .count();
