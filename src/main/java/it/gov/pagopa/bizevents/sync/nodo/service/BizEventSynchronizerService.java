@@ -59,6 +59,7 @@ public class BizEventSynchronizerService {
       int overriddenTimeSlotSize,
       boolean showEventData) {
 
+    List<BizEvent> allBizEventsAnalyzed = new LinkedList<>();
     List<BizEvent> bizEventsToSend = new LinkedList<>();
     Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents = new HashSet<>();
     boolean errorDuringComputation = false;
@@ -97,6 +98,7 @@ public class BizEventSynchronizerService {
 
           //
           bizEventsToSend = generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
+          allBizEventsAnalyzed.addAll(bizEventsToSend);
 
           //
           if (mustSendEventToEvent) {
@@ -118,7 +120,7 @@ public class BizEventSynchronizerService {
     //
     log.info("Synchronization ended! Generating report...");
     return generateReport(
-        bizEventsToSend,
+        allBizEventsAnalyzed,
         receiptsNotConvertedInBizEvents,
         lowerLimitDate,
         upperLimitDate,
