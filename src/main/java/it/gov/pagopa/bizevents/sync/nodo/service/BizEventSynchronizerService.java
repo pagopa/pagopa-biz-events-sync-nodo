@@ -38,7 +38,7 @@ public class BizEventSynchronizerService {
   private boolean mustSendEventToEvent;
 
   @Value("${synchronization-process.time-slot.size.minutes}")
-  private int slotSizeInMinutes;
+  private int defaultSlotSizeInMinutes;
 
   @Autowired
   public BizEventSynchronizerService(
@@ -54,7 +54,10 @@ public class BizEventSynchronizerService {
   }
 
   public SyncReport executeSynchronization(
-      LocalDateTime lowerLimitDate, LocalDateTime upperLimitDate, boolean showEventData) {
+      LocalDateTime lowerLimitDate,
+      LocalDateTime upperLimitDate,
+      int overriddenTimeSlotSize,
+      boolean showEventData) {
 
     List<BizEvent> bizEventsToSend = new LinkedList<>();
     Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents = new HashSet<>();
@@ -62,7 +65,8 @@ public class BizEventSynchronizerService {
 
     //
     List<Pair<LocalDateTime, LocalDateTime>> timeSlots =
-        getTimeSlotThatRequireSynchronization(lowerLimitDate, upperLimitDate);
+        getTimeSlotThatRequireSynchronization(
+            lowerLimitDate, upperLimitDate, overriddenTimeSlotSize);
     log.info("Found [{}] time slots to be synchronized: [{}]", timeSlots.size(), timeSlots);
 
     //
@@ -124,12 +128,13 @@ public class BizEventSynchronizerService {
   }
 
   private List<Pair<LocalDateTime, LocalDateTime>> getTimeSlotThatRequireSynchronization(
-      LocalDateTime lowerLimitDate, LocalDateTime upperLimitDate) {
+      LocalDateTime lowerLimitDate, LocalDateTime upperLimitDate, int overriddenTimeSlotSize) {
 
     List<Pair<LocalDateTime, LocalDateTime>> timeSlotsInError = new ArrayList<>();
 
+    int slotSize = overriddenTimeSlotSize > 0 ? overriddenTimeSlotSize : defaultSlotSizeInMinutes;
     List<LocalDateTime> timeSlots =
-        CommonUtility.splitInSlots(lowerLimitDate, upperLimitDate, slotSizeInMinutes);
+        CommonUtility.splitInSlots(lowerLimitDate, upperLimitDate, slotSize);
     log.info(
         "Split [{} - {}] time slot in different sections: {}",
         lowerLimitDate,
