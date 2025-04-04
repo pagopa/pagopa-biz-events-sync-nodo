@@ -83,7 +83,7 @@ microservice-chart: &microservice-chart
     COSMOS_DB_NAME: 'db'
     COSMOS_DB_URI: 'https://pagopa-p-weu-bizevents-ds-cosmos-account.documents.azure.com:443/'
     COSMOS_QUERY_METRICS: 'false'
-    COSMOS_READ_REGION: 'North EU'
+    COSMOS_READ_REGION: 'North Europe'
     CRONJOB_SCHEDULE_ENABLED: 'false'
     DATABASE_SCHEMA: 'NODO_ONLINE'
     EVENTHUB_PRODUCER_NAME: 'nodo-dei-pagamenti-biz-evt'
