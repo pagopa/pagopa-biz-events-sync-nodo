@@ -7,8 +7,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class EcommerceHelpdeskClientConfig extends AuthorizationClientConfig {
 
-  protected String subscriptionKey;
-
   @Autowired
   public EcommerceHelpdeskClientConfig(
       @Value("${client.ecommerce-helpdesk.subscription-key}") String subscriptionKey) {
