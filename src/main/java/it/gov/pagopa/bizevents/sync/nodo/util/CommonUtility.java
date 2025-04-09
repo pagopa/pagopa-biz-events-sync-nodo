@@ -43,20 +43,23 @@ public class CommonUtility {
    *
    * @param lowerBound the lower bound of the time duration
    * @param upperBound the lower bound of the time duration
-   * @param slotSizeInHours the fixed size of the time slots
+   * @param slotSizeInMinutes the fixed size of the time slots
    * @return the list of newly created time slots
    */
   public static List<LocalDateTime> splitInSlots(
-      LocalDateTime lowerBound, LocalDateTime upperBound, int slotSizeInHours) {
+      LocalDateTime lowerBound, LocalDateTime upperBound, int slotSizeInMinutes) {
 
     List<LocalDateTime> slots = new ArrayList<>();
     if (lowerBound.isBefore(upperBound)) {
       LocalDateTime currentSlot = LocalDateTime.from(lowerBound);
       slots.add(currentSlot);
-      while (!currentSlot.isEqual(upperBound)) {
-        currentSlot = currentSlot.plusHours(slotSizeInHours);
+      while (currentSlot.isBefore(upperBound)) {
+        currentSlot = currentSlot.plusMinutes(slotSizeInMinutes);
         slots.add(currentSlot);
       }
+    } else {
+      slots.add(lowerBound);
+      slots.add(upperBound);
     }
     return slots;
   }
@@ -87,7 +90,7 @@ public class CommonUtility {
 
   public static String convertBlob(byte[] blobContent) {
     String convertedBlob = null;
-    if (blobContent.length > 0) {
+    if (blobContent != null && blobContent.length > 0) {
       convertedBlob = new String(blobContent, StandardCharsets.UTF_8);
     }
     return convertedBlob;

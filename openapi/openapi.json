@@ -4,7 +4,7 @@
     "description": "placeholder-description",
     "termsOfService": "https://www.pagopa.gov.it/",
     "title": "test-artifactId",
-    "version": "0.1.0"
+    "version": "0.1.0-11-fix-first-run"
   },
   "servers": [
     {
@@ -95,6 +95,18 @@
               "type": "string",
               "description": "Upper limit date",
               "example": "2025-01-01T21:00:00"
+            }
+          },
+          {
+            "description": "Override default time slot size in minutes. The values must be greater than 1",
+            "example": 10,
+            "in": "query",
+            "name": "timeSlotSize",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Override default time slot size in minutes. The values must be greater than 1",
+              "example": 10
             }
           },
           {

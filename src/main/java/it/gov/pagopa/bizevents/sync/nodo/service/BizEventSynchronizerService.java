@@ -37,6 +37,9 @@ public class BizEventSynchronizerService {
   @Value("${synchronization-process.send-to-eventhub.activation}")
   private boolean mustSendEventToEvent;
 
+  @Value("${synchronization-process.time-slot.size.minutes}")
+  private int defaultSlotSizeInMinutes;
+
   @Autowired
   public BizEventSynchronizerService(
       BizEventsReaderService bizEventsReaderService,
@@ -51,16 +54,21 @@ public class BizEventSynchronizerService {
   }
 
   public SyncReport executeSynchronization(
-      LocalDateTime lowerLimitDate, LocalDateTime upperLimitDate, boolean showEventData) {
+      LocalDateTime lowerLimitDate,
+      LocalDateTime upperLimitDate,
+      int overriddenTimeSlotSize,
+      boolean showEventData) {
 
+    List<BizEvent> allBizEventsAnalyzed = new LinkedList<>();
     List<BizEvent> bizEventsToSend = new LinkedList<>();
     Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents = new HashSet<>();
     boolean errorDuringComputation = false;
 
     //
     List<Pair<LocalDateTime, LocalDateTime>> timeSlots =
-        getTimeSlotThatRequireSynchronization(lowerLimitDate, upperLimitDate);
-    log.debug("Found [{}] time slots to be synchronized: [{}]", timeSlots.size(), timeSlots);
+        getTimeSlotThatRequireSynchronization(
+            lowerLimitDate, upperLimitDate, overriddenTimeSlotSize);
+    log.info("Found [{}] time slots to be synchronized: [{}]", timeSlots.size(), timeSlots);
 
     //
     for (Pair<LocalDateTime, LocalDateTime> timeSlotToSynchronize : timeSlots) {
@@ -90,6 +98,7 @@ public class BizEventSynchronizerService {
 
           //
           bizEventsToSend = generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
+          allBizEventsAnalyzed.addAll(bizEventsToSend);
 
           //
           if (mustSendEventToEvent) {
@@ -109,9 +118,9 @@ public class BizEventSynchronizerService {
     }
 
     //
-    log.debug("Synchronization ended! Generating report...");
+    log.info("Synchronization ended! Generating report...");
     return generateReport(
-        bizEventsToSend,
+        allBizEventsAnalyzed,
         receiptsNotConvertedInBizEvents,
         lowerLimitDate,
         upperLimitDate,
@@ -121,11 +130,18 @@ public class BizEventSynchronizerService {
   }
 
   private List<Pair<LocalDateTime, LocalDateTime>> getTimeSlotThatRequireSynchronization(
-      LocalDateTime lowerLimitDate, LocalDateTime upperLimitDate) {
+      LocalDateTime lowerLimitDate, LocalDateTime upperLimitDate, int overriddenTimeSlotSize) {
 
     List<Pair<LocalDateTime, LocalDateTime>> timeSlotsInError = new ArrayList<>();
 
-    List<LocalDateTime> timeSlots = CommonUtility.splitInSlots(lowerLimitDate, upperLimitDate, 1);
+    int slotSize = overriddenTimeSlotSize > 0 ? overriddenTimeSlotSize : defaultSlotSizeInMinutes;
+    List<LocalDateTime> timeSlots =
+        CommonUtility.splitInSlots(lowerLimitDate, upperLimitDate, slotSize);
+    log.info(
+        "Split [{} - {}] time slot in different sections: {}",
+        lowerLimitDate,
+        upperLimitDate,
+        timeSlots);
     for (int index = 0; index < timeSlots.size() - 1; index++) {
 
       // Extracting upper and lower date boundaries
@@ -133,14 +149,15 @@ public class BizEventSynchronizerService {
       LocalDateTime maxDate = timeSlots.get(index + 1);
 
       // Count differences between receipts stored from NdP and elaborated BizEvents
+      log.info("Searching missing BizEvents for time slot [{} - {}]", minDate, maxDate);
       boolean areThereMissingBizEvent =
           this.bizEventsReaderService.checkIfMissingBizEventsAtTimeSlot(minDate, maxDate);
 
       // If there are missing BizEvents, add the time slot boundaries in the returned list
       if (areThereMissingBizEvent) {
 
-        log.debug(
-            "Time slot [{} - {}] has missing BizEvents. They will be synchronized in the next"
+        log.info(
+            "Time slot [{} - {}] has missing BizEvents! They will be synchronized in the next"
                 + " step.",
             minDate,
             maxDate);
@@ -253,7 +270,10 @@ public class BizEventSynchronizerService {
           records.stream()
               .filter(
                   rec ->
-                      receiptEvent.getIuv().equals(rec.getIuv())
+                      (receiptEvent
+                                  .getIuv()
+                                  .equals(rec.getEvent().getDebtorPosition().getNoticeNumber())
+                              || receiptEvent.getIuv().equals(rec.getIuv()))
                           && receiptEvent.getDomainId().equals(rec.getDomainId())
                           && receiptEvent.getPaymentToken().equals(rec.getPaymentToken()))
               .count();

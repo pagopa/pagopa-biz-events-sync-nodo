@@ -21,4 +21,6 @@ public class AppInfo {
   private String version;
 
   private String environment;
+
+  private String db;
 }

@@ -44,6 +44,12 @@ public class SyncController {
           @RequestParam(name = "dateTo")
           @Schema(example = "2025-01-01T21:00:00", description = "Upper limit date")
           LocalDateTime dateTo,
+      @RequestParam(name = "timeSlotSize", defaultValue = "-1")
+          @Schema(
+              example = "10",
+              description =
+                  "Override default time slot size in minutes. The values must be greater than 1")
+          int overriddenTimeSlotSize,
       @RequestParam(name = "showBizEvents", defaultValue = "true")
           @Schema(example = "true", description = "Show generated biz events data in final report")
           boolean showBizEvents) {
@@ -51,7 +57,8 @@ public class SyncController {
     log.info("Invoking BizEvent-to-Nodo synchronization via HTTP manual trigger!");
     long start = Calendar.getInstance().getTimeInMillis();
     SyncReport report =
-        bizEventSynchronizerService.executeSynchronization(dateFrom, dateTo, showBizEvents);
+        bizEventSynchronizerService.executeSynchronization(
+            dateFrom, dateTo, overriddenTimeSlotSize, showBizEvents);
     log.info(
         "Invoked BizEvent-to-Nodo synchronization via HTTP manual trigger completed in [{}] ms!",
         CommonUtility.getTimelapse(start));

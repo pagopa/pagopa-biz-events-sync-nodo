@@ -53,7 +53,7 @@ public class CosmosDBConfiguration extends AbstractCosmosConfiguration {
   public CosmosConfig cosmosConfig() {
     return CosmosConfig.builder()
         .enableQueryMetrics(queryMetricsEnabled)
-        .responseDiagnosticsProcessor(new ResponseDiagnosticsProcessorImplementation())
+        // .responseDiagnosticsProcessor(new ResponseDiagnosticsProcessorImplementation())
         .build();
   }
 

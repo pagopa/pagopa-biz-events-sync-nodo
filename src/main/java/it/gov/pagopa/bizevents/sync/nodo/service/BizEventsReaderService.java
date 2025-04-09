@@ -58,6 +58,11 @@ public class BizEventsReaderService {
     if (!countOfBizEventByTimeSlot.isEmpty()) {
       numberOfBizEvents = countOfBizEventByTimeSlot.get(0);
     }
+    log.info(
+        "Found [{}] BizEvents in time slot [{} - {}]",
+        numberOfBizEvents,
+        lowerBoundDate,
+        upperBoundDate);
 
     // Retrieve the count of receipts generated on the first occurrence for old payment models for
     // the time slot passed
@@ -72,10 +77,20 @@ public class BizEventsReaderService {
     // Calculate the count of receipts useful for old payment models for the time slot passed
     long numberOfOldModelReceipts =
         numberOfFirstPayOldModelReceipts - numberOfRetriedOldModelReceipts;
+    log.info(
+        "Found [{}] receipts for old model in time slot [{} - {}]",
+        numberOfOldModelReceipts,
+        lowerBoundDate,
+        upperBoundDate);
 
     // Retrieve the count of receipts generated for new payment models for the time slot passed
     long numberOfNewModelReceipts =
         this.positionReceiptRepository.countByTimeSlot(lowerBoundDate, upperBoundDate);
+    log.info(
+        "Found [{}] receipts for new model in time slot [{} - {}]",
+        numberOfNewModelReceipts,
+        lowerBoundDate,
+        upperBoundDate);
 
     return ((numberOfNewModelReceipts + numberOfOldModelReceipts) - numberOfBizEvents) > 0;
   }
@@ -91,10 +106,10 @@ public class BizEventsReaderService {
       //
       Set<ReceiptEventInfo> newModelReceipts =
           this.positionReceiptRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate);
-      log.debug("Found [{}] new model receipts in analyzed time slot...", newModelReceipts.size());
+      log.info("Found [{}] new model receipts in analyzed time slot...", newModelReceipts.size());
       Set<ReceiptEventInfo> oldModelReceipts =
           this.rtRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate);
-      log.debug("Found [{}] old model receipts in analyzed time slot...", newModelReceipts.size());
+      log.info("Found [{}] old model receipts in analyzed time slot...", oldModelReceipts.size());
 
       //
       ndpReceipts.addAll(oldModelReceipts);
@@ -114,11 +129,11 @@ public class BizEventsReaderService {
           this.bizEventsRepository.readBizEventsInTimeSlot(
               formattedLowerBoundDate, formattedUpperBoundDate);
       bizEvents = rawResults.stream().map(ReceiptEventInfo::new).collect(Collectors.toSet());
-      log.debug("Found [{}] BizEvents in analyzed time slot...", bizEvents.size());
+      log.info("Found [{}] BizEvents in analyzed time slot...", bizEvents.size());
 
       //
       ndpReceipts.removeAll(bizEvents);
-      log.debug(
+      log.info(
           "Removed all extracted BizEvents from NdP new-and-old receipts: found [{}] receipts that"
               + " must be synchronized as BizEvents!",
           ndpReceipts.size());
