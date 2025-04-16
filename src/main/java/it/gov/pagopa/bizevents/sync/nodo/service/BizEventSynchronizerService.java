@@ -60,7 +60,7 @@ public class BizEventSynchronizerService {
       boolean showEventData) {
 
     List<BizEvent> allBizEventsAnalyzed = new LinkedList<>();
-    List<BizEvent> bizEventsToSend = new LinkedList<>();
+    List<BizEvent> bizEventsToSend;
     Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents = new HashSet<>();
     boolean errorDuringComputation = false;
 
