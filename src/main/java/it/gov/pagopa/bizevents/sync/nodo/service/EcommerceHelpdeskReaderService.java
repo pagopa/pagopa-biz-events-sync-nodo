@@ -1,6 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.service;
 
-import feign.FeignException;
+import feign.FeignException.FeignServerException;
 import it.gov.pagopa.bizevents.sync.nodo.client.EcommerceHelpdeskClient;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.TransactionDetails;
 import it.gov.pagopa.bizevents.sync.nodo.model.client.ecommerce.request.SearchTransactionRequest;
@@ -55,7 +55,8 @@ public class EcommerceHelpdeskReaderService {
         transactionDetails = BizEventMapper.fromTransactionResponse(transactions.get(0));
       }
 
-    } catch (FeignException e) {
+    } catch (FeignServerException e) {
+
       log.error(
           "[BIZ-EVENTS-SYNC-NODO] An error occurred while communicating with eCommerce Helpdesk"
               + " using request [{}]",
