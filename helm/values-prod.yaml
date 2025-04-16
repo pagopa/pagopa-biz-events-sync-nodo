@@ -36,7 +36,7 @@ microservice-chart: &microservice-chart
     name: "bizevents-workload-identity"
   azure:
     workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
-  podAnnotations: {}
+  podAnnotations: { }
   podSecurityContext:
     seccompProfile:
       type: RuntimeDefault
@@ -82,6 +82,7 @@ microservice-chart: &microservice-chart
     COSMOS_DB_CONTAINER_NAME: 'biz-events'
     COSMOS_DB_NAME: 'db'
     COSMOS_DB_URI: 'https://pagopa-p-weu-bizevents-ds-cosmos-account.documents.azure.com:443/'
+    COSMOS_LOGGING_LEVEL: 'ERROR'
     COSMOS_QUERY_METRICS: 'false'
     COSMOS_READ_REGION: 'North Europe'
     CRONJOB_SCHEDULE_ENABLED: 'true'
@@ -91,6 +92,7 @@ microservice-chart: &microservice-chart
       -Duser.timezone=GMT
     SPRING_DATASOURCE_DRIVER: 'oracle.jdbc.OracleDriver'
     SPRING_DATASOURCE_HEALTHCHECK_QUERY: 'SELECT 1 FROM DUAL'
+    SPRING_DATASOURCE_HIKARI_MAXLIFETIME: '600000'
     SPRING_DATASOURCE_URL: "jdbc:oracle:thin:@(DESCRIPTION=(ENABLE=BROKEN)(ADDRESS=(PROTOCOL=tcp)(PORT=1521)(HOST=db-nodo-pagamenti-dr.p.db-nodo-pagamenti.com))(CONNECT_DATA=(SERVICE_NAME=PAGOPA_READ))(SO_KEEPALIVE=true)(TCP_KEEPIDLE=60)(TCP_KEEPINTVL=30)(TCP_KEEPCNT=15))"
     SPRING_DATASOURCE_USERNAME: 'PAGOPA_READER'
     SPRING_JPA_DB_PLATFORM: 'org.hibernate.dialect.Oracle12cDialect'
@@ -109,8 +111,8 @@ microservice-chart: &microservice-chart
   keyvault:
     name: "pagopa-p-bizevents-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
-  nodeSelector: {}
-  tolerations: []
+  nodeSelector: { }
+  tolerations: [ ]
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
