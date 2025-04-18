@@ -27,6 +27,9 @@ public class BizEventsSyncNodoScheduler {
   @Scheduled(cron = "${synchronization-process.schedule.expression}")
   public void synchronizeBizEventsWithNdpReceipts() {
 
+    long start = System.currentTimeMillis();
+    log.info("Starting scheduled execution of NdP receipts to BizEvents!");
+
     //
     LocalDateTime todayDate = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
     LocalDateTime lowerLimitDate = todayDate.minusDays(lowerBoundDateBeforeDays);
@@ -34,5 +37,10 @@ public class BizEventsSyncNodoScheduler {
 
     //
     bizEventSynchronizerService.executeSynchronization(lowerLimitDate, upperLimitDate, -1, false);
+
+    long end = System.currentTimeMillis();
+    log.info(
+        "Ended scheduled execution of NdP receipts to BizEvents! Elapsed time: [{}] ms.",
+        end - start);
   }
 }
