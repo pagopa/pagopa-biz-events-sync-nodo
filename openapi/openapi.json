@@ -4,7 +4,7 @@
     "description": "placeholder-description",
     "termsOfService": "https://www.pagopa.gov.it/",
     "title": "test-artifactId",
-    "version": "0.1.0-15-fix-connection-pool"
+    "version": "0.1.0-16-fix-connection-pool"
   },
   "servers": [
     {
