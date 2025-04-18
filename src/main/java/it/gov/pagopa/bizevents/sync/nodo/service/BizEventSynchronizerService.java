@@ -60,7 +60,7 @@ public class BizEventSynchronizerService {
       boolean showEventData) {
 
     List<BizEvent> allBizEventsAnalyzed = new LinkedList<>();
-    List<BizEvent> bizEventsToSend = new LinkedList<>();
+    List<BizEvent> bizEventsToSend;
     Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents = new HashSet<>();
     boolean errorDuringComputation = false;
 
@@ -118,7 +118,6 @@ public class BizEventSynchronizerService {
     }
 
     //
-    log.info("Synchronization ended! Generating report...");
     return generateReport(
         allBizEventsAnalyzed,
         receiptsNotConvertedInBizEvents,
@@ -227,6 +226,7 @@ public class BizEventSynchronizerService {
       boolean showEventData,
       boolean errorDuringComputation) {
 
+    log.info("Synchronization ended! Generating report...");
     List<SyncReportRecord> records = new LinkedList<>();
     boolean onError = errorDuringComputation;
     for (BizEvent bizEvent : events) {
