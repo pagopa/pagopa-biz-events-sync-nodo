@@ -272,7 +272,10 @@ public class BizEventSynchronizerService {
                   rec ->
                       (receiptEvent
                                   .getIuv()
-                                  .equals(rec.getEvent().getDebtorPosition().getNoticeNumber())
+                                  .equals(
+                                      rec.getEvent() != null
+                                          ? rec.getEvent().getDebtorPosition().getNoticeNumber()
+                                          : null)
                               || receiptEvent.getIuv().equals(rec.getIuv()))
                           && receiptEvent.getDomainId().equals(rec.getDomainId())
                           && receiptEvent.getPaymentToken().equals(rec.getPaymentToken()))
