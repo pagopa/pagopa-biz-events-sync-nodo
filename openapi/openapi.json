@@ -4,7 +4,7 @@
     "description": "placeholder-description",
     "termsOfService": "https://www.pagopa.gov.it/",
     "title": "test-artifactId",
-    "version": "0.1.2"
+    "version": "0.1.3"
   },
   "servers": [
     {
