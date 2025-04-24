@@ -95,7 +95,7 @@ public class BizEventMapper {
     try {
       bizEvent =
           BizEvent.builder()
-              .id(UUID.randomUUID().toString())
+              .id(generateUniqueID())
               .version("2")
               .idPaymentManager(pp.getTransactionId())
               .receiptId(pp.getPaymentToken())
@@ -298,7 +298,7 @@ public class BizEventMapper {
 
       bizEvent =
           BizEvent.builder()
-              .id(UUID.randomUUID().toString())
+              .id(generateUniqueID())
               .version("2")
               .idPaymentManager("Y".equalsIgnoreCase(rpt.getWisp2()) ? rpt.getIdSessione() : null)
               .debtorPosition(
@@ -640,5 +640,9 @@ public class BizEventMapper {
     } catch (JsonProcessingException e) {
       log.warn("Failed to generate transaction details from PM_INFO. Skipping it.");
     }
+  }
+
+  private static String generateUniqueID() {
+    return "resync-" + UUID.randomUUID();
   }
 }

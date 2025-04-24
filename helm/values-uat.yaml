@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-biz-events-sync-nodo
-    tag: "0.1.1"
+    tag: "0.1.1-1-fix-eventhub-processing"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -108,7 +108,7 @@ microservice-chart: &microservice-chart
     CLIENT_APICONFIG_CACHE_SUBKEY: 'api-config-cache-subscription-key'
     CLIENT_ECOMMERCE_HELPDESK_SUBKEY: 'ecommerce-helpdesk-subscription-key'
     COSMOS_DB_PRIMARY_KEY: 'cosmos-u-biz-key'
-    EVENTHUB_PRODUCER_CONNECTION_STRING: 'ehub-u-biz-connection-string'
+    EVENTHUB_PRODUCER_CONNECTION_STRING: 'ehub-tx-u-biz-connection-string'
     SPRING_DATASOURCE_PASSWORD: 'nodo-oracle-db-password'
   keyvault:
     name: "pagopa-u-bizevents-kv"
