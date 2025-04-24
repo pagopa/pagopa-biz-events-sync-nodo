@@ -36,7 +36,7 @@ microservice-chart: &microservice-chart
     name: "bizevents-workload-identity"
   azure:
     workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
-  podAnnotations: {}
+  podAnnotations: { }
   podSecurityContext:
     seccompProfile:
       type: RuntimeDefault
@@ -100,8 +100,8 @@ microservice-chart: &microservice-chart
     SPRING_DATASOURCE_USERNAME: 'PAGOPA_READER'
     SPRING_JPA_DB_PLATFORM: 'org.hibernate.dialect.Oracle12cDialect'
     SYNCHRONIZATION_JOB_LOWER_BOUND_DATE_BEFORE_DAYS: '2'
-    SYNCHRONIZATION_JOB_SCHEDULE: '0 0 18 * * *'
-    SYNCHRONIZATION_JOB_SEND_TO_EVENTHUB: 'false'
+    SYNCHRONIZATION_JOB_SCHEDULE: '0 0 1 * * *'
+    SYNCHRONIZATION_JOB_SEND_TO_EVENTHUB: 'true'
     SYNCHRONIZATION_JOB_TIMESLOT_SIZE_MINUTES: '60'
   envSecret: &envSecret
     # required
@@ -114,8 +114,8 @@ microservice-chart: &microservice-chart
   keyvault:
     name: "pagopa-p-bizevents-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
-  nodeSelector: {}
-  tolerations: []
+  nodeSelector: { }
+  tolerations: [ ]
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
