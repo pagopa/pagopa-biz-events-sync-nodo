@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,9 @@ public class BizEventSynchronizerService {
                 lowerDateBound, upperDateBound);
 
         //
+        receiptsNotConvertedInBizEvents =
+            receiptsNotConvertedInBizEvents.stream().findFirst().stream()
+                .collect(Collectors.toSet());
         if (!receiptsNotConvertedInBizEvents.isEmpty()) {
 
           //
