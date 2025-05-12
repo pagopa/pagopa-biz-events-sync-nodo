@@ -17,11 +17,7 @@ import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.Transactio
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.TransactionDetails;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.subject.TransactionPsp;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.transaction.subject.User;
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionPayment;
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionPaymentPlan;
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionService;
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionSubject;
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionTransfer;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.*;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.Rpt;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RptSoggetti;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RptVersamenti;
@@ -43,13 +39,7 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import java.io.StringReader;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 import javax.xml.transform.stream.StreamSource;
 import lombok.extern.slf4j.Slf4j;
@@ -66,10 +56,7 @@ public class BizEventMapper {
       ConfigDataV1 configData) {
 
     PositionPaymentPlan ppp = pp.getPaymentPlan();
-    PositionService ps = ppp.getPositionService();
-    PositionSubject debtor = ps.getDebtor();
     PositionSubject payer = pp.getPayer();
-
     if (ppp == null) {
       String msg =
           String.format(
@@ -79,6 +66,7 @@ public class BizEventMapper {
       throw new BizEventSyncException(msg);
     }
 
+    PositionService ps = ppp.getPositionService();
     if (ps == null) {
       String msg =
           String.format(
@@ -88,6 +76,7 @@ public class BizEventMapper {
       throw new BizEventSyncException(msg);
     }
 
+    PositionSubject debtor = ps.getDebtor();
     String paFiscalCode = ps.getPaFiscalCode();
     String pspId = pp.getPspId();
 
