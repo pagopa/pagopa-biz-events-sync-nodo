@@ -42,3 +42,5 @@ hs_err_pid*
 
 *.env
 **/.DS_Store
+**/scripts/*.xml
+**/scripts/*.json
