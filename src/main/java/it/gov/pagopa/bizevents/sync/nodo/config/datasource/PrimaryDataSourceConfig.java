@@ -36,12 +36,18 @@ public class PrimaryDataSourceConfig {
       @Value("${spring.datasource.url}") String url,
       @Value("${spring.datasource.username}") String username,
       @Value("${spring.datasource.password}") String password,
-      @Value("${spring.datasource.driver-class-name}") String driverClassName) {
+      @Value("${spring.datasource.driver-class-name}") String driverClassName,
+      @Value("${spring.datasource.hikari.maxLifetime}") Long maxLifetime,
+      @Value("${spring.datasource.hikari.keepaliveTime}") Long keepaliveTime,
+      @Value("${spring.datasource.hikari.connectionTimeout}") Long connectionTimeout) {
     HikariDataSource ds = new HikariDataSource();
     ds.setJdbcUrl(url);
     ds.setUsername(username);
     ds.setPassword(password);
     ds.setDriverClassName(driverClassName);
+    ds.setMaxLifetime(maxLifetime);
+    ds.setKeepaliveTime(keepaliveTime);
+    ds.setConnectionTimeout(connectionTimeout);
     return ds;
   }
 

@@ -1,4 +1,4 @@
-package it.gov.pagopa.bizevents.sync.nodo.repository;
+package it.gov.pagopa.bizevents.sync.nodo.repository.historic;
 
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
@@ -6,14 +6,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class HealthCheckRepository {
+public class HistoricHealthCheckRepository {
 
   EntityManager entityManager;
 
-  @Value("${spring.datasource.health-check.query}")
+  @Value("${historic.datasource.health-check.query}")
   private String query;
 
-  public HealthCheckRepository(EntityManager entityManager) {
+  public HistoricHealthCheckRepository(EntityManager entityManager) {
     this.entityManager = entityManager;
   }
 

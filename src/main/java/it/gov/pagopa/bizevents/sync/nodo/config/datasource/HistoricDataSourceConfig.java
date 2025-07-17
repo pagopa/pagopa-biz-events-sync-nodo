@@ -32,12 +32,18 @@ public class HistoricDataSourceConfig {
       @Value("${historic.datasource.url}") String url,
       @Value("${historic.datasource.username}") String username,
       @Value("${historic.datasource.password}") String password,
-      @Value("${historic.datasource.driver-class-name}") String driverClassName) {
+      @Value("${historic.datasource.driver-class-name}") String driverClassName,
+      @Value("${historic.datasource.hikari.maxLifetime}") Long maxLifetime,
+      @Value("${historic.datasource.hikari.keepaliveTime}") Long keepaliveTime,
+      @Value("${historic.datasource.hikari.connectionTimeout}") Long connectionTimeout) {
     HikariDataSource ds = new HikariDataSource();
     ds.setJdbcUrl(url);
     ds.setUsername(username);
     ds.setPassword(password);
     ds.setDriverClassName(driverClassName);
+    ds.setMaxLifetime(maxLifetime);
+    ds.setKeepaliveTime(keepaliveTime);
+    ds.setConnectionTimeout(connectionTimeout);
     return ds;
   }
 

@@ -1,12 +1,8 @@
 package it.gov.pagopa.bizevents.sync.nodo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
 @Data
 @Builder(toBuilder = true)
@@ -22,5 +18,9 @@ public class AppInfo {
 
   private String environment;
 
-  private String db;
+  @JsonProperty("primary_db")
+  private String primaryDb;
+
+  @JsonProperty("historic_db")
+  private String historicDb;
 }
