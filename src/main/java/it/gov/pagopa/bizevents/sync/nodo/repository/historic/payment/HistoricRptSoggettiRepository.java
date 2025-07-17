@@ -1,4 +1,4 @@
-package it.gov.pagopa.bizevents.sync.nodo.repository.payment;
+package it.gov.pagopa.bizevents.sync.nodo.repository.historic.payment;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RptSoggetti;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RptSoggettiId;
@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface RptSoggettiRepository extends JpaRepository<RptSoggetti, RptSoggettiId> {
+public interface HistoricRptSoggettiRepository extends JpaRepository<RptSoggetti, RptSoggettiId> {
 
   @Query(
       """

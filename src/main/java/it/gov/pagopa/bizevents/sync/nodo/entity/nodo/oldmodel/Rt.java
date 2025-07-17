@@ -13,7 +13,7 @@ public class Rt {
 
   @Id
   @Column(name = "ID")
-  private long id;
+  private Long id;
 
   @Column(name = "ID_SESSIONE")
   private String idSessione;
@@ -28,7 +28,7 @@ public class Rt {
   private String iuv;
 
   @Column(name = "COD_ESITO")
-  private int codEsito;
+  private Integer codEsito;
 
   @Column(name = "ESITO")
   private String esito;
@@ -46,7 +46,7 @@ public class Rt {
   private String idRichiesta;
 
   @Column(name = "SOMMA_VERSAMENTI")
-  private long sommaVersamenti;
+  private Long sommaVersamenti;
 
   @Column(name = "INSERTED_TIMESTAMP")
   private LocalDateTime insertedTimestamp;

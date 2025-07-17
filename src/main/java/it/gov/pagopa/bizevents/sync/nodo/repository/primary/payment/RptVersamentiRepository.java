@@ -1,4 +1,4 @@
-package it.gov.pagopa.bizevents.sync.nodo.repository.payment;
+package it.gov.pagopa.bizevents.sync.nodo.repository.primary.payment;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.RptVersamenti;
 import java.util.List;

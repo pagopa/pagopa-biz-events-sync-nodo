@@ -16,7 +16,7 @@ public class Rpt {
 
   @Id
   @Column(name = "ID")
-  private long id;
+  private Long id;
 
   @Column(name = "ID_SESSIONE")
   private String idSessione;
@@ -64,19 +64,19 @@ public class Rpt {
   private String tipoVersamento;
 
   @Column(name = "NUM_VERSAMENTI")
-  private long numVersamenti;
+  private Long numVersamenti;
 
   @Column(name = "RT_SIGNATURE_CODE")
-  private long rtSignatureCode;
+  private Long rtSignatureCode;
 
   @Column(name = "SOMMA_VERSAMENTI")
-  private long sommaVersamenti;
+  private Long sommaVersamenti;
 
   @Column(name = "PARAMETRI_PROFILO_PAGAMENTO")
   private String parametriProfiloPagamento;
 
   @Column(name = "FK_CARRELLO")
-  private long fkCarrello;
+  private Long fkCarrello;
 
   @Column(name = "INSERTED_TIMESTAMP")
   private LocalDateTime insertedTimestamp;
