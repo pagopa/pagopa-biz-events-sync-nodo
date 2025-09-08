@@ -1,11 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -67,9 +62,6 @@ public class PositionTransfer {
 
   @Column(name = "REQ_PROVINCIA_RESIDENZA", length = 2)
   private String reqProvinciaResidenza;
-
-  @Column(name = "COMPANY_NAME_SECONDARY")
-  private String companyNameSecondary;
 
   @Column(name = "INSERTED_BY")
   private String insertedBy;

@@ -10,6 +10,7 @@ import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReport;
 import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReportRecord;
 import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReportTimeSlot;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,9 @@ public class BizEventSynchronizerService {
   @Value("${synchronization-process.time-slot.size.minutes}")
   private int defaultSlotSizeInMinutes;
 
+  @Value("${historic.historicization-after.days}")
+  private int historicizationAfterInDays;
+
   @Autowired
   public BizEventSynchronizerService(
       BizEventsReaderService bizEventsReaderService,
@@ -49,6 +53,53 @@ public class BizEventSynchronizerService {
     this.eventHubSenderService = eventHubSenderService;
   }
 
+  public SyncReport executeSynchronizationForSingleReceipt(
+      @NotNull LocalDateTime lowerLimitDate,
+      @NotNull LocalDateTime upperLimitDate,
+      String domainId,
+      String noticeNumber) {
+
+    List<BizEvent> allBizEventsAnalyzed = new LinkedList<>();
+    Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents = new HashSet<>();
+    boolean errorDuringComputation = false;
+
+    boolean isBizEventMissing =
+        bizEventsReaderService.checkIfMissingBizEvent(
+            lowerLimitDate, upperLimitDate, domainId, noticeNumber);
+    if (isBizEventMissing) {
+      try {
+
+        // Retrieve receipts from Nodo's DB that are not converted in BizEvents
+        receiptsNotConvertedInBizEvents =
+            this.bizEventsReaderService.retrieveSingleReceiptNotConvertedInBizEvents(
+                lowerLimitDate, upperLimitDate, domainId, noticeNumber);
+
+        // If there are receipts not converted in biz events, call conversion method
+        if (!receiptsNotConvertedInBizEvents.isEmpty()) {
+          generateNewBizEventsFromReceipts(
+              lowerLimitDate,
+              upperLimitDate,
+              receiptsNotConvertedInBizEvents,
+              allBizEventsAnalyzed);
+        }
+
+      } catch (BizEventSyncException e) {
+        log.error(e.getCustomMessage(), e);
+        errorDuringComputation = true;
+      }
+    }
+
+    // Generate final report
+    return generateReport(
+        allBizEventsAnalyzed,
+        receiptsNotConvertedInBizEvents,
+        lowerLimitDate,
+        upperLimitDate,
+        mustSendEventToEvent,
+        true,
+        errorDuringComputation);
+  }
+
   public SyncReport executeSynchronization(
       LocalDateTime lowerLimitDate,
       LocalDateTime upperLimitDate,
@@ -56,7 +107,6 @@ public class BizEventSynchronizerService {
       boolean showEventData) {
 
     List<BizEvent> allBizEventsAnalyzed = new LinkedList<>();
-    List<BizEvent> bizEventsToSend;
     Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents = new HashSet<>();
     boolean errorDuringComputation = false;
 
@@ -81,30 +131,13 @@ public class BizEventSynchronizerService {
             this.bizEventsReaderService.retrieveReceiptsNotConvertedInBizEvents(
                 lowerDateBound, upperDateBound);
 
-        //
+        // If there are receipts not converted in biz events, call conversion method
         if (!receiptsNotConvertedInBizEvents.isEmpty()) {
-
-          //
-          log.error(
-              "[BIZ-EVENTS-SYNC-NODO] Found [{}] payments from NdP not converted as BizEvents in"
-                  + " time slot [{} - {}].",
-              receiptsNotConvertedInBizEvents.size(),
+          generateNewBizEventsFromReceipts(
               lowerDateBound,
-              upperDateBound);
-
-          //
-          bizEventsToSend = generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
-          allBizEventsAnalyzed.addAll(bizEventsToSend);
-
-          //
-          if (mustSendEventToEvent) {
-            log.info("Sending [{}] BizEvents to the EventHub...", bizEventsToSend.size());
-            this.eventHubSenderService.sendBizEventsToEventHub(bizEventsToSend);
-          } else {
-            log.info(
-                "Skipped sending BizEvents to the EventHub because the 'send-to-eventhub' flag is"
-                    + " false!");
-          }
+              upperDateBound,
+              receiptsNotConvertedInBizEvents,
+              allBizEventsAnalyzed);
         }
 
       } catch (BizEventSyncException e) {
@@ -113,7 +146,7 @@ public class BizEventSynchronizerService {
       }
     }
 
-    //
+    // Generate final report
     return generateReport(
         allBizEventsAnalyzed,
         receiptsNotConvertedInBizEvents,
@@ -122,6 +155,35 @@ public class BizEventSynchronizerService {
         mustSendEventToEvent,
         showEventData,
         errorDuringComputation);
+  }
+
+  private void generateNewBizEventsFromReceipts(
+      LocalDateTime lowerDateBound,
+      LocalDateTime upperDateBound,
+      Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents,
+      List<BizEvent> allBizEventsAnalyzed) {
+
+    log.error(
+        "[BIZ-EVENTS-SYNC-NODO] Found [{}] payments from NdP not converted as BizEvents in"
+            + " time slot [{} - {}].",
+        receiptsNotConvertedInBizEvents.size(),
+        lowerDateBound,
+        upperDateBound);
+
+    // Generate the BizEvents from receipts retrieved from Nodo's DB
+    List<BizEvent> bizEventsToSend =
+        generateBizEventsFromNodoReceipts(receiptsNotConvertedInBizEvents);
+    allBizEventsAnalyzed.addAll(bizEventsToSend);
+
+    // Send events to EventHub, but only if feature flag is active
+    if (mustSendEventToEvent) {
+      log.info("Sending [{}] BizEvents to the EventHub...", bizEventsToSend.size());
+      this.eventHubSenderService.sendBizEventsToEventHub(bizEventsToSend);
+    } else {
+      log.info(
+          "Skipped sending BizEvents to the EventHub because the 'send-to-eventhub' flag is"
+              + " false!");
+    }
   }
 
   private List<Pair<LocalDateTime, LocalDateTime>> getTimeSlotThatRequireSynchronization(
@@ -177,20 +239,28 @@ public class BizEventSynchronizerService {
     List<BizEvent> newlyGeneratedBizEvents = new LinkedList<>();
     for (ReceiptEventInfo receiptEvent : receiptsNotConvertedInBizEvents) {
 
+      LocalDateTime insertedTimestamp = receiptEvent.getInsertedTimestamp();
+      boolean isHistoricized =
+          LocalDateTime.now().minusDays(historicizationAfterInDays).isAfter(insertedTimestamp);
+
       try {
 
         BizEvent convertedBizEvent;
         if (PaymentModelVersion.OLD.equals(receiptEvent.getVersion())) {
 
-          //
           convertedBizEvent =
-              this.paymentPositionReaderService.readOldModelPaymentPosition(receiptEvent);
+              isHistoricized
+                  ? this.paymentPositionReaderService.readOldModelPaymentPositionFromHistoric(
+                      receiptEvent)
+                  : this.paymentPositionReaderService.readOldModelPaymentPosition(receiptEvent);
 
         } else {
 
-          //
           convertedBizEvent =
-              this.paymentPositionReaderService.readNewModelPaymentPosition(receiptEvent);
+              isHistoricized
+                  ? this.paymentPositionReaderService.readNewModelPaymentPositionFromHistoric(
+                      receiptEvent)
+                  : this.paymentPositionReaderService.readNewModelPaymentPosition(receiptEvent);
         }
 
         //

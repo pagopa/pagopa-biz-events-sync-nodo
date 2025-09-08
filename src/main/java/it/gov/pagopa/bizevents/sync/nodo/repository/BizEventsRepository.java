@@ -30,6 +30,27 @@ public interface BizEventsRepository extends CosmosRepository<BizEvent, String> 
 
   @Query(
       """
+      SELECT
+        c.debtorPosition.noticeNumber != null ?
+          c.debtorPosition.noticeNumber :
+          c.debtorPosition.iuv as iuv,
+        c.paymentInfo.paymentToken as paymentToken,
+        c.creditor.idPA as domainId,
+        StringToNumber(c.debtorPosition.modelType) = 1 ? "OLD" : "NEW" as version
+      FROM c
+      WHERE c.paymentInfo.paymentDateTime >= @minDate
+        AND c.paymentInfo.paymentDateTime < @maxDate
+        AND c.creditor.idPA = @domainId
+        AND c.debtorPosition.noticeNumber = @noticeNumber
+      """)
+  Set<Map<String, Object>> readBizEventsByDomainAndNoticeNumber(
+      @Param("minDate") String minDate,
+      @Param("maxDate") String maxDate,
+      @Param("domainId") String domainId,
+      @Param("noticeNumber") String noticeNumber);
+
+  @Query(
+      """
       SELECT VALUE COUNT(e)
       FROM e
       WHERE e.paymentInfo.paymentDateTime >= @minDate
