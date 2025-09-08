@@ -2,6 +2,7 @@ package it.gov.pagopa.bizevents.sync.nodo.repository.primary.receipt;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionReceipt;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,11 +21,14 @@ public interface PositionReceiptRepository extends JpaRepository<PositionReceipt
           it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion.NEW AS version
       )
       FROM PositionReceipt pr
-      WHERE pr.paymentDateTime >= :minDate
-        AND pr.paymentDateTime < :maxDate
+      WHERE (pr.insertedTimestamp >= :minDate AND pr.insertedTimestamp < :maxDate)
+        AND (pr.paymentDateTime >= :minDateTime AND pr.paymentDateTime < :maxDateTime)
       """)
   Set<ReceiptEventInfo> readReceiptsInTimeSlot(
-      @Param("minDate") LocalDateTime minDate, @Param("maxDate") LocalDateTime maxDate);
+      @Param("minDate") LocalDate minDate,
+      @Param("maxDate") LocalDate maxDate,
+      @Param("minDateTime") LocalDateTime minDateTime,
+      @Param("maxDateTime") LocalDateTime maxDateTime);
 
   @Query(
       """
@@ -51,9 +55,12 @@ public interface PositionReceiptRepository extends JpaRepository<PositionReceipt
       """
       SELECT COUNT(pr)
       FROM PositionReceipt pr
-      WHERE pr.paymentDateTime >= :minDate
-        AND pr.paymentDateTime < :maxDate
+      WHERE (pr.insertedTimestamp >= :minDate AND pr.insertedTimestamp < :maxDate)
+        AND (pr.paymentDateTime >= :minDateTime AND pr.paymentDateTime < :minDateTime)
       """)
   long countByTimeSlot(
-      @Param("minDate") LocalDateTime minDate, @Param("maxDate") LocalDateTime maxDate);
+      @Param("minDate") LocalDate minDate,
+      @Param("maxDate") LocalDate maxDate,
+      @Param("minDateTime") LocalDateTime minDateTime,
+      @Param("maxDateTime") LocalDateTime maxDateTime);
 }

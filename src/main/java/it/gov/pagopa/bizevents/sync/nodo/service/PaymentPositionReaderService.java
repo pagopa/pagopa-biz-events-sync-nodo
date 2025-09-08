@@ -14,6 +14,7 @@ import it.gov.pagopa.bizevents.sync.nodo.repository.historic.payment.*;
 import it.gov.pagopa.bizevents.sync.nodo.repository.historic.receipt.HistoricRtRepository;
 import it.gov.pagopa.bizevents.sync.nodo.repository.primary.payment.*;
 import it.gov.pagopa.bizevents.sync.nodo.repository.primary.receipt.RtRepository;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -109,7 +110,7 @@ public class PaymentPositionReaderService {
       if ("v2".equalsIgnoreCase(positionPayment.getCloseVersion())) {
         totalNotices =
             this.paymentPositionRepository.countPositionPaymentsByTransactionId(
-                positionPayment.getTransactionId());
+                minDate, maxDate, positionPayment.getTransactionId());
       }
 
       List<PositionTransfer> positionTransfers =
@@ -144,9 +145,12 @@ public class PaymentPositionReaderService {
     String domainId = receiptEvent.getDomainId();
     String iuv = receiptEvent.getIuv();
     String ccp = receiptEvent.getPaymentToken();
+    LocalDate lowerBound = receiptEvent.getInsertedTimestamp().toLocalDate();
+    LocalDate upperBound = lowerBound.plusDays(1);
 
     try {
-      Optional<Rpt> rptOpt = this.rptRepository.readByUniqueIdentifier(domainId, iuv, ccp);
+      Optional<Rpt> rptOpt =
+          this.rptRepository.readByUniqueIdentifier(lowerBound, upperBound, domainId, iuv, ccp);
       if (rptOpt.isEmpty()) {
         String msg =
             String.format(
@@ -156,7 +160,8 @@ public class PaymentPositionReaderService {
       }
       Rpt rpt = rptOpt.get();
 
-      Optional<Rt> rtOpt = this.rtRepository.readByUniqueIdentifier(domainId, iuv, ccp);
+      Optional<Rt> rtOpt =
+          this.rtRepository.readByUniqueIdentifier(lowerBound, upperBound, domainId, iuv, ccp);
       if (rtOpt.isEmpty()) {
         String msg =
             String.format(
@@ -212,7 +217,7 @@ public class PaymentPositionReaderService {
       if ("v2".equalsIgnoreCase(positionPayment.getCloseVersion())) {
         totalNotices =
             this.historicPaymentPositionRepository.countPositionPaymentsByTransactionId(
-                positionPayment.getTransactionId());
+                minDate, maxDate, positionPayment.getTransactionId());
       }
 
       List<PositionTransfer> positionTransfers =
@@ -248,9 +253,13 @@ public class PaymentPositionReaderService {
     String domainId = receiptEvent.getDomainId();
     String iuv = receiptEvent.getIuv();
     String ccp = receiptEvent.getPaymentToken();
+    LocalDate lowerBound = receiptEvent.getInsertedTimestamp().toLocalDate();
+    LocalDate upperBound = lowerBound.plusDays(1);
 
     try {
-      Optional<Rpt> rptOpt = this.historicRptRepository.readByUniqueIdentifier(domainId, iuv, ccp);
+      Optional<Rpt> rptOpt =
+          this.historicRptRepository.readByUniqueIdentifier(
+              lowerBound, upperBound, domainId, iuv, ccp);
       if (rptOpt.isEmpty()) {
         String msg =
             String.format(
@@ -260,7 +269,9 @@ public class PaymentPositionReaderService {
       }
       Rpt rpt = rptOpt.get();
 
-      Optional<Rt> rtOpt = this.historicRtRepository.readByUniqueIdentifier(domainId, iuv, ccp);
+      Optional<Rt> rtOpt =
+          this.historicRtRepository.readByUniqueIdentifier(
+              lowerBound, upperBound, domainId, iuv, ccp);
       if (rtOpt.isEmpty()) {
         String msg =
             String.format(

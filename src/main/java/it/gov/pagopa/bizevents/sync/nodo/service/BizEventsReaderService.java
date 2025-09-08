@@ -81,12 +81,20 @@ public class BizEventsReaderService {
     // Retrieve the count of receipts generated on the first occurrence for old payment models for
     // the time slot passed
     long numberOfFirstPayOldModelReceipts =
-        this.rtRepository.countFirstRPTsByTimeSlot(lowerBoundDate, upperBoundDate);
+        this.rtRepository.countFirstRPTsByTimeSlot(
+            lowerBoundDate.toLocalDate(),
+            upperBoundDate.toLocalDate(),
+            lowerBoundDate,
+            upperBoundDate);
 
     // Retrieve the count of receipts generated on the retried occurrence for old payment models for
     // the time slot passed
     long numberOfRetriedOldModelReceipts =
-        this.rtRepository.countRetriedRPTsByTimeSlot(lowerBoundDate, upperBoundDate);
+        this.rtRepository.countRetriedRPTsByTimeSlot(
+            lowerBoundDate.toLocalDate(),
+            upperBoundDate.toLocalDate(),
+            lowerBoundDate,
+            upperBoundDate);
 
     // Calculate the count of receipts useful for old payment models for the time slot passed
     long numberOfOldModelReceipts =
@@ -99,7 +107,11 @@ public class BizEventsReaderService {
 
     // Retrieve the count of receipts generated for new payment models for the time slot passed
     long numberOfNewModelReceipts =
-        this.positionReceiptRepository.countByTimeSlot(lowerBoundDate, upperBoundDate);
+        this.positionReceiptRepository.countByTimeSlot(
+            lowerBoundDate.toLocalDate(),
+            upperBoundDate.toLocalDate(),
+            lowerBoundDate,
+            upperBoundDate);
     log.info(
         "Found [{}] receipts for new model in time slot [{} - {}]",
         numberOfNewModelReceipts,
@@ -134,10 +146,18 @@ public class BizEventsReaderService {
 
       //
       Set<ReceiptEventInfo> newModelReceipts =
-          this.positionReceiptRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate);
+          this.positionReceiptRepository.readReceiptsInTimeSlot(
+              lowerBoundDate.toLocalDate(),
+              upperBoundDate.toLocalDate(),
+              lowerBoundDate,
+              upperBoundDate);
       log.info("Found [{}] new model receipts in analyzed time slot...", newModelReceipts.size());
       Set<ReceiptEventInfo> oldModelReceipts =
-          this.rtRepository.readReceiptsInTimeSlot(lowerBoundDate, upperBoundDate);
+          this.rtRepository.readReceiptsInTimeSlot(
+              lowerBoundDate.toLocalDate(),
+              upperBoundDate.toLocalDate(),
+              lowerBoundDate,
+              upperBoundDate);
       log.info("Found [{}] old model receipts in analyzed time slot...", oldModelReceipts.size());
 
       //

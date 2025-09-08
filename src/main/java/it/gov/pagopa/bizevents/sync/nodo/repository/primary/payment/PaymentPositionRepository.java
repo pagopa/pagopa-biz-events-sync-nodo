@@ -13,8 +13,7 @@ public interface PaymentPositionRepository extends JpaRepository<PositionPayment
       """
       SELECT pp
       FROM PositionPayment pp
-      WHERE pp.insertedTimestamp >= :minDate
-        AND pp.insertedTimestamp < :maxDate
+      WHERE (pp.insertedTimestamp >= :minDate AND pp.insertedTimestamp < :maxDate)
         AND pp.paymentToken = :paymentToken
       """)
   Optional<PositionPayment> readByPaymentTokenInTimeSlot(
@@ -26,7 +25,11 @@ public interface PaymentPositionRepository extends JpaRepository<PositionPayment
       """
       SELECT COUNT(pp)
       FROM PositionPayment pp
-      WHERE pp.transactionId = :transactionId
+      WHERE (pp.insertedTimestamp >= :minDate AND pp.insertedTimestamp < :maxDate)
+        AND pp.transactionId = :transactionId
       """)
-  Long countPositionPaymentsByTransactionId(@Param("transactionId") String transactionId);
+  Long countPositionPaymentsByTransactionId(
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
+      @Param("transactionId") String transactionId);
 }

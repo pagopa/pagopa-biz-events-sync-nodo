@@ -2,6 +2,7 @@ package it.gov.pagopa.bizevents.sync.nodo.repository.historic.receipt;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.Rt;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
@@ -41,10 +42,15 @@ public interface HistoricRtRepository extends JpaRepository<Rt, Long> {
       """
       SELECT rt
       FROM Rt rt
-      WHERE rt.identDominio = :domainId
+      WHERE (rt.insertedTimestamp >= :minDate AND rt.insertedTimestamp < :maxDate)
+        AND rt.identDominio = :domainId
         AND rt.iuv = :iuv
         AND rt.ccp = :ccp
       """)
   Optional<Rt> readByUniqueIdentifier(
-      @Param("domainId") String domainId, @Param("iuv") String iuv, @Param("ccp") String ccp);
+      @Param("minDate") LocalDate minDate,
+      @Param("maxDate") LocalDate maxDate,
+      @Param("domainId") String domainId,
+      @Param("iuv") String iuv,
+      @Param("ccp") String ccp);
 }
