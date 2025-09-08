@@ -4,9 +4,7 @@ resource "github_repository_environment" "github_repository_environment" {
   # filter teams reviewers from github_organization_teams
   # if reviewers_teams is null no reviewers will be configured for environment
   dynamic "reviewers" {
-    for_each = (var.github_repository_environment.reviewers_teams == null || var.env_short != "p" ? [] : [
-      1
-    ])
+    for_each = (var.github_repository_environment.reviewers_teams == null || var.env_short != "p" ? [] : [1])
     content {
       teams = matchkeys(
         data.github_organization_teams.all.teams.*.id,
@@ -23,7 +21,7 @@ resource "github_repository_environment" "github_repository_environment" {
 
 locals {
   env_secrets = {
-    "CLIENT_ID" : data.azurerm_user_assigned_identity.identity_cd_01.client_id,
+    "CD_CLIENT_ID" : data.azurerm_user_assigned_identity.identity_cd.client_id,
     "TENANT_ID" : data.azurerm_client_config.current.tenant_id,
     "SUBSCRIPTION_ID" : data.azurerm_subscription.current.subscription_id,
     "SUBKEY" : data.azurerm_key_vault_secret.key_vault_integration_test_subkey.value,
@@ -40,6 +38,7 @@ locals {
     "SONAR_TOKEN" : data.azurerm_key_vault_secret.key_vault_sonar.value,
     "BOT_TOKEN_GITHUB" : data.azurerm_key_vault_secret.key_vault_bot_token.value,
     "CUCUMBER_PUBLISH_TOKEN" : data.azurerm_key_vault_secret.key_vault_cucumber_token.value,
+    "SLACK_WEBHOOK_URL_DEPLOY": data.azurerm_key_vault_secret.key_vault_deploy_slack_webhook.value
   }
   special_repo_secrets = {
   }
@@ -60,7 +59,6 @@ resource "github_actions_environment_secret" "github_environment_runner_secrets"
 #################
 # ENV Variables #
 #################
-
 
 resource "github_actions_environment_variable" "github_environment_runner_variables" {
   for_each      = local.env_variables
