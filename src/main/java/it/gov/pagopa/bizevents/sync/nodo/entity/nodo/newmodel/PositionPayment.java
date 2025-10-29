@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.sql.Blob;
+import java.sql.Types;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
 
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -127,6 +130,7 @@ public class PositionPayment {
 
   @Lob
   @Basic(fetch = LAZY)
+  @JdbcTypeCode(Types.BINARY)
   @Column(name = "PM_INFO")
   private Blob pmInfo;
 
