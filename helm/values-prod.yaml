@@ -98,6 +98,8 @@ microservice-chart: &microservice-chart
     SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT: '60000'
     SPRING_DATASOURCE_HIKARI_KEEPALIVETIME: '30000'
     SPRING_DATASOURCE_HIKARI_MAXLIFETIME: '1800000'
+    SPRING_DATASOURCE_LOGGING_LEVEL_SQL: 'OFF'
+    SPRING_DATASOURCE_LOGGING_LEVEL_SQL_QUERY: 'OFF'
     SPRING_DATASOURCE_URL: "jdbc:postgresql://db-postgres-ndp.p.db-nodo-pagamenti.com:6433/ndparehp_ro?prepareThreshold=0&currentSchema=NODO4_ONLINE"
     SPRING_DATASOURCE_USERNAME: 'biz_pagopa_sv'
     SPRING_JPA_DB_PLATFORM: 'org.hibernate.dialect.PostgreSQLDialect'
