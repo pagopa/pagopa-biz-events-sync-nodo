@@ -39,6 +39,7 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Supplier;
@@ -622,10 +623,13 @@ public class BizEventMapper {
 
   private static void generateTransactionDetailFromPMInfo(PositionPayment pp, BizEvent bizEvent) {
     try {
-      String pmInfo = CommonUtility.convertBlob(pp.getPmInfo().getBytes(1, (int) pp.getPmInfo().length()));
-      if (pmInfo != null) {
-        bizEvent.setTransactionDetails(
-            new ObjectMapper().readValue(pmInfo, TransactionDetails.class));
+      Blob rawBlob = pp.getPmInfo();
+      if (rawBlob != null) {
+          String pmInfo = CommonUtility.convertBlob(rawBlob.getBytes(1, (int) rawBlob.length()));
+          if (pmInfo != null) {
+              bizEvent.setTransactionDetails(
+                      new ObjectMapper().readValue(pmInfo, TransactionDetails.class));
+          }
       }
     } catch (JsonProcessingException | SQLException e) {
       log.warn("Failed to generate transaction details from PM_INFO. Skipping it.", e);
