@@ -22,7 +22,7 @@
         <postgresql-version>42.5.5</postgresql-version>
     </properties>
 
-    <version>0.1.4-4-PAGOPA-3170</version>
+    <version>0.1.4-5-PAGOPA-3170</version>
 
     <dependencies>
         <dependency>
