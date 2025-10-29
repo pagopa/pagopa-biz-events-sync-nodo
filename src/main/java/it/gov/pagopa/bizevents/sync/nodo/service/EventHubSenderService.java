@@ -22,10 +22,14 @@ public class EventHubSenderService {
 
   private final EventHubProducerClient eventHubProducerClient;
 
+  private final String serviceIdentifier;
+
   public EventHubSenderService(
       @Value("${azure.event-hub.connection-string}") String eventHubConnectionString,
-      @Value("${azure.event-hub.producer.name}") String eventHubTopicName) {
+      @Value("${azure.event-hub.producer.name}") String eventHubTopicName,
+      @Value("${synchronization-process.service-identifier}") String serviceIdentifier) {
 
+    this.serviceIdentifier = serviceIdentifier;
     this.eventHubProducerClient =
         new EventHubClientBuilder()
             .connectionString(eventHubConnectionString, eventHubTopicName)
@@ -57,7 +61,7 @@ public class EventHubSenderService {
                     .getProperties()
                     .put(
                         Constants.REGEN_SERVICE_IDENTIFIER_KEY,
-                        Constants.REGEN_SERVICE_IDENTIFIER_VALUE));
+                        this.serviceIdentifier));
 
         //
         EventDataBatch evhEventBatch = this.eventHubProducerClient.createBatch();

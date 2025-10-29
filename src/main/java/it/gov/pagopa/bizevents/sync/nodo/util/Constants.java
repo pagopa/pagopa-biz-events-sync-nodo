@@ -30,8 +30,6 @@ public class Constants {
 
   public static final String REGEN_SERVICE_IDENTIFIER_KEY = "serviceIdentifier";
 
-  public static final Object REGEN_SERVICE_IDENTIFIER_VALUE = "NDP003PROD_R";
-
   public static final JAXBContext RT_JAXB_CONTEXT;
 
   static {
