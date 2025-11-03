@@ -4,7 +4,7 @@
     "description": "placeholder-description",
     "termsOfService": "https://www.pagopa.gov.it/",
     "title": "test-artifactId",
-    "version": "0.1.4-2-PIDM-811-api-proposal"
+    "version": "0.1.5"
   },
   "servers": [
     {

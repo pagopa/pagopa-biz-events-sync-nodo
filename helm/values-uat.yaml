@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-biz-events-sync-nodo
-    tag: "0.1.4-2-PIDM-811-api-proposal"
+    tag: "0.1.5"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -22,6 +22,12 @@ microservice-chart: &microservice-chart
     periodSeconds: 10
   deployment:
     create: true
+    replicas: 1
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxUnavailable: 0
+        maxSurge: 1
   service:
     create: true
     type: ClusterIP
@@ -92,14 +98,17 @@ microservice-chart: &microservice-chart
     JAVA_OPTS: >-
       -Duser.timezone=GMT
     OTEL_SERVICE_NAME: 'pagopa-bizevents-sync-nodo'
-    SPRING_DATASOURCE_DRIVER: 'oracle.jdbc.OracleDriver'
-    SPRING_DATASOURCE_HEALTHCHECK_QUERY: 'SELECT 1 FROM DUAL'
-    SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT: '15000'
-    SPRING_DATASOURCE_HIKARI_KEEPALIVETIME: '20000'
-    SPRING_DATASOURCE_HIKARI_MAXLIFETIME: '30000'
-    SPRING_DATASOURCE_URL: "jdbc:oracle:thin:@(DESCRIPTION=(ENABLE=BROKEN)(ADDRESS=(PROTOCOL=tcp)(PORT=1521)(HOST=db-nodo-pagamenti.u.db-nodo-pagamenti.com))(CONNECT_DATA=(SERVICE_NAME=PAGOPA_READ))(SO_KEEPALIVE=true)(TCP_KEEPIDLE=60)(TCP_KEEPINTVL=30)(TCP_KEEPCNT=15))"
-    SPRING_DATASOURCE_USERNAME: 'PAGOPA_READER'
-    SPRING_JPA_DB_PLATFORM: 'org.hibernate.dialect.Oracle12cDialect'
+    SERVICE_IDENTIFIER: 'NDP004UAT_R'
+    SPRING_DATASOURCE_DRIVER: "org.postgresql.Driver"
+    SPRING_DATASOURCE_HEALTHCHECK_QUERY: 'SELECT 1'
+    SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT: '60000'
+    SPRING_DATASOURCE_HIKARI_KEEPALIVETIME: '30000'
+    SPRING_DATASOURCE_HIKARI_MAXLIFETIME: '1800000'
+    SPRING_DATASOURCE_LOGGING_LEVEL_SQL: 'DEBUG'
+    SPRING_DATASOURCE_LOGGING_LEVEL_SQL_QUERY: 'TRACE'
+    SPRING_DATASOURCE_URL: "jdbc:postgresql://db-postgres-ndp-prf.u.db-nodo-pagamenti.com:6432/ndpspcq_ro?prepareThreshold=0&currentSchema=NODO4_ONLINE"
+    SPRING_DATASOURCE_USERNAME: 'biz_pagopa_sv'
+    SPRING_JPA_DB_PLATFORM: 'org.hibernate.dialect.PostgreSQLDialect'
     HISTORIC_DATASOURCE_DRIVER: 'oracle.jdbc.OracleDriver'
     HISTORIC_DATASOURCE_HEALTHCHECK_QUERY: 'SELECT 1 FROM DUAL'
     HISTORIC_DATASOURCE_HIKARI_CONNECTIONTIMEOUT: '15000'
@@ -118,7 +127,7 @@ microservice-chart: &microservice-chart
     CLIENT_ECOMMERCE_HELPDESK_SUBKEY: 'ecommerce-helpdesk-subscription-key'
     COSMOS_DB_PRIMARY_KEY: 'cosmos-u-biz-key'
     EVENTHUB_PRODUCER_CONNECTION_STRING: 'ehub-tx-u-biz-connection-string'
-    SPRING_DATASOURCE_PASSWORD: 'nodo-oracle-db-password'
+    SPRING_DATASOURCE_PASSWORD: 'db-postgres-nexi-password'
     HISTORIC_DATASOURCE_PASSWORD: 'nodo-oracle-db-password'
   keyvault:
     name: "pagopa-u-bizevents-kv"

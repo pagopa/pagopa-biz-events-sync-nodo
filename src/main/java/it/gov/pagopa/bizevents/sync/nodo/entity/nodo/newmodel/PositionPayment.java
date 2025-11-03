@@ -1,16 +1,17 @@
 package it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Types;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
+
+import static jakarta.persistence.FetchType.LAZY;
 
 @Getter
 @Setter
@@ -128,8 +129,10 @@ public class PositionPayment {
   private String bundlePaId;
 
   @Lob
+  @Basic(fetch = LAZY)
+  @JdbcTypeCode(Types.BINARY)
   @Column(name = "PM_INFO")
-  private byte[] pmInfo;
+  private Blob pmInfo;
 
   @Column(name = "MBD")
   private String mbd;
