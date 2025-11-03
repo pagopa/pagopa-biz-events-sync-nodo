@@ -250,7 +250,7 @@ public class BizEventMapper {
       throw new BizEventSyncException(msg);
     }
 
-    CtRicevutaTelematica decodedRT = extractRT(rt.getRtXml().getXmlContent());
+    CtRicevutaTelematica decodedRT = extractRT(CommonUtility.convertBlob(rt.getRtXml().getXmlContent()));
     List<CtDatiSingoloPagamentoRT> datiSingoloPagamento = new ArrayList<>();
     if (decodedRT != null) {
       datiSingoloPagamento = decodedRT.getDatiPagamento().getDatiSingoloPagamento();
@@ -625,13 +625,13 @@ public class BizEventMapper {
     try {
       Blob rawBlob = pp.getPmInfo();
       if (rawBlob != null) {
-          String pmInfo = CommonUtility.convertBlob(rawBlob.getBytes(1, (int) rawBlob.length()));
+          String pmInfo = CommonUtility.convertBlob(rawBlob);
           if (pmInfo != null) {
               bizEvent.setTransactionDetails(
                       new ObjectMapper().readValue(pmInfo, TransactionDetails.class));
           }
       }
-    } catch (JsonProcessingException | SQLException e) {
+    } catch (JsonProcessingException e) {
       log.warn("Failed to generate transaction details from PM_INFO. Skipping it.", e);
     }
   }

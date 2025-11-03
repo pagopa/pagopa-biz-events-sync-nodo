@@ -2,12 +2,16 @@ package it.gov.pagopa.bizevents.sync.nodo.util;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
+
+import it.gov.pagopa.bizevents.sync.nodo.exception.BizEventSyncException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -88,10 +92,16 @@ public class CommonUtility {
     return Calendar.getInstance().getTimeInMillis() - startTime;
   }
 
-  public static String convertBlob(byte[] blobContent) {
+  public static String convertBlob(Blob blobContent) {
     String convertedBlob = null;
-    if (blobContent != null && blobContent.length > 0) {
-      convertedBlob = new String(blobContent, StandardCharsets.UTF_8);
+    try {
+        if (blobContent != null) {
+            byte[] rawBlobContent = blobContent.getBytes(1, (int) blobContent.length());
+            convertedBlob = new String(rawBlobContent, StandardCharsets.UTF_8);
+        }
+    } catch (SQLException e) {
+        String msg = String.format("Impossible to convert blob [%s]", blobContent);
+        throw new BizEventSyncException(msg);
     }
     return convertedBlob;
   }
