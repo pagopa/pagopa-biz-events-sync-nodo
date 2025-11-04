@@ -49,8 +49,8 @@ public class HistoricDataSourceConfig {
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
       EntityManagerFactoryBuilder builder,
       @Qualifier("historicDataSource") DataSource dataSource,
-      @Value("${spring.datasource.dialect}") String dialect,
-      @Value("${spring.datasource.default_schema}") String defaultSchema) {
+      @Value("${historic.datasource.dialect}") String dialect,
+      @Value("${historic.datasource.default_schema}") String defaultSchema) {
 
     Map<String, Object> jpaProperties = new HashMap<>();
     jpaProperties.put("hibernate.dialect", dialect);
