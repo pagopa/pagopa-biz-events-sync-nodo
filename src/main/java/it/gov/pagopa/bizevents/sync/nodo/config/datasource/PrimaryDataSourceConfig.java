@@ -15,6 +15,9 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
@@ -28,10 +31,6 @@ public class PrimaryDataSourceConfig {
 
   @Bean(name = "primaryDataSource")
   @Primary
-  // @ConfigurationProperties("spring.datasource")
-  /*public HikariDataSource dataSource() {
-      return new HikariDataSource();
-  }*/
   public DataSource dataSource(
       @Value("${spring.datasource.url}") String url,
       @Value("${spring.datasource.username}") String username,
@@ -54,13 +53,24 @@ public class PrimaryDataSourceConfig {
   @Bean(name = "primaryEntityManagerFactory")
   @Primary
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-      EntityManagerFactoryBuilder builder, @Qualifier("primaryDataSource") DataSource dataSource) {
+      EntityManagerFactoryBuilder builder,
+      @Qualifier("primaryDataSource") DataSource dataSource,
+      @Value("${spring.datasource.dialect}") String dialect,
+      @Value("${spring.datasource.default_schema}") String defaultSchema) {
+
+    Map<String, Object> jpaProperties = new HashMap<>();
+    jpaProperties.put("hibernate.dialect", dialect);
+    jpaProperties.put("hibernate.hbm2ddl.auto", "none");
+    jpaProperties.put("hibernate.jdbc.lob.non_contextual_creation", true);
+    jpaProperties.put("hibernate.default_schema", defaultSchema);
+    jpaProperties.put("hibernate.id.new_generator_mappings", false);
     return builder
         .dataSource(dataSource)
         .packages(
             "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
             "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel")
         .persistenceUnit("primary")
+        .properties(jpaProperties)
         .build();
   }
 
