@@ -50,9 +50,7 @@ public class HistoricDataSourceConfig {
   @Bean(name = "historicEntityManagerFactory")
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
       EntityManagerFactoryBuilder builder,
-      @Qualifier("historicDataSource") DataSource dataSource,
-      @Value("${historic.datasource.dialect}") String dialect,
-      @Value("${historic.datasource.default_schema}") String defaultSchema) {
+      @Qualifier("historicDataSource") DataSource dataSource) {
 
     return builder
         .dataSource(dataSource)
