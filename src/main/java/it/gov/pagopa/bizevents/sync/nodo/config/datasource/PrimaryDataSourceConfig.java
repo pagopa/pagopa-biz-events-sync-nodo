@@ -35,6 +35,7 @@ public class PrimaryDataSourceConfig {
       @Value("${spring.datasource.url}") String url,
       @Value("${spring.datasource.username}") String username,
       @Value("${spring.datasource.password}") String password,
+      @Value("${spring.datasource.schema}") String schema,
       @Value("${spring.datasource.driver-class-name}") String driverClassName,
       @Value("${spring.datasource.hikari.maxLifetime}") Long maxLifetime,
       @Value("${spring.datasource.hikari.keepaliveTime}") Long keepaliveTime,
@@ -47,6 +48,7 @@ public class PrimaryDataSourceConfig {
     ds.setMaxLifetime(maxLifetime);
     ds.setKeepaliveTime(keepaliveTime);
     ds.setConnectionTimeout(connectionTimeout);
+    ds.setSchema(schema);
     return ds;
   }
 
@@ -54,23 +56,13 @@ public class PrimaryDataSourceConfig {
   @Primary
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
       EntityManagerFactoryBuilder builder,
-      @Qualifier("primaryDataSource") DataSource dataSource,
-      @Value("${spring.datasource.dialect}") String dialect,
-      @Value("${spring.datasource.default_schema}") String defaultSchema) {
-
-    Map<String, Object> jpaProperties = new HashMap<>();
-    jpaProperties.put("hibernate.dialect", dialect);
-    jpaProperties.put("hibernate.hbm2ddl.auto", "none");
-    jpaProperties.put("hibernate.jdbc.lob.non_contextual_creation", true);
-    jpaProperties.put("hibernate.default_schema", defaultSchema);
-    jpaProperties.put("hibernate.id.new_generator_mappings", false);
+      @Qualifier("primaryDataSource") DataSource dataSource) {
     return builder
         .dataSource(dataSource)
         .packages(
             "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
             "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel")
         .persistenceUnit("primary")
-        .properties(jpaProperties)
         .build();
   }
 

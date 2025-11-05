@@ -30,6 +30,7 @@ public class HistoricDataSourceConfig {
       @Value("${historic.datasource.url}") String url,
       @Value("${historic.datasource.username}") String username,
       @Value("${historic.datasource.password}") String password,
+      @Value("${spring.datasource.schema}") String schema,
       @Value("${historic.datasource.driver-class-name}") String driverClassName,
       @Value("${historic.datasource.hikari.maxLifetime}") Long maxLifetime,
       @Value("${historic.datasource.hikari.keepaliveTime}") Long keepaliveTime,
@@ -42,6 +43,7 @@ public class HistoricDataSourceConfig {
     ds.setMaxLifetime(maxLifetime);
     ds.setKeepaliveTime(keepaliveTime);
     ds.setConnectionTimeout(connectionTimeout);
+    ds.setSchema(schema);
     return ds;
   }
 
@@ -52,19 +54,12 @@ public class HistoricDataSourceConfig {
       @Value("${historic.datasource.dialect}") String dialect,
       @Value("${historic.datasource.default_schema}") String defaultSchema) {
 
-    Map<String, Object> jpaProperties = new HashMap<>();
-    jpaProperties.put("hibernate.dialect", dialect);
-    jpaProperties.put("hibernate.hbm2ddl.auto", "none");
-    jpaProperties.put("hibernate.jdbc.lob.non_contextual_creation", true);
-    jpaProperties.put("hibernate.default_schema", defaultSchema);
-    jpaProperties.put("hibernate.id.new_generator_mappings", false);
     return builder
         .dataSource(dataSource)
         .packages(
             "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
             "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel")
         .persistenceUnit("historic")
-        .properties(jpaProperties)
         .build();
   }
 
