@@ -78,16 +78,19 @@ public class PrimaryDataSourceConfig {
 
     @Primary
     @Bean(name = "primaryEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean (@Qualifier("primaryDataSource") DataSource dataSource) {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean (
+            EntityManagerFactoryBuilder builder,
+            @Qualifier("primaryDataSource") DataSource dataSource) {
 
         // Setting entity manager properties
-        LocalContainerEntityManagerFactoryBean entityManager = new LocalContainerEntityManagerFactoryBean();
-        entityManager.setDataSource(dataSource);
-        entityManager.setPackagesToScan(
-                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
-                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel"
-        );
-        entityManager.setPersistenceUnitName("primaryPersistenceUnit");
+        LocalContainerEntityManagerFactoryBean entityManager = builder
+                .dataSource(dataSource)
+                .packages(
+                        "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
+                        "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel"
+                )
+                .persistenceUnit("primaryPersistenceUnit")
+                .build();
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         entityManager.setJpaVendorAdapter(vendorAdapter);
 
