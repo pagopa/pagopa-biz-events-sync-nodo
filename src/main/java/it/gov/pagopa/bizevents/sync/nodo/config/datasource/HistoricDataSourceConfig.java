@@ -1,69 +1,109 @@
 package it.gov.pagopa.bizevents.sync.nodo.config.datasource;
 
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.sql.DataSource;
+import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-    basePackages = "it.gov.pagopa.bizevents.sync.nodo.repository.historic",
+    basePackages = {
+        "it.gov.pagopa.bizevents.sync.nodo.repository.historic"
+    },
     entityManagerFactoryRef = "historicEntityManagerFactory",
     transactionManagerRef = "historicTransactionManager")
+@ConditionalOnProperty(value = "historic.datasource.enabled")
 public class HistoricDataSourceConfig {
 
-  @Bean(name = "historicDataSource")
-  public DataSource dataSource(
-      @Value("${historic.datasource.url}") String url,
-      @Value("${historic.datasource.username}") String username,
-      @Value("${historic.datasource.password}") String password,
-      @Value("${spring.datasource.schema}") String schema,
-      @Value("${historic.datasource.driver-class-name}") String driverClassName,
-      @Value("${historic.datasource.hikari.maxLifetime}") Long maxLifetime,
-      @Value("${historic.datasource.hikari.keepaliveTime}") Long keepaliveTime,
-      @Value("${historic.datasource.hikari.connectionTimeout}") Long connectionTimeout) {
-    HikariDataSource ds = new HikariDataSource();
-    ds.setJdbcUrl(url);
-    ds.setUsername(username);
-    ds.setPassword(password);
-    ds.setDriverClassName(driverClassName);
-    ds.setMaxLifetime(maxLifetime);
-    ds.setKeepaliveTime(keepaliveTime);
-    ds.setConnectionTimeout(connectionTimeout);
-    ds.setSchema(schema);
-    return ds;
-  }
+    @Value("${historic.datasource.url}")
+    private String url;
 
-  @Bean(name = "historicEntityManagerFactory")
-  public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-      EntityManagerFactoryBuilder builder,
-      @Qualifier("historicDataSource") DataSource dataSource) {
+    @Value("${historic.datasource.username}")
+    private String username;
 
-    return builder
-        .dataSource(dataSource)
-        .packages(
-            "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
-            "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel")
-        .persistenceUnit("historic")
-        .build();
-  }
+    @Value("${historic.datasource.password}")
+    private String password;
 
-  @Bean(name = "historicTransactionManager")
-  public PlatformTransactionManager transactionManager(
-      @Qualifier("historicEntityManagerFactory") EntityManagerFactory emf) {
-    return new JpaTransactionManager(emf);
-  }
+    @Value("${historic.datasource.schema}")
+    private String defaultSchema;
+
+    @Value("${historic.datasource.driver-class-name}")
+    private String driverClassName;
+
+    @Value("${historic.datasource.hikari.connectionTimeout}")
+    private String connectionTimeout;
+
+    @Value("${historic.datasource.hikari.maxLifetime}")
+    private String maxLifetime;
+
+    @Value("${historic.datasource.hikari.keepaliveTime}")
+    private String keepaliveTime;
+
+    @Value("${historic.datasource.hibernate-dialect}")
+    private String hibernateDialect;
+
+    @Bean(name = "historicDataSource")
+    public DataSource dataSource() {
+
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setUsername(username);
+        hikariConfig.setPassword(password);
+        hikariConfig.setJdbcUrl(url);
+        hikariConfig.setDriverClassName(driverClassName);
+        hikariConfig.setConnectionTimeout(Long.parseLong(connectionTimeout));
+        hikariConfig.setMaxLifetime(Long.parseLong(maxLifetime));
+        hikariConfig.setKeepaliveTime(Long.parseLong(keepaliveTime));
+        return new HikariDataSource(hikariConfig);
+    }
+
+    @Bean(name = "historicEntityManagerFactory")
+    @ConditionalOnBean(name = "historicDataSource")
+    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean () {
+
+        // Setting entity manager properties
+        LocalContainerEntityManagerFactoryBean entityManager = new LocalContainerEntityManagerFactoryBean();
+        entityManager.setDataSource(dataSource());
+        entityManager.setPackagesToScan(
+                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
+                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel"
+        );
+        entityManager.setPersistenceUnitName("historicPersistenceUnit");
+        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        entityManager.setJpaVendorAdapter(vendorAdapter);
+
+        // Setting JPA properties
+        Properties props = new Properties();
+        props.put("hibernate.dialect", hibernateDialect);
+        props.put("hibernate.database-platform", hibernateDialect);
+        props.put("hibernate.ddl-auto", "none");
+        props.put("hibernate.hbm2ddl.auto", "none");
+        props.put("hibernate.default_schema", defaultSchema);
+        props.put("hibernate.jdbc.lob.non_contextual_creation", "true");
+        entityManager.setJpaProperties(props);
+
+        return entityManager;
+    }
+
+    @Bean(name = "historicTransactionManager")
+    @ConditionalOnMissingBean(type = "JpaTransactionManager")
+    public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(entityManagerFactory);
+        return transactionManager;
+    }
 }
