@@ -83,7 +83,7 @@ public class HistoricDataSourceConfig {
                         "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
                         "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel"
                 )
-                .persistenceUnit("postgresqlUnit")
+                .persistenceUnit("historicPersistenceUnit")
                 .build();
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         entityManager.setJpaVendorAdapter(vendorAdapter);

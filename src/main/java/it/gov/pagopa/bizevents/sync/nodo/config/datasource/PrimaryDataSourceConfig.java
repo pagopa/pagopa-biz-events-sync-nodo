@@ -34,36 +34,6 @@ import java.util.Properties;
     transactionManagerRef = "primaryTransactionManager")
 public class PrimaryDataSourceConfig {
 
-
-    @Primary
-    @Bean(name = "primaryEntityManagerFactory")
-    @ConditionalOnBean(name = "primaryDataSource")
-    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean () {
-
-        // Setting entity manager properties
-        LocalContainerEntityManagerFactoryBean entityManager = new LocalContainerEntityManagerFactoryBean();
-        entityManager.setDataSource(dataSource());
-        entityManager.setPackagesToScan(
-                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
-                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel"
-        );
-        entityManager.setPersistenceUnitName("primaryPersistenceUnit");
-        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        entityManager.setJpaVendorAdapter(vendorAdapter);
-
-        // Setting JPA properties
-        Properties props = new Properties();
-        props.put("hibernate.dialect", hibernateDialect);
-        props.put("hibernate.database-platform", hibernateDialect);
-        props.put("hibernate.ddl-auto", "none");
-        props.put("hibernate.hbm2ddl.auto", "none");
-        props.put("hibernate.default_schema", defaultSchema);
-        props.put("hibernate.jdbc.lob.non_contextual_creation", "true");
-        entityManager.setJpaProperties(props);
-
-        return entityManager;
-    }
-
     @Value("${primary.datasource.url}")
     private String url;
 
@@ -106,14 +76,39 @@ public class PrimaryDataSourceConfig {
         return new HikariDataSource(hikariConfig);
     }
 
+    @Primary
+    @Bean(name = "primaryEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean (@Qualifier("primaryDataSource") DataSource dataSource) {
+
+        // Setting entity manager properties
+        LocalContainerEntityManagerFactoryBean entityManager = new LocalContainerEntityManagerFactoryBean();
+        entityManager.setDataSource(dataSource);
+        entityManager.setPackagesToScan(
+                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
+                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel"
+        );
+        entityManager.setPersistenceUnitName("primaryPersistenceUnit");
+        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        entityManager.setJpaVendorAdapter(vendorAdapter);
+
+        // Setting JPA properties
+        Properties props = new Properties();
+        props.put("hibernate.dialect", hibernateDialect);
+        props.put("hibernate.database-platform", hibernateDialect);
+        props.put("hibernate.ddl-auto", "none");
+        props.put("hibernate.hbm2ddl.auto", "none");
+        props.put("hibernate.default_schema", defaultSchema);
+        props.put("hibernate.jdbc.lob.non_contextual_creation", "true");
+        entityManager.setJpaProperties(props);
+
+        return entityManager;
+    }
 
     @Primary
     @Bean(name = "primaryTransactionManager")
     @ConditionalOnMissingBean(type = "JpaTransactionManager")
-    public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+    public JpaTransactionManager transactionManager(@Qualifier("primaryEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
 
-        JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(entityManagerFactory);
-        return transactionManager;
+        return new JpaTransactionManager(entityManagerFactory);
     }
 }
