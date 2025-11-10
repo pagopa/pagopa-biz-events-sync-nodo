@@ -15,8 +15,7 @@ import org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.retry.annotation.EnableRetry;
 
-//@SpringBootApplication
-@SpringBootApplication(exclude = {HibernateJpaAutoConfiguration.class})
+@SpringBootApplication
 @EnableFeignClients
 @EnableRetry
 public class BizEventsSyncNodoApplication {
@@ -25,25 +24,4 @@ public class BizEventsSyncNodoApplication {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     SpringApplication.run(BizEventsSyncNodoApplication.class, args);
   }
-
-
-    @Bean
-    public EntityManagerFactoryBuilder entityManagerFactoryBuilder(
-            JpaVendorAdapter jpaVendorAdapter,
-            ObjectProvider<PersistenceUnitManager> persistenceUnitManager) {
-        return new EntityManagerFactoryBuilder(
-                jpaVendorAdapter,
-                new HashMap<>(),
-                persistenceUnitManager.getIfAvailable()
-        );
-    }
-
-    @Bean
-    public JpaVendorAdapter jpaVendorAdapter() {
-        HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
-        adapter.setDatabasePlatform("org.hibernate.dialect.PostgreSQLDialect"); // o il dialect che usi
-        adapter.setGenerateDdl(false);
-        adapter.setShowSql(false);
-        return adapter;
-    }
 }

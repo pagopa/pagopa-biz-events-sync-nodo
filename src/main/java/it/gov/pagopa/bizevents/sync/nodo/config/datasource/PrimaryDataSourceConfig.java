@@ -5,20 +5,15 @@ import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -30,12 +25,13 @@ import java.util.Properties;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-    basePackages = {
-      "it.gov.pagopa.bizevents.sync.nodo.repository.primary.payment",
-      "it.gov.pagopa.bizevents.sync.nodo.repository.primary.receipt"
-    },
-    entityManagerFactoryRef = "primaryEntityManagerFactory",
-    transactionManagerRef = "primaryTransactionManager")
+        basePackages = {
+                "it.gov.pagopa.bizevents.sync.nodo.repository.primary.payment",
+                "it.gov.pagopa.bizevents.sync.nodo.repository.primary.receipt"
+        },
+        entityManagerFactoryRef = "primaryEntityManagerFactory",
+        transactionManagerRef = "primaryTransactionManager"
+)
 public class PrimaryDataSourceConfig {
 
     @Value("${primary.datasource.url}")
@@ -68,11 +64,10 @@ public class PrimaryDataSourceConfig {
     @Primary
     @Bean(name = "primaryDataSource")
     public DataSource primaryDataSource() {
-
         HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setJdbcUrl(url);
         hikariConfig.setUsername(username);
         hikariConfig.setPassword(password);
-        hikariConfig.setJdbcUrl(url);
         hikariConfig.setDriverClassName(driverClassName);
         hikariConfig.setConnectionTimeout(Long.parseLong(connectionTimeout));
         hikariConfig.setMaxLifetime(Long.parseLong(maxLifetime));
@@ -82,41 +77,38 @@ public class PrimaryDataSourceConfig {
 
     @Primary
     @Bean(name = "primaryEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactoryBean (
-            EntityManagerFactoryBuilder builder,
+    public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(
             @Qualifier("primaryDataSource") DataSource dataSource) {
 
-        // Setting entity manager properties
-        LocalContainerEntityManagerFactoryBean entityManager = builder
-                .dataSource(dataSource)
-                .packages(
-                        "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
-                        "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel"
-                )
-                .persistenceUnit("primaryPersistenceUnit")
-                .build();
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        entityManager.setJpaVendorAdapter(vendorAdapter);
+        vendorAdapter.setGenerateDdl(false);
+        vendorAdapter.setShowSql(false);
 
-        // Setting JPA properties
+        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+        em.setDataSource(dataSource);
+        em.setJpaVendorAdapter(vendorAdapter);
+        em.setPackagesToScan(
+                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
+                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel"
+        );
+        em.setPersistenceUnitName("primaryPersistenceUnit");
+
         Properties props = new Properties();
         props.put("hibernate.dialect", hibernateDialect);
-        props.put("hibernate.database-platform", hibernateDialect);
-        props.put("hibernate.ddl-auto", "none");
-        props.put("hibernate.hbm2ddl.auto", "none");
         props.put("hibernate.default_schema", defaultSchema);
+        props.put("hibernate.hbm2ddl.auto", "none");
         props.put("hibernate.jdbc.lob.non_contextual_creation", "true");
-        props.put("hibernate.archive.autodetection", "none");
+        props.put("hibernate.archive.autodetection", "class"); // usa "class" per evitare Invalid Magic
         props.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
-        entityManager.setJpaProperties(props);
+        em.setJpaProperties(props);
 
-        return entityManager;
+        return em;
     }
 
     @Primary
     @Bean(name = "primaryTransactionManager")
-    public JpaTransactionManager primaryTransactionManager(@Qualifier("primaryEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
-
+    public PlatformTransactionManager primaryTransactionManager(
+            @Qualifier("primaryEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 }
