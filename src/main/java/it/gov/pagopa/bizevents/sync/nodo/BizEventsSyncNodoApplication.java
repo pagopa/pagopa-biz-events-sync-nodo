@@ -12,6 +12,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.retry.annotation.EnableRetry;
 
 //@SpringBootApplication
@@ -35,5 +36,14 @@ public class BizEventsSyncNodoApplication {
                 new HashMap<>(),
                 persistenceUnitManager.getIfAvailable()
         );
+    }
+
+    @Bean
+    public JpaVendorAdapter jpaVendorAdapter() {
+        HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
+        adapter.setDatabasePlatform("org.hibernate.dialect.PostgreSQLDialect"); // o il dialect che usi
+        adapter.setGenerateDdl(false);
+        adapter.setShowSql(false);
+        return adapter;
     }
 }
