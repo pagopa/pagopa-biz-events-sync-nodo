@@ -10,7 +10,7 @@ public class HealthCheckRepository {
 
   EntityManager entityManager;
 
-  @Value("${spring.datasource.health-check.query}")
+  @Value("${primary.datasource.health-check.query}")
   private String query;
 
   public HealthCheckRepository(EntityManager entityManager) {
