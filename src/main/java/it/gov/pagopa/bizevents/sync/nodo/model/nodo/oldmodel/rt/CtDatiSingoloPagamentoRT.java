@@ -1,4 +1,4 @@
-package it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.rt;
+package it.gov.pagopa.bizevents.sync.nodo.model.nodo.oldmodel.rt;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;

@@ -1,4 +1,4 @@
-package it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.rt;
+package it.gov.pagopa.bizevents.sync.nodo.model.nodo.oldmodel.rt;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -15,12 +15,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
-    name = "ctAllegatoRicevuta",
-    propOrder = {"tipoAllegatoRicevuta", "testoAllegato"})
-public class CtAllegatoRicevuta {
+    name = "ctIdentificativoUnivoco",
+    propOrder = {"tipoIdentificativoUnivoco", "codiceIdentificativoUnivoco"})
+public class CtIdentificativoUnivoco {
 
   @XmlSchemaType(name = "string")
-  protected StTipoAllegatoRicevuta tipoAllegatoRicevuta;
+  protected StTipoIdentificativoUnivoco tipoIdentificativoUnivoco;
 
-  protected byte[] testoAllegato;
+  protected String codiceIdentificativoUnivoco;
 }
