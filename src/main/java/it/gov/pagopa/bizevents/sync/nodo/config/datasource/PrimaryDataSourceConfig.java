@@ -102,6 +102,8 @@ public class PrimaryDataSourceConfig {
         props.put("hibernate.hbm2ddl.auto", "none");
         props.put("hibernate.default_schema", defaultSchema);
         props.put("hibernate.jdbc.lob.non_contextual_creation", "true");
+        props.put("hibernate.archive.autodetection", "none");
+        props.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
         entityManager.setJpaProperties(props);
 
         return entityManager;
