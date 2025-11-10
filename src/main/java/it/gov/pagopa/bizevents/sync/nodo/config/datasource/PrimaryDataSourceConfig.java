@@ -60,10 +60,10 @@ public class PrimaryDataSourceConfig {
 
     @Value("${primary.datasource.hibernate-dialect}")
     private String hibernateDialect;
-    
-    @Bean(name = "primaryDataSource")
+
     @Primary
-    public DataSource dataSource() {
+    @Bean(name = "primaryDataSource")
+    public DataSource primaryDataSource() {
 
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setUsername(username);
@@ -78,7 +78,7 @@ public class PrimaryDataSourceConfig {
 
     @Primary
     @Bean(name = "primaryEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean (
+    public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactoryBean (
             EntityManagerFactoryBuilder builder,
             @Qualifier("primaryDataSource") DataSource dataSource) {
 
@@ -111,8 +111,7 @@ public class PrimaryDataSourceConfig {
 
     @Primary
     @Bean(name = "primaryTransactionManager")
-    @ConditionalOnMissingBean(type = "JpaTransactionManager")
-    public JpaTransactionManager transactionManager(@Qualifier("primaryEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+    public JpaTransactionManager primaryTransactionManager(@Qualifier("primaryEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
 
         return new JpaTransactionManager(entityManagerFactory);
     }

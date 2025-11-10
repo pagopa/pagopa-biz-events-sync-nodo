@@ -58,7 +58,7 @@ public class HistoricDataSourceConfig {
     private String hibernateDialect;
 
     @Bean(name = "historicDataSource")
-    public DataSource dataSource() {
+    public DataSource historyDataSource() {
 
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setUsername(username);
@@ -72,7 +72,7 @@ public class HistoricDataSourceConfig {
     }
 
     @Bean(name = "historicEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean (
+    public LocalContainerEntityManagerFactoryBean historyEntityManagerFactoryBean (
         EntityManagerFactoryBuilder builder,
         @Qualifier("historicDataSource") DataSource dataSource) {
 
@@ -104,7 +104,7 @@ public class HistoricDataSourceConfig {
     }
 
     @Bean(name = "historicTransactionManager")
-    public PlatformTransactionManager transactionManager (@Qualifier("historicEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+    public PlatformTransactionManager historyTransactionManager (@Qualifier("historicEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
 
         return new JpaTransactionManager(entityManagerFactory);
     }
