@@ -3,16 +3,19 @@ package it.gov.pagopa.bizevents.sync.nodo.config.datasource;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
@@ -71,17 +74,19 @@ public class HistoricDataSourceConfig {
     }
 
     @Bean(name = "historicEntityManagerFactory")
-    @ConditionalOnBean(name = "historicDataSource")
-    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean () {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean (
+        EntityManagerFactoryBuilder builder,
+        @Qualifier("historicDataSource") DataSource dataSource) {
 
         // Setting entity manager properties
-        LocalContainerEntityManagerFactoryBean entityManager = new LocalContainerEntityManagerFactoryBean();
-        entityManager.setDataSource(dataSource());
-        entityManager.setPackagesToScan(
-                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
-                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel"
-        );
-        entityManager.setPersistenceUnitName("historicPersistenceUnit");
+        LocalContainerEntityManagerFactoryBean entityManager = builder
+                .dataSource(dataSource)
+                .packages(
+                        "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
+                        "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel"
+                )
+                .persistenceUnit("postgresqlUnit")
+                .build();
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         entityManager.setJpaVendorAdapter(vendorAdapter);
 
@@ -99,11 +104,8 @@ public class HistoricDataSourceConfig {
     }
 
     @Bean(name = "historicTransactionManager")
-    @ConditionalOnMissingBean(type = "JpaTransactionManager")
-    public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+    public PlatformTransactionManager transactionManager (@Qualifier("historicEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
 
-        JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(entityManagerFactory);
-        return transactionManager;
+        return new JpaTransactionManager(entityManagerFactory);
     }
 }

@@ -65,7 +65,7 @@ public class PrimaryDataSourceConfig {
     @Primary
     public DataSource dataSource() {
 
-       HikariConfig hikariConfig = new HikariConfig();
+        HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setUsername(username);
         hikariConfig.setPassword(password);
         hikariConfig.setJdbcUrl(url);
