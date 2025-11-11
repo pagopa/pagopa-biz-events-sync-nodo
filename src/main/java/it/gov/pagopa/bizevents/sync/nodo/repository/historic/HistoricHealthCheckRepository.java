@@ -3,9 +3,11 @@ package it.gov.pagopa.bizevents.sync.nodo.repository.historic;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@ConditionalOnProperty(value = "spring.datasource.historic.enabled")
 public class HistoricHealthCheckRepository {
 
   EntityManager entityManager;

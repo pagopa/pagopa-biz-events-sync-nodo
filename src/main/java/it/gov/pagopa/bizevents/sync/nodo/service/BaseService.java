@@ -4,6 +4,7 @@ import it.gov.pagopa.bizevents.sync.nodo.model.AppInfo;
 import it.gov.pagopa.bizevents.sync.nodo.repository.historic.HistoricHealthCheckRepository;
 import it.gov.pagopa.bizevents.sync.nodo.repository.primary.HealthCheckRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,7 @@ public class BaseService {
 
   public BaseService(
       HealthCheckRepository healthCheckRepository,
-      HistoricHealthCheckRepository historicDBHealthCheckRepository) {
+      @Autowired(required = false) HistoricHealthCheckRepository historicDBHealthCheckRepository) {
 
     this.healthCheckRepository = healthCheckRepository;
     this.historicDBHealthCheckRepository = historicDBHealthCheckRepository;

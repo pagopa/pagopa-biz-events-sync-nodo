@@ -2,6 +2,8 @@ package it.gov.pagopa.bizevents.sync.nodo.config.datasource;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.*;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.*;
 import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
@@ -66,12 +68,30 @@ public class PrimaryDataSourceConfig {
         jpaProps.put("hibernate.dialect", primaryDialect);
         jpaProps.put("hibernate.hbm2ddl.auto", "none");
         jpaProps.put("hibernate.archive.autodetection", "none");
+        jpaProps.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
 
         return builder
                 .dataSource(primaryDataSource())
                 .packages(
                         "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
                         "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel")
+                /*.packages( // NewModel
+                        PositionPayment.class,
+                        PositionPaymentPlan.class,
+                        PositionReceipt.class,
+                        PositionService.class,
+                        PositionSubject.class,
+                        PositionTransfer.class,
+                        PositionTransferMBD.class
+                )
+                .packages( // OldModel
+                        Rpt.class,
+                        RptSoggetti.class,
+                        RptVersamenti.class,
+                        Rt.class,
+                        RtVersamenti.class,
+                        RtXml.class
+                )*/
                 .properties(jpaProps)
                 .build();
     }

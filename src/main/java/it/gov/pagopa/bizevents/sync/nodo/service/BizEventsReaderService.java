@@ -41,8 +41,8 @@ public class BizEventsReaderService {
       BizEventsRepository bizEventsRepository,
       PositionReceiptRepository positionReceiptRepository,
       RtRepository rtRepository,
-      HistoricPositionReceiptRepository historicPositionReceiptRepository,
-      HistoricRtRepository historicRtRepository) {
+      @Autowired(required = false) HistoricPositionReceiptRepository historicPositionReceiptRepository,
+      @Autowired(required = false) HistoricRtRepository historicRtRepository) {
 
     this.bizEventsRepository = bizEventsRepository;
     this.positionReceiptRepository = positionReceiptRepository;

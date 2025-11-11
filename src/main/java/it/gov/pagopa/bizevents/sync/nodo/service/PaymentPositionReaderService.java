@@ -20,6 +20,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -60,12 +61,12 @@ public class PaymentPositionReaderService {
       RptRepository rptRepository,
       RptSoggettiRepository rptSoggettiRepository,
       RptVersamentiRepository rptVersamentiRepository,
-      HistoricPaymentPositionRepository historicPaymentPositionRepository,
-      HistoricPositionTransferRepository historicPositionTransferRepository,
-      HistoricRtRepository historicRtRepository,
-      HistoricRptRepository historicRptRepository,
-      HistoricRptSoggettiRepository historicRptSoggettiRepository,
-      HistoricRptVersamentiRepository historicRptVersamentiRepository,
+      @Autowired(required = false) HistoricPaymentPositionRepository historicPaymentPositionRepository,
+      @Autowired(required = false) HistoricPositionTransferRepository historicPositionTransferRepository,
+      @Autowired(required = false) HistoricRtRepository historicRtRepository,
+      @Autowired(required = false) HistoricRptRepository historicRptRepository,
+      @Autowired(required = false) HistoricRptSoggettiRepository historicRptSoggettiRepository,
+      @Autowired(required = false) HistoricRptVersamentiRepository historicRptVersamentiRepository,
       ConfigCacheService configCacheService) {
 
     this.paymentPositionRepository = paymentPositionRepository;
