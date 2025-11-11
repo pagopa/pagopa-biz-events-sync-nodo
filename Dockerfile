@@ -23,9 +23,9 @@ FROM ghcr.io/pagopa/docker-base-springboot-openjdk17:v2.2.0@sha256:b866656c31f2c
 WORKDIR /app
 
 COPY --chown=spring:spring --from=layertools /app/dependencies/ ./dependencies/
-COPY --chown:spring:spring --from=layertools /app/snapshot-dependencies/ ./snapshot-dependencies/
+COPY --chown=spring:spring --from=layertools /app/snapshot-dependencies/ ./snapshot-dependencies/
 COPY --chown=spring:spring --from=layertools /app/spring-boot-loader/ ./spring-boot-loader/
-COPY --chown:spring:spring --from=layertools /app/application/ ./application/
+COPY --chown=spring:spring --from=layertools /app/application/ ./application/
 
 EXPOSE 8080
 USER spring
