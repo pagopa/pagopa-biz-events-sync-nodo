@@ -10,7 +10,7 @@ RUN mvn clean package -U -Dmaven.test.skip=true
 #
 # Package stage
 #
-FROM amazoncorretto:17.0.9-al2023@sha256:1f57bde832a4df4b3d2b4ec1cf17882e36a2bb3f3d8fc92ccfe653d55e2a4cc0 AS layertools
+FROM amazoncorretto:17.0.9-al2023@sha256:638da7295a278de15f3ef1ee672aae19d40e49438c7b4164f0bb3bd0dcd215a5 AS layertools
 WORKDIR /app
 COPY --from=build /build/target/*.jar app.jar
 RUN java -Djarmode=layertools -jar app.jar extract
