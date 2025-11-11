@@ -1,23 +1,23 @@
 package it.gov.pagopa.bizevents.sync.nodo.config.datasource;
 
-import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableTransactionManagement
@@ -27,34 +27,79 @@ import java.util.Properties;
     },
     entityManagerFactoryRef = "historicEntityManagerFactory",
     transactionManagerRef = "historicTransactionManager")
-@ConditionalOnProperty(value = "historic.datasource.enabled")
+@ConditionalOnProperty(value = "spring.datasource.historic.enabled") //, havingValue = "false")
 public class HistoricDataSourceConfig {
 
-    @Value("${historic.datasource.url}")
+
+
+    @Value("${spring.datasource.historic.hibernate.dialect}")
+    private String historicDialect;
+
+    @Bean
+    @ConfigurationProperties("spring.datasource.historic")
+    public DataSourceProperties historicDatasourceProperties() {
+        return new DataSourceProperties();
+    }
+
+    @Bean
+    @ConfigurationProperties("spring.datasource.historic")
+    public DataSource historicDataSource() {
+        HikariDataSource build = historicDatasourceProperties()
+                .initializeDataSourceBuilder()
+                .type(HikariDataSource.class)
+                .build();
+        build.setPoolName("historic");
+        return build;
+    }
+
+    @Bean(name = "historicEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean historicEntityManagerFactory(EntityManagerFactoryBuilder builder) {
+
+        Map<String, Object> jpaProps = new HashMap<>();
+        jpaProps.put("hibernate.dialect", historicDialect);
+        jpaProps.put("hibernate.hbm2ddl.auto", "none");
+        jpaProps.put("hibernate.archive.autodetection", "none");
+
+        return builder
+                .dataSource(historicDataSource())
+                .packages(
+                        "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
+                        "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel")
+                .properties(jpaProps)
+                .build();
+    }
+
+    @Bean(name = "historicTransactionManager")
+    public PlatformTransactionManager historicTransactionManager(final @Qualifier("historicEntityManagerFactory") LocalContainerEntityManagerFactoryBean historicEntityManagerFactory) {
+        return new JpaTransactionManager(historicEntityManagerFactory.getObject());
+    }
+
+    /*
+    @Value("${spring.datasource.historic.url}")
     private String url;
 
-    @Value("${historic.datasource.username}")
+    @Value("${spring.datasource.historic.username}")
     private String username;
 
-    @Value("${historic.datasource.password}")
+    @Value("${spring.datasource.historic.password}")
     private String password;
 
-    @Value("${historic.datasource.schema}")
+    @Value("${spring.datasource.historic.schema}")
     private String defaultSchema;
 
-    @Value("${historic.datasource.driver-class-name}")
+    @Value("${spring.datasource.historic.driver-class-name}")
     private String driverClassName;
 
-    @Value("${historic.datasource.hikari.connectionTimeout}")
+    @Value("${spring.datasource.historic.connectionTimeout}")
     private String connectionTimeout;
 
-    @Value("${historic.datasource.hikari.maxLifetime}")
+    @Value("${spring.datasource.historic.maxLifetime}")
     private String maxLifetime;
 
-    @Value("${historic.datasource.hikari.keepaliveTime}")
+    @Value("${spring.datasource.historic.keepaliveTime}")
     private String keepaliveTime;
 
-    @Value("${historic.datasource.hibernate-dialect}")
+    @Value("${spring.datasource.historic.hibernate-dialect}")
     private String hibernateDialect;
 
     @Bean(name = "historicDataSource")
@@ -108,4 +153,5 @@ public class HistoricDataSourceConfig {
 
         return new JpaTransactionManager(entityManagerFactory);
     }
+     */
 }

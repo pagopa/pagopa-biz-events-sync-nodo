@@ -7,6 +7,8 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,81 +36,49 @@ import java.util.Properties;
 )
 public class PrimaryDataSourceConfig {
 
-    @Value("${primary.datasource.url}")
-    private String url;
-
-    @Value("${primary.datasource.username}")
-    private String username;
-
-    @Value("${primary.datasource.password}")
-    private String password;
-
-    @Value("${primary.datasource.schema}")
-    private String defaultSchema;
-
-    @Value("${primary.datasource.driver-class-name}")
-    private String driverClassName;
-
-    @Value("${primary.datasource.hikari.connectionTimeout}")
-    private String connectionTimeout;
-
-    @Value("${primary.datasource.hikari.maxLifetime}")
-    private String maxLifetime;
-
-    @Value("${primary.datasource.hikari.keepaliveTime}")
-    private String keepaliveTime;
-
-    @Value("${primary.datasource.hibernate-dialect}")
-    private String hibernateDialect;
+    @Value("${spring.datasource.primary.hibernate.dialect}")
+    private String primaryDialect;
 
     @Primary
-    @Bean(name = "primaryDataSource")
+    @Bean
+    @ConfigurationProperties("spring.datasource.primary")
+    public DataSourceProperties primaryDatasourceProperties() {
+        return new DataSourceProperties();
+    }
+
+    @Primary
+    @Bean
+    @ConfigurationProperties("spring.datasource.primary")
     public DataSource primaryDataSource() {
-        HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setJdbcUrl(url);
-        hikariConfig.setUsername(username);
-        hikariConfig.setPassword(password);
-        hikariConfig.setDriverClassName(driverClassName);
-        hikariConfig.setConnectionTimeout(Long.parseLong(connectionTimeout));
-        hikariConfig.setMaxLifetime(Long.parseLong(maxLifetime));
-        hikariConfig.setKeepaliveTime(Long.parseLong(keepaliveTime));
-        return new HikariDataSource(hikariConfig);
+        HikariDataSource build = primaryDatasourceProperties()
+                .initializeDataSourceBuilder()
+                .type(HikariDataSource.class)
+                .build();
+        build.setPoolName("primary");
+        return build;
     }
 
     @Primary
     @Bean(name = "primaryEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(
-            @Qualifier("primaryDataSource") DataSource dataSource) {
+    public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(EntityManagerFactoryBuilder builder) {
 
-        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        vendorAdapter.setGenerateDdl(false);
-        vendorAdapter.setShowSql(false);
+        Map<String, Object> jpaProps = new HashMap<>();
+        jpaProps.put("hibernate.dialect", primaryDialect);
+        jpaProps.put("hibernate.hbm2ddl.auto", "none");
+        jpaProps.put("hibernate.archive.autodetection", "none");
 
-        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(dataSource);
-        em.setJpaVendorAdapter(vendorAdapter);
-        em.setPackagesToScan(
-                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
-                "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel"
-        );
-        em.setPersistenceUnitName("primaryPersistenceUnit");
-
-        Properties props = new Properties();
-        props.put("hibernate.dialect", hibernateDialect);
-        props.put("hibernate.default_schema", defaultSchema);
-        props.put("hibernate.hbm2ddl.auto", "none");
-        props.put("hibernate.jdbc.lob.non_contextual_creation", "true");
-        props.put("hibernate.archive.autodetection", "class"); // usa "class" per evitare Invalid Magic
-        props.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
-        em.setJpaProperties(props);
-
-        return em;
+        return builder
+                .dataSource(primaryDataSource())
+                .packages(
+                        "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
+                        "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel")
+                .properties(jpaProps)
+                .build();
     }
 
     @Primary
     @Bean(name = "primaryTransactionManager")
-    public PlatformTransactionManager primaryTransactionManager(
-            @Qualifier("primaryEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
-        return new JpaTransactionManager(entityManagerFactory);
+    public PlatformTransactionManager primaryTransactionManager(final @Qualifier("primaryEntityManagerFactory") LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory) {
+        return new JpaTransactionManager(primaryEntityManagerFactory.getObject());
     }
 }

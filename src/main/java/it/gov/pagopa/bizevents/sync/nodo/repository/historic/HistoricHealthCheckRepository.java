@@ -10,7 +10,7 @@ public class HistoricHealthCheckRepository {
 
   EntityManager entityManager;
 
-  @Value("${historic.datasource.health-check.query}")
+  @Value("${spring.datasource.historic.connection-test-query:}")
   private String query;
 
   public HistoricHealthCheckRepository(EntityManager entityManager) {
