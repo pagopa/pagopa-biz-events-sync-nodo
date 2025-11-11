@@ -22,7 +22,7 @@
         <postgresql-version>42.5.5</postgresql-version>
     </properties>
 
-    <version>0.1.5-24-PIDM-811-api-proposal</version>
+    <version>0.1.5-26-PIDM-811-api-proposal</version>
 
     <dependencies>
         <dependency>
@@ -114,7 +114,7 @@
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>6.4.4.Final</version>
+            <version>6.6.4.Final</version>
         </dependency>
 
         <dependency>
