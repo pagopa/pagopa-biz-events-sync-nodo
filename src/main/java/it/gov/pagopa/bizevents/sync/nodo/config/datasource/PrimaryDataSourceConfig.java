@@ -76,7 +76,7 @@ public class PrimaryDataSourceConfig {
                 /*.packages(
                         "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
                         "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel")*/
-                .packages( // NewModel
+                .classes( // NewModel
                         PositionPayment.class,
                         PositionPaymentPlan.class,
                         PositionReceipt.class,
