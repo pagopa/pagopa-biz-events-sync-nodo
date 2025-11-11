@@ -10,7 +10,7 @@ RUN mvn clean package -U -Dmaven.test.skip=true
 #
 # Package stage
 #
-FROM amazoncorretto:17.0.17-al2023@sha256:a2c6332958ce3aaa7154bacb4c050ed749b34f72 AS builder
+FROM maven:3.9.5-amazoncorretto-17-al2023@sha256:eeaa7ab572d931f7273fc5cf31429923f172091ae388969e11f42ec6dd817d74 AS builder
 WORKDIR /app
 COPY --from=build /build/target/*.jar app.jar
 RUN java -Djarmode=builder -jar app.jar extract
