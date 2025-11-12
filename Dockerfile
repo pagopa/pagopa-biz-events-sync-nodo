@@ -1,32 +1,29 @@
 #
 # Build
 #
-FROM maven:3.9.5-amazoncorretto-17-al2023@sha256:eeaa7ab572d931f7273fc5cf31429923f172091ae388969e11f42ec6dd817d74 AS build
+FROM maven:3.9.6-amazoncorretto-17-al2023@sha256:4c8bd9ec72b372f587f7b9d92564a307e4f5180b7ec08455fb346617bae1757e as buildtime
 WORKDIR /build
-COPY pom.xml .
-COPY src ./src
-RUN mvn clean package -U -Dmaven.test.skip=true
+COPY . .
+RUN mvn clean package -DskipTests
 
-#
-# Package stage
-#
-FROM amazoncorretto:17.0.9-al2023@sha256:638da7295a278de15f3ef1ee672aae19d40e49438c7b4164f0bb3bd0dcd215a5 AS layertools
-WORKDIR /app
-COPY --from=build /build/target/*.jar app.jar
-RUN java -Djarmode=layertools -jar app.jar extract
+FROM amazoncorretto:17.0.10-alpine3.19@sha256:180e9c91bdbaad3599fedd2f492bf0d0335a9382835aa64669b2c2a8de7c9a22 as builder
+#WORKDIR /app
+#COPY --from=buildtime /build/target/*.jar /app/application.jar
+#RUN java -Djarmode=layertools -jar application.jar extract
+COPY --from=buildtime /build/target/*.jar application.jar
 
+#FROM ghcr.io/pagopa/docker-base-springboot-openjdk17:v1.1.3@sha256:a4e970ef05ecf2081424a64707e7c20856bbc40ddb3e99b32a24cd74591817c4
+#COPY --chown=spring:spring --from=builder /app/dependencies/ ./
+#COPY --chown=spring:spring --from=builder /app/snapshot-dependencies/ ./
+# https://github.com/moby/moby/issues/37965#issuecomment-426853382
+#RUN true
+#COPY --chown=spring:spring --from=builder /app/spring-boot-loader/ ./
+#COPY --chown=spring:spring --from=builder /app/application/ ./
 
-#
-# Final runtime stage
-#
-FROM ghcr.io/pagopa/docker-base-springboot-openjdk17:v2.2.0@sha256:b866656c31f2c6ebe6e78b9437ce930d6c94c0b4bfc8e9ecc1076a780b9dfb18
-WORKDIR /app
-
-COPY --chown=spring:spring --from=layertools /app/dependencies/ ./dependencies/
-COPY --chown=spring:spring --from=layertools /app/snapshot-dependencies/ ./snapshot-dependencies/
-COPY --chown=spring:spring --from=layertools /app/spring-boot-loader/ ./spring-boot-loader/
-COPY --chown=spring:spring --from=layertools /app/application/ ./
+## https://github.com/microsoft/ApplicationInsights-Java/releases
+COPY --chown=spring:spring docker/run.sh run.sh
+RUN chmod +x ./run.sh
 
 EXPOSE 8080
-USER spring
-ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
+
+ENTRYPOINT ["./run.sh"]
