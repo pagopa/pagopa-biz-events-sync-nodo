@@ -11,9 +11,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Embeddable
 public class RptSoggettiId implements Serializable {
 

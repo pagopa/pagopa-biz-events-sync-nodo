@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-biz-events-sync-nodo
-    tag: "0.1.5"
+    tag: "0.1.5-36-PIDM-811-api-proposal"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -95,21 +95,32 @@ microservice-chart: &microservice-chart
     DATABASE_SCHEMA: 'NODO_ONLINE'
     EVENTHUB_LOGGING_LEVEL: 'ERROR'
     EVENTHUB_PRODUCER_NAME: 'nodo-dei-pagamenti-biz-evt'
+    HISTORIC_DATASOURCE_DRIVER: 'oracle.jdbc.OracleDriver'
+    HISTORIC_DATASOURCE_ENABLED: 'false'
+    HISTORIC_DATASOURCE_HEALTHCHECK_QUERY: 'SELECT 1 FROM DUAL'
+    HISTORIC_DATASOURCE_HIBERNATE_DIALECT: 'org.hibernate.dialect.Oracle12cDialect'
+    HISTORIC_DATASOURCE_HIKARI_CONNECTIONTIMEOUT: '15000'
+    HISTORIC_DATASOURCE_HIKARI_KEEPALIVETIME: '20000'
+    HISTORIC_DATASOURCE_HIKARI_MAXLIFETIME: '30000'
+    HISTORIC_DATASOURCE_SCHEMA: 'NODO_ONLINE'
+    HISTORIC_DATASOURCE_URL: "jdbc:oracle:thin:@(DESCRIPTION=(ENABLE=BROKEN)(ADDRESS=(PROTOCOL=tcp)(PORT=1521)(HOST=db-nodo-pagamenti.u.db-nodo-pagamenti.com))(CONNECT_DATA=(SERVICE_NAME=PAGOPA_READ))(SO_KEEPALIVE=true)(TCP_KEEPIDLE=60)(TCP_KEEPINTVL=30)(TCP_KEEPCNT=15))"
+    HISTORIC_DATASOURCE_USERNAME: 'PAGOPA_READER'
     JAVA_OPTS: >-
       -Duser.timezone=GMT
     OTEL_SERVICE_NAME: 'pagopa-bizevents-sync-nodo'
     SERVICE_IDENTIFIER: 'NDP004UAT_R'
-    SPRING_DATASOURCE_DRIVER: "org.postgresql.Driver"
-    SPRING_DATASOURCE_HEALTHCHECK_QUERY: 'SELECT 1'
-    SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT: '60000'
-    SPRING_DATASOURCE_HIKARI_KEEPALIVETIME: '30000'
-    SPRING_DATASOURCE_HIKARI_MAXLIFETIME: '1800000'
+    PRIMARY_DATASOURCE_DRIVER: "org.postgresql.Driver"
+    PRIMARY_DATASOURCE_HEALTHCHECK_QUERY: 'SELECT 1'
+    PRIMARY_DATASOURCE_HIBERNATE_DIALECT: "org.hibernate.dialect.PostgreSQLDialect"
+    PRIMARY_DATASOURCE_HIKARI_CONNECTIONTIMEOUT: '60000'
+    PRIMARY_DATASOURCE_HIKARI_KEEPALIVETIME: '30000'
+    PRIMARY_DATASOURCE_HIKARI_MAXLIFETIME: '1800000'
+    PRIMARY_DATASOURCE_SCHEMA: 'NODO_ONLINE'
+#   PRIMARY_DATASOURCE_URL: "jdbc:postgresql://db-postgres-ndp-prf.u.db-nodo-pagamenti.com:6432/ndpspcq_ro?prepareThreshold=0&currentSchema=NODO4_ONLINE"
+    PRIMARY_DATASOURCE_URL: "jdbc:postgresql://10.6.52.94:6432/ndpspca_ro"
+    PRIMARY_DATASOURCE_USERNAME: 'biz_pagopa_sv'
     SPRING_DATASOURCE_LOGGING_LEVEL_SQL: 'DEBUG'
     SPRING_DATASOURCE_LOGGING_LEVEL_SQL_QUERY: 'TRACE'
-#    SPRING_DATASOURCE_URL: "jdbc:postgresql://db-postgres-ndp-prf.u.db-nodo-pagamenti.com:6432/ndpspcq_ro?prepareThreshold=0&currentSchema=NODO4_ONLINE"
-    SPRING_DATASOURCE_URL: "jdbc:postgresql://10.6.52.94:6432/ndpspca_ro"
-    SPRING_DATASOURCE_USERNAME: "biz_pagopa_sv"
-    SPRING_JPA_DB_PLATFORM: 'org.hibernate.dialect.PostgreSQLDialect'
     SYNCHRONIZATION_JOB_LOWER_BOUND_DATE_BEFORE_DAYS: '2'
     SYNCHRONIZATION_JOB_SCHEDULE: '0 0 2 * * *'
     SYNCHRONIZATION_JOB_SEND_TO_EVENTHUB: 'false'
@@ -120,7 +131,11 @@ microservice-chart: &microservice-chart
     CLIENT_ECOMMERCE_HELPDESK_SUBKEY: 'ecommerce-helpdesk-subscription-key'
     COSMOS_DB_PRIMARY_KEY: 'cosmos-u-biz-key'
     EVENTHUB_PRODUCER_CONNECTION_STRING: 'ehub-tx-u-biz-connection-string'
-    SPRING_DATASOURCE_PASSWORD: 'db-nexi-biz-pagopa-sv-password'
+    PRIMARY_DATASOURCE_PASSWORD: 'db-nexi-biz-pagopa-sv-password'
+    HISTORIC_DATASOURCE_PASSWORD: 'nodo-oracle-db-password'
+  envFieldRef:
+    APP_NAME: "metadata.labels['app.kubernetes.io/instance']"
+    APP_VERSION: "metadata.labels['app.kubernetes.io/version']"
   keyvault:
     name: "pagopa-u-bizevents-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"

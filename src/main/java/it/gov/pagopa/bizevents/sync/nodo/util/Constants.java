@@ -1,7 +1,7 @@
 package it.gov.pagopa.bizevents.sync.nodo.util;
 
 import com.google.gson.Gson;
-import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.rt.CtRicevutaTelematica;
+import it.gov.pagopa.bizevents.sync.nodo.model.nodo.oldmodel.rt.CtRicevutaTelematica;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import java.time.format.DateTimeFormatter;

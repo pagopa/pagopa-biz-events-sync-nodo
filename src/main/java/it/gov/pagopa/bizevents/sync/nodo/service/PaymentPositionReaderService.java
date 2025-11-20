@@ -10,17 +10,17 @@ import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.Rt;
 import it.gov.pagopa.bizevents.sync.nodo.exception.BizEventSyncException;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.model.mapper.BizEventMapper;
-import it.gov.pagopa.bizevents.sync.nodo.repository.payment.PaymentPositionRepository;
-import it.gov.pagopa.bizevents.sync.nodo.repository.payment.PositionTransferRepository;
-import it.gov.pagopa.bizevents.sync.nodo.repository.payment.RptRepository;
-import it.gov.pagopa.bizevents.sync.nodo.repository.payment.RptSoggettiRepository;
-import it.gov.pagopa.bizevents.sync.nodo.repository.payment.RptVersamentiRepository;
-import it.gov.pagopa.bizevents.sync.nodo.repository.receipt.RtRepository;
+import it.gov.pagopa.bizevents.sync.nodo.repository.historic.payment.*;
+import it.gov.pagopa.bizevents.sync.nodo.repository.historic.receipt.HistoricRtRepository;
+import it.gov.pagopa.bizevents.sync.nodo.repository.primary.payment.*;
+import it.gov.pagopa.bizevents.sync.nodo.repository.primary.receipt.RtRepository;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +40,18 @@ public class PaymentPositionReaderService {
 
   private final RptVersamentiRepository rptVersamentiRepository;
 
+  private final HistoricPaymentPositionRepository historicPaymentPositionRepository;
+
+  private final HistoricPositionTransferRepository historicPositionTransferRepository;
+
+  private final HistoricRtRepository historicRtRepository;
+
+  private final HistoricRptRepository historicRptRepository;
+
+  private final HistoricRptSoggettiRepository historicRptSoggettiRepository;
+
+  private final HistoricRptVersamentiRepository historicRptVersamentiRepository;
+
   private final ConfigCacheService configCacheService;
 
   public PaymentPositionReaderService(
@@ -49,6 +61,12 @@ public class PaymentPositionReaderService {
       RptRepository rptRepository,
       RptSoggettiRepository rptSoggettiRepository,
       RptVersamentiRepository rptVersamentiRepository,
+      @Autowired(required = false) HistoricPaymentPositionRepository historicPaymentPositionRepository,
+      @Autowired(required = false) HistoricPositionTransferRepository historicPositionTransferRepository,
+      @Autowired(required = false) HistoricRtRepository historicRtRepository,
+      @Autowired(required = false) HistoricRptRepository historicRptRepository,
+      @Autowired(required = false) HistoricRptSoggettiRepository historicRptSoggettiRepository,
+      @Autowired(required = false) HistoricRptVersamentiRepository historicRptVersamentiRepository,
       ConfigCacheService configCacheService) {
 
     this.paymentPositionRepository = paymentPositionRepository;
@@ -57,6 +75,12 @@ public class PaymentPositionReaderService {
     this.rptRepository = rptRepository;
     this.rptSoggettiRepository = rptSoggettiRepository;
     this.rptVersamentiRepository = rptVersamentiRepository;
+    this.historicPaymentPositionRepository = historicPaymentPositionRepository;
+    this.historicPositionTransferRepository = historicPositionTransferRepository;
+    this.historicRtRepository = historicRtRepository;
+    this.historicRptRepository = historicRptRepository;
+    this.historicRptSoggettiRepository = historicRptSoggettiRepository;
+    this.historicRptVersamentiRepository = historicRptVersamentiRepository;
     this.configCacheService = configCacheService;
   }
 
@@ -65,8 +89,8 @@ public class PaymentPositionReaderService {
     BizEvent bizEvent;
     LocalDateTime insertedTimestamp =
         receiptEvent.getInsertedTimestamp().truncatedTo(ChronoUnit.DAYS);
-    LocalDateTime minDate = LocalDateTime.from(insertedTimestamp);
-    LocalDateTime maxDate = LocalDateTime.from(insertedTimestamp.plusDays(1));
+    LocalDateTime minDate = insertedTimestamp;
+    LocalDateTime maxDate = insertedTimestamp.plusDays(1);
     String paymentToken = receiptEvent.getPaymentToken();
 
     try {
@@ -87,7 +111,7 @@ public class PaymentPositionReaderService {
       if ("v2".equalsIgnoreCase(positionPayment.getCloseVersion())) {
         totalNotices =
             this.paymentPositionRepository.countPositionPaymentsByTransactionId(
-                positionPayment.getTransactionId());
+                minDate, maxDate, positionPayment.getTransactionId());
       }
 
       List<PositionTransfer> positionTransfers =
@@ -122,9 +146,12 @@ public class PaymentPositionReaderService {
     String domainId = receiptEvent.getDomainId();
     String iuv = receiptEvent.getIuv();
     String ccp = receiptEvent.getPaymentToken();
+    LocalDate lowerBound = receiptEvent.getInsertedTimestamp().toLocalDate();
+    LocalDate upperBound = lowerBound.plusDays(1);
 
     try {
-      Optional<Rpt> rptOpt = this.rptRepository.readByUniqueIdentifier(domainId, iuv, ccp);
+      Optional<Rpt> rptOpt =
+          this.rptRepository.readByUniqueIdentifier(lowerBound, upperBound, domainId, iuv, ccp);
       if (rptOpt.isEmpty()) {
         String msg =
             String.format(
@@ -134,7 +161,8 @@ public class PaymentPositionReaderService {
       }
       Rpt rpt = rptOpt.get();
 
-      Optional<Rt> rtOpt = this.rtRepository.readByUniqueIdentifier(domainId, iuv, ccp);
+      Optional<Rt> rtOpt =
+          this.rtRepository.readByUniqueIdentifier(lowerBound, upperBound, domainId, iuv, ccp);
       if (rtOpt.isEmpty()) {
         String msg =
             String.format(
@@ -147,6 +175,116 @@ public class PaymentPositionReaderService {
       Long rptId = rpt.getId();
       List<RptSoggetti> rptSubjects = this.rptSoggettiRepository.readByRptId(rptId);
       List<RptVersamenti> rptTransfers = this.rptVersamentiRepository.readByRptId(rptId);
+
+      bizEvent =
+          BizEventMapper.fromOldModel(
+              rpt, rt, rptSubjects, rptTransfers, configCacheService.getConfigData());
+
+    } catch (DataAccessException e) {
+      String msg =
+          String.format(
+              "An error occurred during read operation on tables for domainId=[%s] iuv=[%s]"
+                  + " ccp=[%s]",
+              domainId, iuv, ccp);
+      throw new BizEventSyncException(msg, e);
+    }
+    return bizEvent;
+  }
+
+  public BizEvent readNewModelPaymentPositionFromHistoric(ReceiptEventInfo receiptEvent) {
+
+    BizEvent bizEvent;
+    LocalDateTime insertedTimestamp =
+        receiptEvent.getInsertedTimestamp().truncatedTo(ChronoUnit.DAYS);
+    LocalDateTime minDate = insertedTimestamp;
+    LocalDateTime maxDate = insertedTimestamp.plusDays(1);
+    String paymentToken = receiptEvent.getPaymentToken();
+
+    try {
+      Optional<PositionPayment> positionPaymentOpt =
+          this.historicPaymentPositionRepository.readByPaymentTokenInTimeSlot(
+              minDate, maxDate, paymentToken);
+      if (positionPaymentOpt.isEmpty()) {
+        String msg =
+            String.format(
+                "No valid record found in POSITION_PAYMENT table for paymentToken=[%s] in"
+                    + " range=[%s-%s]",
+                paymentToken, minDate, maxDate);
+        throw new BizEventSyncException(msg);
+      }
+
+      PositionPayment positionPayment = positionPaymentOpt.get();
+      Long totalNotices = 1L;
+      if ("v2".equalsIgnoreCase(positionPayment.getCloseVersion())) {
+        totalNotices =
+            this.historicPaymentPositionRepository.countPositionPaymentsByTransactionId(
+                minDate, maxDate, positionPayment.getTransactionId());
+      }
+
+      List<PositionTransfer> positionTransfers =
+          this.historicPositionTransferRepository.readByPositionPayment(
+              positionPayment.getId(), minDate);
+      if (positionTransfers.isEmpty()) {
+        String msg =
+            String.format(
+                "No valid record found in POSITION_TRANSFER table for FK_POSITION_PAYMENT=[%s] with"
+                    + " inserted timestamp > [%s]",
+                positionPayment.getId(), minDate);
+        throw new BizEventSyncException(msg);
+      }
+
+      bizEvent =
+          BizEventMapper.fromNewModel(
+              positionPayment, positionTransfers, totalNotices, configCacheService.getConfigData());
+
+    } catch (DataAccessException e) {
+      String msg =
+          String.format(
+              "An error occurred during read operation on tables for paymentToken=[%s]",
+              paymentToken);
+      throw new BizEventSyncException(msg, e);
+    }
+
+    return bizEvent;
+  }
+
+  public BizEvent readOldModelPaymentPositionFromHistoric(ReceiptEventInfo receiptEvent) {
+
+    BizEvent bizEvent;
+    String domainId = receiptEvent.getDomainId();
+    String iuv = receiptEvent.getIuv();
+    String ccp = receiptEvent.getPaymentToken();
+    LocalDate lowerBound = receiptEvent.getInsertedTimestamp().toLocalDate();
+    LocalDate upperBound = lowerBound.plusDays(1);
+
+    try {
+      Optional<Rpt> rptOpt =
+          this.historicRptRepository.readByUniqueIdentifier(
+              lowerBound, upperBound, domainId, iuv, ccp);
+      if (rptOpt.isEmpty()) {
+        String msg =
+            String.format(
+                "No valid record found in RPT table for domainId=[%s] iuv=[%s] ccp=[%s]",
+                domainId, iuv, ccp);
+        throw new BizEventSyncException(msg);
+      }
+      Rpt rpt = rptOpt.get();
+
+      Optional<Rt> rtOpt =
+          this.historicRtRepository.readByUniqueIdentifier(
+              lowerBound, upperBound, domainId, iuv, ccp);
+      if (rtOpt.isEmpty()) {
+        String msg =
+            String.format(
+                "No valid record found in RT table for domainId=[%s] iuv=[%s] ccp=[%s]",
+                domainId, iuv, ccp);
+        throw new BizEventSyncException(msg);
+      }
+      Rt rt = rtOpt.get();
+
+      Long rptId = rpt.getId();
+      List<RptSoggetti> rptSubjects = this.historicRptSoggettiRepository.readByRptId(rptId);
+      List<RptVersamenti> rptTransfers = this.historicRptVersamentiRepository.readByRptId(rptId);
 
       bizEvent =
           BizEventMapper.fromOldModel(
