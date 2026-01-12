@@ -22,7 +22,7 @@
         <postgresql-version>42.5.5</postgresql-version>
     </properties>
 
-    <version>0.2.0-1-fix-prod-helm</version>
+    <version>0.2.1</version>
 
     <dependencies>
         <dependency>
