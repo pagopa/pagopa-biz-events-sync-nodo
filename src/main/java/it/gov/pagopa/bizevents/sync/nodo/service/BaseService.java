@@ -38,8 +38,8 @@ public class BaseService {
         .name(name)
         .version(version)
         .environment(environment)
-        .primaryDb(healthCheckRepository.health())
-        .historicDb(historicDBHealthCheckRepository.health())
+        .primaryDb(healthCheckRepository == null ? "disabled" : healthCheckRepository.health())
+        .historicDb(historicDBHealthCheckRepository == null ? "disabled" : historicDBHealthCheckRepository.health())
         .build();
   }
 }
