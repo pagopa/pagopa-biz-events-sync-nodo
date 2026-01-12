@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-biz-events-sync-nodo
-    tag: "0.2.0"
+    tag: "0.2.0-1-fix-prod-helm"
     pullPolicy: Always
   livenessProbe:
     httpGet:
@@ -115,7 +115,7 @@ microservice-chart: &microservice-chart
     PRIMARY_DATASOURCE_HIKARI_CONNECTIONTIMEOUT: '60000'
     PRIMARY_DATASOURCE_HIKARI_KEEPALIVETIME: '30000'
     PRIMARY_DATASOURCE_HIKARI_MAXLIFETIME: '1800000'
-    PRIMARY_DATASOURCE_SCHEMA: 'NODO_ONLINE'
+    PRIMARY_DATASOURCE_SCHEMA: 'nodo_online'
     #   PRIMARY_DATASOURCE_URL: "jdbc:postgresql://db-postgres-ndp-prf.u.db-nodo-pagamenti.com:6432/ndpspcq_ro?prepareThreshold=0&currentSchema=NODO4_ONLINE"
     PRIMARY_DATASOURCE_URL: "jdbc:postgresql://10.6.52.94:6432/ndpspca_ro"
     PRIMARY_DATASOURCE_USERNAME: 'biz_pagopa_sv'
