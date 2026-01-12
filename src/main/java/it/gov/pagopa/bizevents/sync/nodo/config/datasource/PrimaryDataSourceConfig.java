@@ -41,6 +41,9 @@ public class PrimaryDataSourceConfig {
     @Value("${spring.datasource.primary.hibernate.dialect}")
     private String primaryDialect;
 
+    @Value("${spring.datasource.primary.schema}")
+    private String primarySchema;
+
     @Primary
     @Bean
     @ConfigurationProperties("spring.datasource.primary")
@@ -57,6 +60,7 @@ public class PrimaryDataSourceConfig {
                 .type(HikariDataSource.class)
                 .build();
         build.setPoolName("primary");
+        build.setSchema(primarySchema);
         return build;
     }
 

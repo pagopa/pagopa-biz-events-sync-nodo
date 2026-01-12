@@ -83,7 +83,7 @@ public class BizEventsReaderService {
     long numberOfFirstPayOldModelReceipts =
         this.rtRepository.countFirstRPTsByTimeSlot(
             lowerBoundDate.toLocalDate(),
-            upperBoundDate.toLocalDate(),
+            upperBoundDate.toLocalDate().plusDays(1),
             lowerBoundDate,
             upperBoundDate);
 
@@ -92,7 +92,7 @@ public class BizEventsReaderService {
     long numberOfRetriedOldModelReceipts =
         this.rtRepository.countRetriedRPTsByTimeSlot(
             lowerBoundDate.toLocalDate(),
-            upperBoundDate.toLocalDate(),
+            upperBoundDate.toLocalDate().plusDays(1),
             lowerBoundDate,
             upperBoundDate);
 
@@ -109,7 +109,7 @@ public class BizEventsReaderService {
     long numberOfNewModelReceipts =
         this.positionReceiptRepository.countByTimeSlot(
             lowerBoundDate.toLocalDate(),
-            upperBoundDate.toLocalDate(),
+            upperBoundDate.toLocalDate().plusDays(1),
             lowerBoundDate,
             upperBoundDate);
     log.info(
@@ -148,14 +148,14 @@ public class BizEventsReaderService {
       Set<ReceiptEventInfo> newModelReceipts =
           this.positionReceiptRepository.readReceiptsInTimeSlot(
               lowerBoundDate.toLocalDate(),
-              upperBoundDate.toLocalDate(),
+              upperBoundDate.toLocalDate().plusDays(1),
               lowerBoundDate,
               upperBoundDate);
       log.info("Found [{}] new model receipts in analyzed time slot...", newModelReceipts.size());
       Set<ReceiptEventInfo> oldModelReceipts =
           this.rtRepository.readReceiptsInTimeSlot(
               lowerBoundDate.toLocalDate(),
-              upperBoundDate.toLocalDate(),
+              upperBoundDate.toLocalDate().plusDays(1),
               lowerBoundDate,
               upperBoundDate);
       log.info("Found [{}] old model receipts in analyzed time slot...", oldModelReceipts.size());
