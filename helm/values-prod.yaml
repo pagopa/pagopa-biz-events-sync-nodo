@@ -115,8 +115,8 @@ microservice-chart: &microservice-chart
     PRIMARY_DATASOURCE_HIKARI_CONNECTIONTIMEOUT: '60000'
     PRIMARY_DATASOURCE_HIKARI_KEEPALIVETIME: '30000'
     PRIMARY_DATASOURCE_HIKARI_MAXLIFETIME: '1800000'
-    PRIMARY_DATASOURCE_SCHEMA: 'NODO_ONLINE'
-    PRIMARY_DATASOURCE_URL: "jdbc:postgresql://db-postgres-ndp.p.db-nodo-pagamenti.com:6432/ndpspcp_ro?prepareThreshold=0&currentSchema=nodo_online"
+    PRIMARY_DATASOURCE_SCHEMA: 'nodo_online'
+    PRIMARY_DATASOURCE_URL: "jdbc:postgresql://db-postgres-ndp.p.db-nodo-pagamenti.com:6432/ndpspcp_ro"
     PRIMARY_DATASOURCE_USERNAME: 'biz_pagopa_sv'
     SPRING_DATASOURCE_LOGGING_LEVEL_SQL: 'OFF'
     SPRING_DATASOURCE_LOGGING_LEVEL_SQL_QUERY: 'OFF'
