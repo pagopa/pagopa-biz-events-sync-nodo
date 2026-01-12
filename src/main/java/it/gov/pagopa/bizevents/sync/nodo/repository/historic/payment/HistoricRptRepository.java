@@ -13,7 +13,7 @@ public interface HistoricRptRepository extends JpaRepository<Rpt, Long> {
       """
       SELECT rpt
       FROM Rpt rpt
-      WHERE (rpt.insertedTimestamp >= :minDate AND rpt.insertedTimestamp < :maxDate)
+      WHERE (CAST(rpt.insertedTimestamp AS DATE) >= :minDate AND CAST(rpt.insertedTimestamp AS DATE) < :maxDate)
         AND rpt.identDominio = :domainId
         AND rpt.iuv = :iuv
         AND rpt.ccp = :ccp
