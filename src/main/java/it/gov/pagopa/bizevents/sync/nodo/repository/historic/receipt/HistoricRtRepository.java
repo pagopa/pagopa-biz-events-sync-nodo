@@ -19,7 +19,7 @@ public interface HistoricRtRepository extends JpaRepository<Rt, Long> {
           rt.ccp AS paymentToken,
           rt.identDominio AS domainId,
           rt.insertedTimestamp AS insertedTimestamp,
-          'OLD'
+          "OLD" as version
       )
       FROM Rt rt
       JOIN Rpt rpt

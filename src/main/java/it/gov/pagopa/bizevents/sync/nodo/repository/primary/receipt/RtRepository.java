@@ -19,17 +19,17 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
           rt.ccp AS paymentToken,
           rt.identDominio AS domainId,
           rt.insertedTimestamp AS insertedTimestamp,
-          'OLD'
+          "OLD" as version
       )
       FROM Rt rt
-      WHERE (CAST(rt.insertedTimestamp AS DATE) >= :minDate AND CAST(rt.insertedTimestamp AS DATE) < :maxDate)
+      WHERE (rt.insertedTimestamp >= :minDate AND rt.insertedTimestamp < :maxDate)
         AND rt.esito = 'ESEGUITO'
         AND (rt.dataRicevuta >= :minDateTime AND rt.dataRicevuta < :maxDateTime)
         AND rt.generataDa = 'PSP'
       """)
   Set<ReceiptEventInfo> readReceiptsInTimeSlot(
-      @Param("minDate") LocalDate minDate,
-      @Param("maxDate") LocalDate maxDate,
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
       @Param("minDateTime") LocalDateTime minDateTime,
       @Param("maxDateTime") LocalDateTime maxDateTime);
 
@@ -40,7 +40,7 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
           rt.ccp AS paymentToken,
           rt.identDominio AS domainId,
           rt.insertedTimestamp AS insertedTimestamp,
-          'OLD'
+          "OLD" as version
       )
       FROM Rt rt
       JOIN Rpt rpt
@@ -63,14 +63,14 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
       """
       SELECT rt
       FROM Rt rt
-      WHERE (CAST(rt.insertedTimestamp AS DATE) >= :minDate AND CAST(rt.insertedTimestamp AS DATE) < :maxDate)
+      WHERE (rt.insertedTimestamp >= :minDate AND rt.insertedTimestamp < :maxDate)
         AND rt.identDominio = :domainId
         AND rt.iuv = :iuv
         AND rt.ccp = :ccp
       """)
   Optional<Rt> readByUniqueIdentifier(
-      @Param("minDate") LocalDate minDate,
-      @Param("maxDate") LocalDate maxDate,
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
       @Param("domainId") String domainId,
       @Param("iuv") String iuv,
       @Param("ccp") String ccp);
@@ -81,16 +81,16 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
       FROM Rt rt
       JOIN Rpt rpt
         ON rpt.identDominio = rt.identDominio AND rpt.iuv = rt.iuv AND rpt.ccp = rt.ccp
-      WHERE (CAST(rt.insertedTimestamp AS DATE) >= :minDate AND CAST(rt.insertedTimestamp AS DATE) < :maxDate)
-        AND (CAST(rpt.insertedTimestamp AS DATE) >= :minDate AND CAST(rpt.insertedTimestamp AS DATE) < :maxDate)
+      WHERE (rt.insertedTimestamp >= :minDate AND rt.insertedTimestamp < :maxDate)
+        AND (rpt.insertedTimestamp >= :minDate AND rpt.insertedTimestamp < :maxDate)
         AND rt.esito = 'ESEGUITO'
         AND (rt.dataRicevuta >= :minDateTime AND rt.dataRicevuta < :maxDateTime)
         AND (rpt.flagSeconda = 'N' OR rpt.flagSeconda IS NULL)
         AND rt.generataDa = 'PSP'
       """)
   long countFirstRPTsByTimeSlot(
-      @Param("minDate") LocalDate minDate,
-      @Param("maxDate") LocalDate maxDate,
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
       @Param("minDateTime") LocalDateTime minDateTime,
       @Param("maxDateTime") LocalDateTime maxDateTime);
 
@@ -100,16 +100,16 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
       FROM Rt rt
       JOIN Rpt rpt
         ON rpt.identDominio = rt.identDominio AND rpt.iuv = rt.iuv AND rpt.ccp = rt.ccp
-      WHERE (CAST(rt.insertedTimestamp AS DATE) >= :minDate AND CAST(rt.insertedTimestamp AS DATE) < :maxDate)
-        AND (CAST(rpt.insertedTimestamp AS DATE) >= :minDate AND CAST(rpt.insertedTimestamp AS DATE) < :maxDate)
+      WHERE (rt.insertedTimestamp >= :minDate AND rt.insertedTimestamp < :maxDate)
+        AND (rpt.insertedTimestamp >= :minDate AND rpt.insertedTimestamp < :maxDate)
         AND rt.esito = 'ESEGUITO'
         AND (rt.dataRicevuta >= :minDateTime AND rt.dataRicevuta < :maxDateTime)
         AND rpt.flagSeconda = 'Y'
         AND rt.generataDa = 'PSP'
       """)
   long countRetriedRPTsByTimeSlot(
-      @Param("minDate") LocalDate minDate,
-      @Param("maxDate") LocalDate maxDate,
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
       @Param("minDateTime") LocalDateTime minDateTime,
       @Param("maxDateTime") LocalDateTime maxDateTime);
 }
