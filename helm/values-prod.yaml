@@ -92,7 +92,6 @@ microservice-chart: &microservice-chart
     COSMOS_QUERY_METRICS: 'false'
     COSMOS_READ_REGION: 'North Europe'
     CRONJOB_SCHEDULE_ENABLED: 'true'
-    DATABASE_SCHEMA: 'nodo_online'
     EVENTHUB_LOGGING_LEVEL: 'ERROR'
     EVENTHUB_PRODUCER_NAME: 'nodo-dei-pagamenti-biz-evt'
     HISTORIC_DATASOURCE_DRIVER: 'oracle.jdbc.OracleDriver'
@@ -116,7 +115,7 @@ microservice-chart: &microservice-chart
     PRIMARY_DATASOURCE_HIKARI_KEEPALIVETIME: '30000'
     PRIMARY_DATASOURCE_HIKARI_MAXLIFETIME: '1800000'
     PRIMARY_DATASOURCE_SCHEMA: 'nodo_online'
-    PRIMARY_DATASOURCE_URL: "jdbc:postgresql://db-postgres-ndp.p.db-nodo-pagamenti.com:6432/ndpspcp_ro?prepareThreshold=0&currentSchema=nodo_online"
+    PRIMARY_DATASOURCE_URL: "jdbc:postgresql://db-postgres-ndp.p.db-nodo-pagamenti.com:6432/ndpspcp_ro"
     PRIMARY_DATASOURCE_USERNAME: 'biz_pagopa_sv'
     SPRING_DATASOURCE_LOGGING_LEVEL_SQL: 'OFF'
     SPRING_DATASOURCE_LOGGING_LEVEL_SQL_QUERY: 'OFF'
