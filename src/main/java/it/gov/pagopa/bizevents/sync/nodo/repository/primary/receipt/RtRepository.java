@@ -19,7 +19,7 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
           rt.ccp AS paymentToken,
           rt.identDominio AS domainId,
           rt.insertedTimestamp AS insertedTimestamp,
-          "OLD" as version
+          "OLD" AS version
       )
       FROM Rt rt
       WHERE (rt.insertedTimestamp >= :minDate AND rt.insertedTimestamp < :maxDate)
@@ -40,7 +40,7 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
           rt.ccp AS paymentToken,
           rt.identDominio AS domainId,
           rt.insertedTimestamp AS insertedTimestamp,
-          "OLD" as version
+          "OLD" AS version
       )
       FROM Rt rt
       JOIN Rpt rpt

@@ -108,7 +108,7 @@ public class BizEventsReaderService {
     // Retrieve the count of receipts generated for new payment models for the time slot passed
     long numberOfNewModelReceipts =
         this.positionReceiptRepository.countByTimeSlot(
-            lowerBoundDate,
+            lowerBoundDate.toLocalDate().atStartOfDay(),
             upperBoundDate.plusDays(1),
             lowerBoundDate,
             upperBoundDate);

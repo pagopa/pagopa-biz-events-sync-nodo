@@ -18,7 +18,7 @@ public interface PositionReceiptRepository extends JpaRepository<PositionReceipt
           pr.paymentToken AS paymentToken,
           pr.paFiscalCode AS domainId,
           pr.insertedTimestamp AS insertedTimestamp,
-          "NEW" as version
+          "NEW" AS version
       )
       FROM PositionReceipt pr
       WHERE (pr.insertedTimestamp >= :minDate AND pr.insertedTimestamp < :maxDate)
@@ -37,7 +37,7 @@ public interface PositionReceiptRepository extends JpaRepository<PositionReceipt
           pr.paymentToken AS paymentToken,
           pr.paFiscalCode AS domainId,
           pr.insertedTimestamp AS insertedTimestamp,
-          "NEW" as version
+          "NEW" AS version
       )
       FROM PositionReceipt pr
       WHERE pr.paymentDateTime >= :minDate
