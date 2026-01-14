@@ -19,7 +19,7 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
           rt.ccp AS paymentToken,
           rt.identDominio AS domainId,
           rt.insertedTimestamp AS insertedTimestamp,
-          it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion.OLD AS version
+          'OLD'
       )
       FROM Rt rt
       WHERE (CAST(rt.insertedTimestamp AS DATE) >= :minDate AND CAST(rt.insertedTimestamp AS DATE) < :maxDate)
@@ -40,7 +40,7 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
           rt.ccp AS paymentToken,
           rt.identDominio AS domainId,
           rt.insertedTimestamp AS insertedTimestamp,
-          it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion.OLD AS version
+          'OLD'
       )
       FROM Rt rt
       JOIN Rpt rpt

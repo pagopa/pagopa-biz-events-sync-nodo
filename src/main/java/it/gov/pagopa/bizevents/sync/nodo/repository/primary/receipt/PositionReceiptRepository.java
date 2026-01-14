@@ -18,7 +18,7 @@ public interface PositionReceiptRepository extends JpaRepository<PositionReceipt
           pr.paymentToken AS paymentToken,
           pr.paFiscalCode AS domainId,
           pr.insertedTimestamp AS insertedTimestamp,
-          it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion.NEW AS version
+          'NEW'
       )
       FROM PositionReceipt pr
       WHERE (CAST(pr.insertedTimestamp AS DATE) >= :minDate AND CAST(pr.insertedTimestamp AS DATE) < :maxDate)
@@ -37,7 +37,7 @@ public interface PositionReceiptRepository extends JpaRepository<PositionReceipt
           pr.paymentToken AS paymentToken,
           pr.paFiscalCode AS domainId,
           pr.insertedTimestamp AS insertedTimestamp,
-          it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion.NEW AS version
+          'NEW'
       )
       FROM PositionReceipt pr
       WHERE pr.paymentDateTime >= :minDate
