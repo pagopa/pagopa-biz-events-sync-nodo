@@ -87,6 +87,8 @@ public class BizEventSynchronizerService {
         log.error(e.getCustomMessage(), e);
         errorDuringComputation = true;
       }
+    } else {
+        log.info("A valid BizEvent for domainId [{}] and notice number [{}] is already present!", domainId, noticeNumber);
     }
 
     // Generate final report
