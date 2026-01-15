@@ -210,6 +210,10 @@ public class BizEventsReaderService {
       boolean isHistoricized =
           LocalDateTime.now().minusDays(historicizationAfterInDays).isAfter(upperLimitDate);
 
+      if (isHistoricized && this.historicPositionReceiptRepository == null) {
+          throw new BizEventSyncException("Required a search in historical DB but it is disabled by configuration.");
+      }
+
       // Searching from Position Receipt receipts table (New Model)
       Set<ReceiptEventInfo> newModelReceipts =
           isHistoricized
