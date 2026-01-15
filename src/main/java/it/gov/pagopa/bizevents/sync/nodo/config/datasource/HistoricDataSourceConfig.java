@@ -59,6 +59,7 @@ public class HistoricDataSourceConfig {
 
         Map<String, Object> jpaProps = new HashMap<>();
         jpaProps.put("hibernate.dialect", historicDialect);
+        jpaProps.put("hibernate.default_schema", historicSchema);
         jpaProps.put("hibernate.hbm2ddl.auto", "none");
         jpaProps.put("hibernate.archive.autodetection", "none");
         jpaProps.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl");
