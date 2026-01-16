@@ -145,6 +145,13 @@ public class BizEventsReaderService {
     try {
 
       boolean isHistoricized = isHistoricizedReceipt(upperBoundDate);
+      log.info(
+          "Executing analysis on insert timestamp [{} - {}] for payment in date [{} - {}]. Check on historic DB? [{}]",
+          lowerBoundDate.toLocalDate().atStartOfDay(),
+          upperBoundDate.plusDays(1),
+          lowerBoundDate,
+          upperBoundDate,
+          isHistoricized);
 
       //
       Set<ReceiptEventInfo> newModelReceipts =
@@ -266,13 +273,12 @@ public class BizEventsReaderService {
     return ndpReceipts;
   }
 
-    private boolean isHistoricizedReceipt(LocalDateTime upperLimitDate) {
-        boolean isHistoricized =
-            LocalDateTime.now().minusDays(historicizationAfterInDays).isAfter(upperLimitDate);
+  public boolean isHistoricizedReceipt(LocalDateTime upperLimitDate) {
 
-        if (isHistoricized && this.historicPositionReceiptRepository == null) {
-            throw new BizEventSyncException("Required a search in historical DB but it is disabled by configuration.");
-        }
-        return isHistoricized;
+    boolean isHistoricized = LocalDateTime.now().minusDays(historicizationAfterInDays).isAfter(upperLimitDate);
+    if (isHistoricized && this.historicPositionReceiptRepository == null) {
+      throw new BizEventSyncException("Required a search in historical DB but it is disabled by configuration.");
     }
+    return isHistoricized;
+  }
 }
