@@ -5,14 +5,20 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.bizevents.sync.nodo.repository.BizEventsRepository;
-import it.gov.pagopa.bizevents.sync.nodo.service.BizEventSynchronizerService;
-import it.gov.pagopa.bizevents.sync.nodo.service.EventHubSenderService;
+import it.gov.pagopa.bizevents.sync.nodo.repository.historic.receipt.HistoricPositionReceiptRepository;
+import it.gov.pagopa.bizevents.sync.nodo.repository.historic.receipt.HistoricRtRepository;
+import it.gov.pagopa.bizevents.sync.nodo.repository.primary.receipt.PositionReceiptRepository;
+import it.gov.pagopa.bizevents.sync.nodo.repository.primary.receipt.RtRepository;
+import it.gov.pagopa.bizevents.sync.nodo.service.*;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -30,9 +36,23 @@ class OpenApiGenerationTest {
 
   @MockBean private BizEventSynchronizerService bizEventSynchronizerService;
 
+  @MockBean private BizEventsRepository bizEventsRepository;
+
+  @MockBean private BizEventsReaderService bizEventsReaderService;
+
+  @MockBean private PaymentPositionReaderService paymentPositionReaderService;
+
+  @MockBean private EcommerceHelpdeskReaderService ecommerceHelpdeskReaderService;
+
   @MockBean private EventHubSenderService eventHubSenderService;
 
-  @MockBean private BizEventsRepository bizEventsRepository;
+  @MockBean private PositionReceiptRepository positionReceiptRepository;
+
+  @MockBean private RtRepository rtRepository;
+
+  @MockBean private HistoricPositionReceiptRepository historicPositionReceiptRepository;
+
+  @MockBean private HistoricRtRepository historicRtRepository;
 
   @Test
   void swaggerSpringPlugin() throws Exception {
