@@ -144,20 +144,35 @@ public class BizEventsReaderService {
 
     try {
 
+      boolean isHistoricized = isHistoricizedReceipt(upperBoundDate);
+
       //
       Set<ReceiptEventInfo> newModelReceipts =
-          this.positionReceiptRepository.readReceiptsInTimeSlot(
-              lowerBoundDate.toLocalDate().atStartOfDay(),
-              upperBoundDate.plusDays(1),
-              lowerBoundDate,
-              upperBoundDate);
+          isHistoricized
+              ? this.historicPositionReceiptRepository.readReceiptsInTimeSlot(
+                  lowerBoundDate.toLocalDate().atStartOfDay(),
+                  upperBoundDate.plusDays(1),
+                  lowerBoundDate,
+                  upperBoundDate)
+              : this.positionReceiptRepository.readReceiptsInTimeSlot(
+                  lowerBoundDate.toLocalDate().atStartOfDay(),
+                  upperBoundDate.plusDays(1),
+                  lowerBoundDate,
+                  upperBoundDate);
       log.info("Found [{}] new model receipts in analyzed time slot...", newModelReceipts.size());
+
       Set<ReceiptEventInfo> oldModelReceipts =
-          this.rtRepository.readReceiptsInTimeSlot(
-              lowerBoundDate.toLocalDate().atStartOfDay(),
-              upperBoundDate.plusDays(1),
-              lowerBoundDate,
-              upperBoundDate);
+          isHistoricized
+              ? this.historicRtRepository.readReceiptsInTimeSlot(
+                  lowerBoundDate.toLocalDate().atStartOfDay(),
+                  upperBoundDate.plusDays(1),
+                  lowerBoundDate,
+                  upperBoundDate)
+              : this.rtRepository.readReceiptsInTimeSlot(
+                  lowerBoundDate.toLocalDate().atStartOfDay(),
+                  upperBoundDate.plusDays(1),
+                  lowerBoundDate,
+                  upperBoundDate);
       log.info("Found [{}] old model receipts in analyzed time slot...", oldModelReceipts.size());
 
       //
@@ -207,14 +222,9 @@ public class BizEventsReaderService {
     Set<ReceiptEventInfo> ndpReceipts = new HashSet<>();
     try {
 
-      boolean isHistoricized =
-          LocalDateTime.now().minusDays(historicizationAfterInDays).isAfter(upperLimitDate);
+      boolean isHistoricized = isHistoricizedReceipt(upperLimitDate);
 
-      if (isHistoricized && this.historicPositionReceiptRepository == null) {
-          throw new BizEventSyncException("Required a search in historical DB but it is disabled by configuration.");
-      }
-
-      // Searching from Position Receipt receipts table (New Model)
+        // Searching from Position Receipt receipts table (New Model)
       Set<ReceiptEventInfo> newModelReceipts =
           isHistoricized
               ? this.historicPositionReceiptRepository
@@ -255,4 +265,14 @@ public class BizEventsReaderService {
 
     return ndpReceipts;
   }
+
+    private boolean isHistoricizedReceipt(LocalDateTime upperLimitDate) {
+        boolean isHistoricized =
+            LocalDateTime.now().minusDays(historicizationAfterInDays).isAfter(upperLimitDate);
+
+        if (isHistoricized && this.historicPositionReceiptRepository == null) {
+            throw new BizEventSyncException("Required a search in historical DB but it is disabled by configuration.");
+        }
+        return isHistoricized;
+    }
 }
