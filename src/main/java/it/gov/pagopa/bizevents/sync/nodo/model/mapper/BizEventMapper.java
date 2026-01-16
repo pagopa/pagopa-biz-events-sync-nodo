@@ -221,8 +221,8 @@ public class BizEventMapper {
     } catch (Exception e) {
       String msg =
           String.format(
-              "An error occurred during mapping of new model payment with ID=[%s] to Biz Event. %s",
-              pp.getId(), e);
+              "An error occurred during mapping of new model payment with NAV=[%s], domainId=[%s], ID=[%s] to Biz Event. %s",
+                  pp.getNoticeId(), pp.getPaFiscalCode(), pp.getId(), e);
       throw new BizEventSyncException(msg, e);
     }
 
@@ -400,8 +400,8 @@ public class BizEventMapper {
     } catch (Exception e) {
       String msg =
           String.format(
-              "An error occurred during mapping of old model payment with ID=[%s] to Biz Event",
-              rpt.getId());
+              "An error occurred during mapping of old model payment with with IUV=[%s], domainId=[%s], ID=[%s] to Biz Event",
+              rpt.getIuv(), rpt.getIdentDominio(), rpt.getId());
       throw new BizEventSyncException(msg, e);
     }
 
