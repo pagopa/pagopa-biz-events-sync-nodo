@@ -249,7 +249,7 @@ public class BizEventMapper {
       throw new BizEventSyncException(msg);
     }
 
-    CtRicevutaTelematica decodedRT = extractRT(CommonUtility.convertBlob(rt.getRtXml().getXmlContent()));
+    CtRicevutaTelematica decodedRT = extractRT(rt.getRtXml().getXmlContent());
     List<CtDatiSingoloPagamentoRT> datiSingoloPagamento = new ArrayList<>();
     if (decodedRT != null) {
       datiSingoloPagamento = decodedRT.getDatiPagamento().getDatiSingoloPagamento();

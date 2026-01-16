@@ -34,16 +34,9 @@ public class RtXml {
   @Column(name = "TIPO_FIRMA")
   private String tipoFirma;
 
-  /*
-  @Lob
-  @Basic(fetch = LAZY)
-  @JdbcTypeCode(Types.BINARY)
-  @Column(name = "XML_CONTENT")
-  private Blob xmlContent;
-   */
   @Lob
   @Column(name = "XML_CONTENT")
-  private byte[] xmlContent;
+  private String xmlContent;
 
   @Column(name = "INSERTED_TIMESTAMP")
   private Timestamp insertedTimestamp;

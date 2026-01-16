@@ -128,16 +128,9 @@ public class PositionPayment {
   @Column(name = "BUNDLE_PA_ID")
   private String bundlePaId;
 
-  /*
-  @Lob
-  @Basic(fetch = LAZY)
-  @JdbcTypeCode(Types.BINARY)
-  @Column(name = "PM_INFO")
-  private Blob pmInfo;
-  */
   @Lob
   @Column(name = "PM_INFO")
-  private byte[] pmInfo;
+  private byte[] pmInfo; //blob;bytea
 
   @Column(name = "MBD")
   private String mbd;

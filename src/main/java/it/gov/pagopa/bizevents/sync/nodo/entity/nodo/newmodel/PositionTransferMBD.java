@@ -48,13 +48,6 @@ public class PositionTransferMBD {
   @Column(name = "UPDATED_BY")
   private String updatedBy;
 
-  /*
-  @Lob
-  @Basic(fetch = LAZY)
-  @JdbcTypeCode(Types.BINARY)
-  @Column(name = "XML_CONTENT")
-  private Blob xmlContent;
-   */
   @Lob
   @Column(name = "XML_CONTENT")
   private byte[] xmlContent;
