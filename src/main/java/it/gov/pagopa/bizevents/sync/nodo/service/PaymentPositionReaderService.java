@@ -151,7 +151,12 @@ public class PaymentPositionReaderService {
 
     try {
       Optional<Rpt> rptOpt =
-          this.rptRepository.readByUniqueIdentifier(lowerBound, upperBound, domainId, iuv, ccp);
+          this.rptRepository.readByUniqueIdentifier(
+                  lowerBound.atStartOfDay(),
+                  upperBound.atStartOfDay(),
+                  domainId,
+                  iuv,
+                  ccp);
       if (rptOpt.isEmpty()) {
         String msg =
             String.format(
@@ -162,7 +167,12 @@ public class PaymentPositionReaderService {
       Rpt rpt = rptOpt.get();
 
       Optional<Rt> rtOpt =
-          this.rtRepository.readByUniqueIdentifier(lowerBound, upperBound, domainId, iuv, ccp);
+          this.rtRepository.readByUniqueIdentifier(
+                  lowerBound.atStartOfDay(),
+                  upperBound.atStartOfDay(),
+                  domainId,
+                  iuv,
+                  ccp);
       if (rtOpt.isEmpty()) {
         String msg =
             String.format(
@@ -260,7 +270,11 @@ public class PaymentPositionReaderService {
     try {
       Optional<Rpt> rptOpt =
           this.historicRptRepository.readByUniqueIdentifier(
-              lowerBound, upperBound, domainId, iuv, ccp);
+              lowerBound.atStartOfDay(),
+              upperBound.atStartOfDay(),
+              domainId,
+              iuv,
+              ccp);
       if (rptOpt.isEmpty()) {
         String msg =
             String.format(
@@ -272,7 +286,11 @@ public class PaymentPositionReaderService {
 
       Optional<Rt> rtOpt =
           this.historicRtRepository.readByUniqueIdentifier(
-              lowerBound, upperBound, domainId, iuv, ccp);
+              lowerBound.atStartOfDay(),
+              upperBound.atStartOfDay(),
+              domainId,
+              iuv,
+              ccp);
       if (rtOpt.isEmpty()) {
         String msg =
             String.format(

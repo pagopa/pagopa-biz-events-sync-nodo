@@ -34,20 +34,20 @@ public class SyncController {
   public ResponseEntity<SyncReport> manuallySynchronize(
       @NotNull
           @RequestParam(name = "dateFrom")
-          @Schema(example = "2025-01-01T12:00:00", description = "Lower limit date")
+          @Schema(example = "2025-01-01T12:00:00", description = "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
           LocalDateTime dateFrom,
       @NotNull
           @RequestParam(name = "dateTo")
-          @Schema(example = "2025-01-01T21:00:00", description = "Upper limit date")
+          @Schema(example = "2025-01-01T21:00:00", description = "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
           LocalDateTime dateTo,
       @RequestParam(name = "timeSlotSize", defaultValue = "-1")
           @Schema(
               example = "10",
               description =
-                  "Override default time slot size in minutes. The values must be greater than 1")
+                  "Override default time slot size in minutes. The values must be greater than 1. Default value is 60")
           int overriddenTimeSlotSize,
       @RequestParam(name = "showBizEvents", defaultValue = "true")
-          @Schema(example = "true", description = "Show generated biz events data in final report")
+          @Schema(example = "true", description = "Show generated BizEvents data in final report")
           boolean showBizEvents) {
 
     log.info("Invoking BizEvent-to-Nodo synchronization via HTTP manual trigger!");
@@ -63,18 +63,18 @@ public class SyncController {
 
   @Operation(
       summary = "Manually synchronize single BizEvents",
-      description = "Execute a synchronization for single event, manually starting the operation",
+      description = "Execute a synchronization for single event, manually starting the operation.",
       tags = {"Manual"})
   @GetMapping(value = "/synchronize/single")
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<SyncReport> manuallySynchronizeSingleEvent(
       @NotNull
           @RequestParam(name = "dateFrom")
-          @Schema(example = "2025-01-01T12:00:00", description = "Lower limit date")
+          @Schema(example = "2025-01-01T12:00:00", description = "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
           LocalDateTime dateFrom,
       @NotNull
           @RequestParam(name = "dateTo")
-          @Schema(example = "2025-01-01T21:00:00", description = "Upper limit date")
+          @Schema(example = "2025-01-01T21:00:00", description = "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
           LocalDateTime dateTo,
       @RequestParam(name = "domainId")
           @Schema(example = "77777777777", description = "Creditor institution identifier")

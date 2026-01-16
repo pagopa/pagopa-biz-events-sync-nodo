@@ -30,6 +30,20 @@ public class ReceiptEventInfo {
       String paymentToken,
       String domainId,
       LocalDateTime insertedTimestamp,
+      String version) {
+
+    this.iuv = iuv;
+    this.paymentToken = paymentToken;
+    this.domainId = domainId;
+    this.insertedTimestamp = insertedTimestamp;
+    this.version = "NEW".equals(version) ? PaymentModelVersion.NEW : PaymentModelVersion.OLD;
+  }
+
+  public ReceiptEventInfo(
+      String iuv,
+      String paymentToken,
+      String domainId,
+      LocalDateTime insertedTimestamp,
       PaymentModelVersion version) {
 
     this.iuv = iuv;
@@ -38,6 +52,7 @@ public class ReceiptEventInfo {
     this.insertedTimestamp = insertedTimestamp;
     this.version = version;
   }
+
 
   public ReceiptEventInfo(Map<String, Object> rawResults) {
 

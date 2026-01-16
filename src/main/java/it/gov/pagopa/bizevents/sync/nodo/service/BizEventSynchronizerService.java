@@ -6,9 +6,7 @@ import it.gov.pagopa.bizevents.sync.nodo.exception.BizEventSyncException;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion;
 import it.gov.pagopa.bizevents.sync.nodo.model.mapper.BizEventMapper;
-import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReport;
-import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReportRecord;
-import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReportTimeSlot;
+import it.gov.pagopa.bizevents.sync.nodo.model.sync.*;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -59,9 +57,9 @@ public class BizEventSynchronizerService {
       String domainId,
       String noticeNumber) {
 
+    SyncOutcome status = SyncOutcome.GENERATED;
     List<BizEvent> allBizEventsAnalyzed = new LinkedList<>();
     Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents = new HashSet<>();
-    boolean errorDuringComputation = false;
 
     boolean isBizEventMissing =
         bizEventsReaderService.checkIfMissingBizEvent(
@@ -85,19 +83,22 @@ public class BizEventSynchronizerService {
 
       } catch (BizEventSyncException e) {
         log.error(e.getCustomMessage(), e);
-        errorDuringComputation = true;
+        status = SyncOutcome.GENERATION_ERROR;
       }
+    } else {
+        log.info("A valid BizEvent for domainId [{}] and notice number [{}] is already present!", domainId, noticeNumber);
+        status = SyncOutcome.RECEIPT_NOT_FOUND;
     }
 
     // Generate final report
     return generateReport(
+        status,
         allBizEventsAnalyzed,
         receiptsNotConvertedInBizEvents,
         lowerLimitDate,
         upperLimitDate,
         mustSendEventToEvent,
-        true,
-        errorDuringComputation);
+        true);
   }
 
   public SyncReport executeSynchronization(
@@ -106,9 +107,9 @@ public class BizEventSynchronizerService {
       int overriddenTimeSlotSize,
       boolean showEventData) {
 
+    SyncOutcome status = SyncOutcome.GENERATED;
     List<BizEvent> allBizEventsAnalyzed = new LinkedList<>();
     Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents = new HashSet<>();
-    boolean errorDuringComputation = false;
 
     //
     List<Pair<LocalDateTime, LocalDateTime>> timeSlots =
@@ -142,19 +143,19 @@ public class BizEventSynchronizerService {
 
       } catch (BizEventSyncException e) {
         log.error(e.getCustomMessage(), e);
-        errorDuringComputation = true;
+        status = SyncOutcome.GENERATION_ERROR;
       }
     }
 
     // Generate final report
     return generateReport(
+        status,
         allBizEventsAnalyzed,
         receiptsNotConvertedInBizEvents,
         lowerLimitDate,
         upperLimitDate,
         mustSendEventToEvent,
-        showEventData,
-        errorDuringComputation);
+        showEventData);
   }
 
   private void generateNewBizEventsFromReceipts(
@@ -284,17 +285,16 @@ public class BizEventSynchronizerService {
   }
 
   private SyncReport generateReport(
+      SyncOutcome status,
       List<BizEvent> events,
       Set<ReceiptEventInfo> receiptEvents,
       LocalDateTime lowerLimitDate,
       LocalDateTime upperLimitDate,
       boolean sentToEventHub,
-      boolean showEventData,
-      boolean errorDuringComputation) {
+      boolean showEventData) {
 
     log.info("Synchronization ended! Generating report...");
     List<SyncReportRecord> records = new LinkedList<>();
-    boolean onError = errorDuringComputation;
     for (BizEvent bizEvent : events) {
 
       String paymentToken = bizEvent.getPaymentInfo().getPaymentToken();
@@ -326,7 +326,7 @@ public class BizEventSynchronizerService {
                           .from(relatedInfo.getLowerBoundTimeSlot())
                           .to(relatedInfo.getUpperBoundTimeSlot())
                           .build())
-              .syncStatus("GENERATED")
+              .syncStatus(SyncSingleRecordStatus.GENERATED)
               .build());
     }
 
@@ -347,24 +347,24 @@ public class BizEventSynchronizerService {
                           && receiptEvent.getPaymentToken().equals(rec.getPaymentToken()))
               .count();
       if (bizEventsInsertedWithThisTriple == 0) {
-        onError = true;
+        status = status != SyncOutcome.GENERATION_ERROR ? SyncOutcome.PARTIALLY_GENERATED : status;
         records.add(
             SyncReportRecord.builder()
                 .iuv(receiptEvent.getIuv())
                 .domainId(receiptEvent.getDomainId())
                 .paymentToken(receiptEvent.getPaymentToken())
                 .modelVersion(receiptEvent.getVersion())
-                .syncStatus("NOT_INSERTED")
+                .syncStatus(SyncSingleRecordStatus.NOT_INSERTED)
                 .build());
       }
     }
 
     return SyncReport.builder()
+        .status(status)
         .executionTimeSlot(
             SyncReportTimeSlot.builder().from(lowerLimitDate).to(upperLimitDate).build())
         .totalRecords(records.size())
         .sentToEventHub(sentToEventHub)
-        .errorDuringComputation(onError)
         .records(records)
         .build();
   }

@@ -82,8 +82,8 @@ public class BizEventsReaderService {
     // the time slot passed
     long numberOfFirstPayOldModelReceipts =
         this.rtRepository.countFirstRPTsByTimeSlot(
-            lowerBoundDate.toLocalDate(),
-            upperBoundDate.toLocalDate().plusDays(1),
+            lowerBoundDate.toLocalDate().atStartOfDay(),
+            upperBoundDate.plusDays(1),
             lowerBoundDate,
             upperBoundDate);
 
@@ -91,8 +91,8 @@ public class BizEventsReaderService {
     // the time slot passed
     long numberOfRetriedOldModelReceipts =
         this.rtRepository.countRetriedRPTsByTimeSlot(
-            lowerBoundDate.toLocalDate(),
-            upperBoundDate.toLocalDate().plusDays(1),
+            lowerBoundDate.toLocalDate().atStartOfDay(),
+            upperBoundDate.plusDays(1),
             lowerBoundDate,
             upperBoundDate);
 
@@ -108,8 +108,8 @@ public class BizEventsReaderService {
     // Retrieve the count of receipts generated for new payment models for the time slot passed
     long numberOfNewModelReceipts =
         this.positionReceiptRepository.countByTimeSlot(
-            lowerBoundDate.toLocalDate(),
-            upperBoundDate.toLocalDate().plusDays(1),
+            lowerBoundDate.toLocalDate().atStartOfDay(),
+            upperBoundDate.plusDays(1),
             lowerBoundDate,
             upperBoundDate);
     log.info(
@@ -147,15 +147,15 @@ public class BizEventsReaderService {
       //
       Set<ReceiptEventInfo> newModelReceipts =
           this.positionReceiptRepository.readReceiptsInTimeSlot(
-              lowerBoundDate.toLocalDate(),
-              upperBoundDate.toLocalDate().plusDays(1),
+              lowerBoundDate.toLocalDate().atStartOfDay(),
+              upperBoundDate.plusDays(1),
               lowerBoundDate,
               upperBoundDate);
       log.info("Found [{}] new model receipts in analyzed time slot...", newModelReceipts.size());
       Set<ReceiptEventInfo> oldModelReceipts =
           this.rtRepository.readReceiptsInTimeSlot(
-              lowerBoundDate.toLocalDate(),
-              upperBoundDate.toLocalDate().plusDays(1),
+              lowerBoundDate.toLocalDate().atStartOfDay(),
+              upperBoundDate.plusDays(1),
               lowerBoundDate,
               upperBoundDate);
       log.info("Found [{}] old model receipts in analyzed time slot...", oldModelReceipts.size());
@@ -209,6 +209,10 @@ public class BizEventsReaderService {
 
       boolean isHistoricized =
           LocalDateTime.now().minusDays(historicizationAfterInDays).isAfter(upperLimitDate);
+
+      if (isHistoricized && this.historicPositionReceiptRepository == null) {
+          throw new BizEventSyncException("Required a search in historical DB but it is disabled by configuration.");
+      }
 
       // Searching from Position Receipt receipts table (New Model)
       Set<ReceiptEventInfo> newModelReceipts =

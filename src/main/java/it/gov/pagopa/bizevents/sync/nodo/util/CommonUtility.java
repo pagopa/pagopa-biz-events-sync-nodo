@@ -14,7 +14,9 @@ import java.util.Optional;
 import it.gov.pagopa.bizevents.sync.nodo.exception.BizEventSyncException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommonUtility {
 
@@ -95,12 +97,13 @@ public class CommonUtility {
   public static String convertBlob(Blob blobContent) {
     String convertedBlob = null;
     try {
-        if (blobContent != null) {
+        if (blobContent != null && blobContent.length() > 0) {
             byte[] rawBlobContent = blobContent.getBytes(1, (int) blobContent.length());
             convertedBlob = new String(rawBlobContent, StandardCharsets.UTF_8);
         }
     } catch (SQLException e) {
-        String msg = String.format("Impossible to convert blob [%s]", blobContent);
+        String msg = String.format("Impossible to convert blob [%s]. %s", blobContent, e);
+        log.error(msg);
         throw new BizEventSyncException(msg);
     }
     return convertedBlob;

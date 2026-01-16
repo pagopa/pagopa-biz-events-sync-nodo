@@ -1,814 +1,896 @@
 {
-  "openapi": "3.0.1",
-  "info": {
-    "description": "placeholder-description",
-    "termsOfService": "https://www.pagopa.gov.it/",
-    "title": "test-artifactId",
-    "version": "0.2.2"
+  "openapi" : "3.0.1",
+  "info" : {
+    "description" : "placeholder-description",
+    "termsOfService" : "https://www.pagopa.gov.it/",
+    "title" : "test-artifactId",
+    "version" : "placeholder-version"
   },
-  "servers": [
-    {
-      "url": "http://localhost:8080"
-    },
-    {
-      "url": "{host}",
-      "variables": {
-        "basePath": {
-          "default": ""
-        },
-        "host": {
-          "default": "",
-          "enum": [
-            "dev",
-            "uat",
-            "prod"
-          ]
-        }
+  "servers" : [ {
+    "url" : "http://localhost:8080"
+  }, {
+    "url" : "{host}",
+    "variables" : {
+      "basePath" : {
+        "default" : ""
+      },
+      "host" : {
+        "default" : "",
+        "enum" : [ "dev", "uat", "prod" ]
       }
     }
-  ],
-  "paths": {
-    "/info": {
-      "get": {
-        "description": "Return OK if application is started",
-        "operationId": "healthCheck",
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AppInfo"
+  } ],
+  "paths" : {
+    "/info" : {
+      "get" : {
+        "description" : "Return OK if application is started",
+        "operationId" : "healthCheck",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AppInfo"
                 }
               }
             },
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
+            "description" : "OK",
+            "headers" : {
+              "X-Request-Id" : {
+                "description" : "This header identifies the call",
+                "schema" : {
+                  "type" : "string"
                 }
               }
             }
           }
         },
-        "summary": "health check",
-        "tags": [
-          "Home"
-        ]
+        "summary" : "Health Check",
+        "tags" : [ "Home" ]
       },
-      "parameters": [
-        {
-          "description": "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
-          "in": "header",
-          "name": "X-Request-Id",
-          "schema": {
-            "type": "string"
-          }
+      "parameters" : [ {
+        "description" : "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
+        "in" : "header",
+        "name" : "X-Request-Id",
+        "schema" : {
+          "type" : "string"
         }
-      ]
+      } ]
     },
-    "/manual/synchronize": {
-      "get": {
-        "description": "Execute a synchronization, manually starting the operation",
-        "operationId": "manuallySynchronize",
-        "parameters": [
-          {
-            "description": "Lower limit date",
-            "example": "2025-01-01T12:00:00",
-            "in": "query",
-            "name": "dateFrom",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Lower limit date",
-              "example": "2025-01-01T12:00:00"
-            }
-          },
-          {
-            "description": "Upper limit date",
-            "example": "2025-01-01T21:00:00",
-            "in": "query",
-            "name": "dateTo",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Upper limit date",
-              "example": "2025-01-01T21:00:00"
-            }
-          },
-          {
-            "description": "Override default time slot size in minutes. The values must be greater than 1",
-            "example": 10,
-            "in": "query",
-            "name": "timeSlotSize",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "description": "Override default time slot size in minutes. The values must be greater than 1",
-              "example": 10
-            }
-          },
-          {
-            "description": "Show generated biz events data in final report",
-            "example": true,
-            "in": "query",
-            "name": "showBizEvents",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "description": "Show generated biz events data in final report",
-              "example": true
-            }
+    "/manual/synchronize" : {
+      "get" : {
+        "description" : "Execute a synchronization, manually starting the operation",
+        "operationId" : "manuallySynchronize",
+        "parameters" : [ {
+          "description" : "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+          "example" : "2025-01-01T12:00:00",
+          "in" : "query",
+          "name" : "dateFrom",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "description" : "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+            "example" : "2025-01-01T12:00:00"
           }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/SyncReport"
+        }, {
+          "description" : "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+          "example" : "2025-01-01T21:00:00",
+          "in" : "query",
+          "name" : "dateTo",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "description" : "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+            "example" : "2025-01-01T21:00:00"
+          }
+        }, {
+          "description" : "Override default time slot size in minutes. The values must be greater than 1. Default value is 60",
+          "example" : 10,
+          "in" : "query",
+          "name" : "timeSlotSize",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "description" : "Override default time slot size in minutes. The values must be greater than 1. Default value is 60",
+            "example" : 10
+          }
+        }, {
+          "description" : "Show generated BizEvents data in final report",
+          "example" : true,
+          "in" : "query",
+          "name" : "showBizEvents",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "description" : "Show generated BizEvents data in final report",
+            "example" : true
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SyncReport"
                 }
               }
             },
-            "description": "OK",
-            "headers": {
-              "X-Request-Id": {
-                "description": "This header identifies the call",
-                "schema": {
-                  "type": "string"
+            "description" : "OK",
+            "headers" : {
+              "X-Request-Id" : {
+                "description" : "This header identifies the call",
+                "schema" : {
+                  "type" : "string"
                 }
               }
             }
           }
         },
-        "summary": "Manually synchronize BizEvents by time slot",
-        "tags": [
-          "Manual"
-        ]
+        "summary" : "Manually synchronize BizEvents by time slot",
+        "tags" : [ "Manual" ]
       },
-      "parameters": [
-        {
-          "description": "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
-          "in": "header",
-          "name": "X-Request-Id",
-          "schema": {
-            "type": "string"
-          }
+      "parameters" : [ {
+        "description" : "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
+        "in" : "header",
+        "name" : "X-Request-Id",
+        "schema" : {
+          "type" : "string"
         }
-      ]
+      } ]
+    },
+    "/manual/synchronize/single" : {
+      "get" : {
+        "description" : "Execute a synchronization for single event, manually starting the operation.",
+        "operationId" : "manuallySynchronizeSingleEvent",
+        "parameters" : [ {
+          "description" : "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+          "example" : "2025-01-01T12:00:00",
+          "in" : "query",
+          "name" : "dateFrom",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "description" : "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+            "example" : "2025-01-01T12:00:00"
+          }
+        }, {
+          "description" : "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+          "example" : "2025-01-01T21:00:00",
+          "in" : "query",
+          "name" : "dateTo",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "description" : "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+            "example" : "2025-01-01T21:00:00"
+          }
+        }, {
+          "description" : "Creditor institution identifier",
+          "example" : 77777777777,
+          "in" : "query",
+          "name" : "domainId",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "description" : "Creditor institution identifier",
+            "example" : 77777777777
+          }
+        }, {
+          "description" : "Notice number",
+          "example" : 300000000000000000,
+          "in" : "query",
+          "name" : "noticeNumber",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "description" : "Notice number",
+            "example" : 300000000000000000
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SyncReport"
+                }
+              }
+            },
+            "description" : "OK",
+            "headers" : {
+              "X-Request-Id" : {
+                "description" : "This header identifies the call",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "summary" : "Manually synchronize single BizEvents",
+        "tags" : [ "Manual" ]
+      },
+      "parameters" : [ {
+        "description" : "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
+        "in" : "header",
+        "name" : "X-Request-Id",
+        "schema" : {
+          "type" : "string"
+        }
+      } ]
     }
   },
-  "components": {
-    "schemas": {
-      "AppInfo": {
-        "type": "object",
-        "properties": {
-          "environment": {
-            "type": "string"
+  "components" : {
+    "schemas" : {
+      "AppInfo" : {
+        "type" : "object",
+        "properties" : {
+          "environment" : {
+            "type" : "string"
           },
-          "name": {
-            "type": "string"
+          "historic_db" : {
+            "type" : "string"
           },
-          "version": {
-            "type": "string"
+          "name" : {
+            "type" : "string"
+          },
+          "primary_db" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "string"
           }
         }
       },
-      "AuthRequest": {
-        "type": "object",
-        "properties": {
-          "authOutcome": {
-            "type": "string"
+      "AuthRequest" : {
+        "type" : "object",
+        "properties" : {
+          "authOutcome" : {
+            "type" : "string"
           },
-          "auth_code": {
-            "type": "string"
+          "auth_code" : {
+            "type" : "string"
           },
-          "correlationId": {
-            "type": "string"
+          "correlationId" : {
+            "type" : "string"
           },
-          "error": {
-            "type": "string"
+          "error" : {
+            "type" : "string"
           },
-          "guid": {
-            "type": "string"
+          "guid" : {
+            "type" : "string"
           }
         }
       },
-      "BizEvent": {
-        "type": "object",
-        "properties": {
-          "complete": {
-            "type": "string"
+      "BizEvent" : {
+        "type" : "object",
+        "properties" : {
+          "complete" : {
+            "type" : "string"
           },
-          "creditor": {
-            "$ref": "#/components/schemas/Creditor"
+          "creditor" : {
+            "$ref" : "#/components/schemas/Creditor"
           },
-          "debtor": {
-            "$ref": "#/components/schemas/Debtor"
+          "debtor" : {
+            "$ref" : "#/components/schemas/Debtor"
           },
-          "debtorPosition": {
-            "$ref": "#/components/schemas/DebtorPosition"
+          "debtorPosition" : {
+            "$ref" : "#/components/schemas/DebtorPosition"
           },
-          "eventErrorMessage": {
-            "type": "string"
+          "eventErrorMessage" : {
+            "type" : "string"
           },
-          "eventRetryEnrichmentCount": {
-            "type": "integer",
-            "format": "int32"
+          "eventRetryEnrichmentCount" : {
+            "type" : "integer",
+            "format" : "int32"
           },
-          "eventStatus": {
-            "type": "string",
-            "enum": [
-              "NA",
-              "RETRY",
-              "FAILED",
-              "DONE"
-            ]
+          "eventStatus" : {
+            "type" : "string",
+            "enum" : [ "NA", "RETRY", "FAILED", "DONE" ]
           },
-          "eventTriggeredBySchedule": {
-            "type": "boolean"
+          "eventTriggeredBySchedule" : {
+            "type" : "boolean"
           },
-          "id": {
-            "type": "string"
+          "id" : {
+            "type" : "string"
           },
-          "idPaymentManager": {
-            "type": "string"
+          "idPaymentManager" : {
+            "type" : "string"
           },
-          "missingInfo": {
-            "type": "array",
-            "items": {
-              "type": "string"
+          "missingInfo" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
             }
           },
-          "payer": {
-            "$ref": "#/components/schemas/Payer"
+          "payer" : {
+            "$ref" : "#/components/schemas/Payer"
           },
-          "paymentInfo": {
-            "$ref": "#/components/schemas/PaymentInfo"
+          "paymentInfo" : {
+            "$ref" : "#/components/schemas/PaymentInfo"
           },
-          "properties": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
+          "properties" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object"
             }
           },
-          "psp": {
-            "$ref": "#/components/schemas/Psp"
+          "psp" : {
+            "$ref" : "#/components/schemas/Psp"
           },
-          "receiptId": {
-            "type": "string"
+          "receiptId" : {
+            "type" : "string"
           },
-          "timestamp": {
-            "type": "integer",
-            "format": "int64"
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64"
           },
-          "transactionDetails": {
-            "$ref": "#/components/schemas/TransactionDetails"
+          "transactionDetails" : {
+            "$ref" : "#/components/schemas/TransactionDetails"
           },
-          "transferList": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Transfer"
+          "transferList" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Transfer"
             }
           },
-          "version": {
-            "type": "string"
+          "version" : {
+            "type" : "string"
+          }
+        },
+        "description" : "The data related to the BizEvent generated."
+      },
+      "Creditor" : {
+        "type" : "object",
+        "properties" : {
+          "companyName" : {
+            "type" : "string"
+          },
+          "idBrokerPA" : {
+            "type" : "string"
+          },
+          "idPA" : {
+            "type" : "string"
+          },
+          "idStation" : {
+            "type" : "string"
+          },
+          "officeName" : {
+            "type" : "string"
           }
         }
       },
-      "Creditor": {
-        "type": "object",
-        "properties": {
-          "companyName": {
-            "type": "string"
+      "Debtor" : {
+        "type" : "object",
+        "properties" : {
+          "city" : {
+            "type" : "string"
           },
-          "idBrokerPA": {
-            "type": "string"
+          "civicNumber" : {
+            "type" : "string"
           },
-          "idPA": {
-            "type": "string"
+          "country" : {
+            "type" : "string"
           },
-          "idStation": {
-            "type": "string"
+          "eMail" : {
+            "type" : "string"
           },
-          "officeName": {
-            "type": "string"
+          "entityUniqueIdentifierType" : {
+            "type" : "string"
+          },
+          "entityUniqueIdentifierValue" : {
+            "type" : "string"
+          },
+          "fullName" : {
+            "type" : "string"
+          },
+          "postalCode" : {
+            "type" : "string"
+          },
+          "stateProvinceRegion" : {
+            "type" : "string"
+          },
+          "streetName" : {
+            "type" : "string"
           }
         }
       },
-      "Debtor": {
-        "type": "object",
-        "properties": {
-          "city": {
-            "type": "string"
+      "DebtorPosition" : {
+        "type" : "object",
+        "properties" : {
+          "iur" : {
+            "type" : "string"
           },
-          "civicNumber": {
-            "type": "string"
+          "iuv" : {
+            "type" : "string"
           },
-          "country": {
-            "type": "string"
+          "modelType" : {
+            "type" : "string"
           },
-          "eMail": {
-            "type": "string"
-          },
-          "entityUniqueIdentifierType": {
-            "type": "string"
-          },
-          "entityUniqueIdentifierValue": {
-            "type": "string"
-          },
-          "fullName": {
-            "type": "string"
-          },
-          "postalCode": {
-            "type": "string"
-          },
-          "stateProvinceRegion": {
-            "type": "string"
-          },
-          "streetName": {
-            "type": "string"
+          "noticeNumber" : {
+            "type" : "string"
           }
         }
       },
-      "DebtorPosition": {
-        "type": "object",
-        "properties": {
-          "iur": {
-            "type": "string"
+      "InfoTransaction" : {
+        "type" : "object",
+        "properties" : {
+          "brand" : {
+            "type" : "string"
           },
-          "iuv": {
-            "type": "string"
+          "brandLogo" : {
+            "type" : "string"
           },
-          "modelType": {
-            "type": "string"
+          "clientId" : {
+            "type" : "string"
           },
-          "noticeNumber": {
-            "type": "string"
+          "maskedEmail" : {
+            "type" : "string"
+          },
+          "paymentMethodName" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
           }
         }
       },
-      "InfoTransaction": {
-        "type": "object",
-        "properties": {
-          "brand": {
-            "type": "string"
+      "MapEntry" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
           },
-          "brandLogo": {
-            "type": "string"
-          },
-          "clientId": {
-            "type": "string"
-          },
-          "maskedEmail": {
-            "type": "string"
-          },
-          "paymentMethodName": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
+          "value" : {
+            "type" : "string"
           }
         }
       },
-      "MapEntry": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
+      "Payer" : {
+        "type" : "object",
+        "properties" : {
+          "city" : {
+            "type" : "string"
           },
-          "value": {
-            "type": "string"
+          "civicNumber" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "eMail" : {
+            "type" : "string"
+          },
+          "entityUniqueIdentifierType" : {
+            "type" : "string"
+          },
+          "entityUniqueIdentifierValue" : {
+            "type" : "string"
+          },
+          "fullName" : {
+            "type" : "string"
+          },
+          "postalCode" : {
+            "type" : "string"
+          },
+          "stateProvinceRegion" : {
+            "type" : "string"
+          },
+          "streetName" : {
+            "type" : "string"
           }
         }
       },
-      "Payer": {
-        "type": "object",
-        "properties": {
-          "city": {
-            "type": "string"
+      "PaymentInfo" : {
+        "type" : "object",
+        "properties" : {
+          "IUR" : {
+            "type" : "string"
           },
-          "civicNumber": {
-            "type": "string"
+          "amount" : {
+            "type" : "string"
           },
-          "country": {
-            "type": "string"
+          "applicationDate" : {
+            "type" : "string"
           },
-          "eMail": {
-            "type": "string"
+          "description" : {
+            "type" : "string"
           },
-          "entityUniqueIdentifierType": {
-            "type": "string"
+          "dueDate" : {
+            "type" : "string"
           },
-          "entityUniqueIdentifierValue": {
-            "type": "string"
+          "fee" : {
+            "type" : "string"
           },
-          "fullName": {
-            "type": "string"
+          "idBundle" : {
+            "type" : "string"
           },
-          "postalCode": {
-            "type": "string"
+          "idCiBundle" : {
+            "type" : "string"
           },
-          "stateProvinceRegion": {
-            "type": "string"
-          },
-          "streetName": {
-            "type": "string"
-          }
-        }
-      },
-      "PaymentInfo": {
-        "type": "object",
-        "properties": {
-          "IUR": {
-            "type": "string"
-          },
-          "amount": {
-            "type": "string"
-          },
-          "applicationDate": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "dueDate": {
-            "type": "string"
-          },
-          "fee": {
-            "type": "string"
-          },
-          "idBundle": {
-            "type": "string"
-          },
-          "idCiBundle": {
-            "type": "string"
-          },
-          "metadata": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MapEntry"
+          "metadata" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MapEntry"
             }
           },
-          "paymentDateTime": {
-            "type": "string"
+          "paymentDateTime" : {
+            "type" : "string"
           },
-          "paymentMethod": {
-            "type": "string"
+          "paymentMethod" : {
+            "type" : "string"
           },
-          "paymentToken": {
-            "type": "string"
+          "paymentToken" : {
+            "type" : "string"
           },
-          "primaryCiIncurredFee": {
-            "type": "string"
+          "primaryCiIncurredFee" : {
+            "type" : "string"
           },
-          "remittanceInformation": {
-            "type": "string"
+          "remittanceInformation" : {
+            "type" : "string"
           },
-          "totalNotice": {
-            "type": "string"
+          "totalNotice" : {
+            "type" : "string"
           },
-          "touchpoint": {
-            "type": "string"
+          "touchpoint" : {
+            "type" : "string"
           },
-          "transferDate": {
-            "type": "string"
+          "transferDate" : {
+            "type" : "string"
           }
         }
       },
-      "Psp": {
-        "type": "object",
-        "properties": {
-          "channelDescription": {
-            "type": "string"
+      "Psp" : {
+        "type" : "object",
+        "properties" : {
+          "channelDescription" : {
+            "type" : "string"
           },
-          "idBrokerPsp": {
-            "type": "string"
+          "idBrokerPsp" : {
+            "type" : "string"
           },
-          "idChannel": {
-            "type": "string"
+          "idChannel" : {
+            "type" : "string"
           },
-          "idPsp": {
-            "type": "string"
+          "idPsp" : {
+            "type" : "string"
           },
-          "psp": {
-            "type": "string"
+          "psp" : {
+            "type" : "string"
           },
-          "pspFiscalCode": {
-            "type": "string"
+          "pspFiscalCode" : {
+            "type" : "string"
           },
-          "pspPartitaIVA": {
-            "type": "string"
+          "pspPartitaIVA" : {
+            "type" : "string"
           }
         }
       },
-      "SyncReport": {
-        "type": "object",
-        "properties": {
-          "error_during_computation": {
-            "type": "boolean"
+      "SyncReport" : {
+        "type" : "object",
+        "properties" : {
+          "execution_time_slot" : {
+            "$ref" : "#/components/schemas/SyncReportTimeSlot"
           },
-          "execution_time_slot": {
-            "$ref": "#/components/schemas/SyncReportTimeSlot"
-          },
-          "records": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SyncReportRecord"
+          "records" : {
+            "type" : "array",
+            "description" : "The list of individual records describing the synchronization status of a single BizEvent.",
+            "items" : {
+              "$ref" : "#/components/schemas/SyncReportRecord"
             }
           },
-          "sent_to_event_hub": {
-            "type": "boolean"
+          "sent_to_event_hub" : {
+            "type" : "boolean",
+            "description" : "The flag that determines whether events have been sent to the EventHub infrastructure component to be ingested by the BizEvents processor. This does NOT define whether the BizEvent has been stored in the DB.",
+            "example" : true
           },
-          "total_records": {
-            "type": "integer",
-            "format": "int32"
+          "status" : {
+            "type" : "string",
+            "description" : "The outcome of the synchronization process.",
+            "example" : "GENERATED",
+            "enum" : [ "RECEIPT_NOT_FOUND", "GENERATION_ERROR", "PARTIALLY_GENERATED", "GENERATED" ]
+          },
+          "total_records" : {
+            "type" : "integer",
+            "description" : "The total number of BizEvents regenerated through the executed process.",
+            "format" : "int32",
+            "example" : 7
+          }
+        },
+        "description" : "A report that defines the status of the synchronization operation for each BizEvent manipulated and in its entirety."
+      },
+      "SyncReportRecord" : {
+        "type" : "object",
+        "properties" : {
+          "biz_event" : {
+            "$ref" : "#/components/schemas/BizEvent"
+          },
+          "biz_event_id" : {
+            "type" : "string",
+            "description" : "The identifier of generated BizEvent. It contains a special prefix that defines whether the sync process was made.",
+            "example" : "resync-000ac324-1c00-469f-8b00-950000fb1432"
+          },
+          "domain_id" : {
+            "type" : "string",
+            "description" : "The identifier of the creditor institution.",
+            "example" : "77777777777"
+          },
+          "iuv" : {
+            "type" : "string",
+            "description" : "The IUV code of related receipt.",
+            "example" : "01102000021300930"
+          },
+          "model_version" : {
+            "type" : "string",
+            "description" : "The model of the payment related to the receipt. 'NEW' means payment position, 'OLD' means RPT",
+            "example" : "NEW",
+            "enum" : [ "NEW", "OLD" ]
+          },
+          "payment_token" : {
+            "type" : "string",
+            "description" : "The payment token of related trnasaction.",
+            "example" : "000ff000ffffffff00000fff00000000"
+          },
+          "sync_status" : {
+            "type" : "string",
+            "description" : "The outcome of the synchronization of a single receipt.",
+            "example" : "GENERATED",
+            "enum" : [ "GENERATED", "NOT_INSERTED" ]
+          },
+          "time_slot" : {
+            "$ref" : "#/components/schemas/SyncReportTimeSlot"
+          }
+        },
+        "description" : "The records describing the synchronization status of a single BizEvent."
+      },
+      "SyncReportTimeSlot" : {
+        "type" : "object",
+        "properties" : {
+          "from" : {
+            "type" : "string",
+            "description" : "The timeslot start (as date-time) from which synchronization operation was executed.",
+            "format" : "date-time"
+          },
+          "to" : {
+            "type" : "string",
+            "description" : "The timeslot end (as date-time) until which synchronization operation was executed.",
+            "format" : "date-time"
+          }
+        },
+        "description" : "The timeslot within which synchronization operation was executed."
+      },
+      "Transaction" : {
+        "type" : "object",
+        "properties" : {
+          "accountCode" : {
+            "type" : "string"
+          },
+          "accountingStatus" : {
+            "type" : "string"
+          },
+          "amount" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "authorizationCode" : {
+            "type" : "string"
+          },
+          "creationDate" : {
+            "type" : "string"
+          },
+          "fee" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "grandTotal" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "idTransaction" : {
+            "type" : "string"
+          },
+          "numAut" : {
+            "type" : "string"
+          },
+          "origin" : {
+            "type" : "string"
+          },
+          "psp" : {
+            "$ref" : "#/components/schemas/TransactionPsp"
+          },
+          "rrn" : {
+            "type" : "string"
+          },
+          "transactionId" : {
+            "type" : "string"
+          },
+          "transactionStatus" : {
+            "type" : "string"
           }
         }
       },
-      "SyncReportRecord": {
-        "type": "object",
-        "properties": {
-          "biz_event": {
-            "$ref": "#/components/schemas/BizEvent"
+      "TransactionDetails" : {
+        "type" : "object",
+        "properties" : {
+          "info" : {
+            "$ref" : "#/components/schemas/InfoTransaction"
           },
-          "biz_event_id": {
-            "type": "string"
+          "origin" : {
+            "type" : "string"
           },
-          "domain_id": {
-            "type": "string"
+          "transaction" : {
+            "$ref" : "#/components/schemas/Transaction"
           },
-          "iuv": {
-            "type": "string"
+          "user" : {
+            "$ref" : "#/components/schemas/User"
           },
-          "model_version": {
-            "type": "string",
-            "enum": [
-              "NEW",
-              "OLD"
-            ]
-          },
-          "payment_token": {
-            "type": "string"
-          },
-          "sync_status": {
-            "type": "string"
-          },
-          "time_slot": {
-            "$ref": "#/components/schemas/SyncReportTimeSlot"
+          "wallet" : {
+            "$ref" : "#/components/schemas/WalletItem"
           }
         }
       },
-      "SyncReportTimeSlot": {
-        "type": "object",
-        "properties": {
-          "from": {
-            "type": "string",
-            "format": "date-time"
+      "TransactionPsp" : {
+        "type" : "object",
+        "properties" : {
+          "businessName" : {
+            "type" : "string"
           },
-          "to": {
-            "type": "string",
-            "format": "date-time"
+          "idChannel" : {
+            "type" : "string"
+          },
+          "serviceName" : {
+            "type" : "string"
           }
         }
       },
-      "Transaction": {
-        "type": "object",
-        "properties": {
-          "accountCode": {
-            "type": "string"
+      "Transfer" : {
+        "type" : "object",
+        "properties" : {
+          "IBAN" : {
+            "type" : "string"
           },
-          "accountingStatus": {
-            "type": "string"
+          "IUR" : {
+            "type" : "string"
           },
-          "amount": {
-            "type": "integer",
-            "format": "int64"
+          "MBDAttachment" : {
+            "type" : "string"
           },
-          "authorizationCode": {
-            "type": "string"
+          "amount" : {
+            "type" : "string"
           },
-          "creationDate": {
-            "type": "string"
+          "companyName" : {
+            "type" : "string"
           },
-          "fee": {
-            "type": "integer",
-            "format": "int64"
+          "fiscalCodePA" : {
+            "type" : "string"
           },
-          "grandTotal": {
-            "type": "integer",
-            "format": "int64"
+          "idTransfer" : {
+            "type" : "string"
           },
-          "idTransaction": {
-            "type": "string"
-          },
-          "numAut": {
-            "type": "string"
-          },
-          "origin": {
-            "type": "string"
-          },
-          "psp": {
-            "$ref": "#/components/schemas/TransactionPsp"
-          },
-          "rrn": {
-            "type": "string"
-          },
-          "transactionId": {
-            "type": "string"
-          },
-          "transactionStatus": {
-            "type": "string"
-          }
-        }
-      },
-      "TransactionDetails": {
-        "type": "object",
-        "properties": {
-          "info": {
-            "$ref": "#/components/schemas/InfoTransaction"
-          },
-          "origin": {
-            "type": "string"
-          },
-          "transaction": {
-            "$ref": "#/components/schemas/Transaction"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "wallet": {
-            "$ref": "#/components/schemas/WalletItem"
-          }
-        }
-      },
-      "TransactionPsp": {
-        "type": "object",
-        "properties": {
-          "businessName": {
-            "type": "string"
-          },
-          "idChannel": {
-            "type": "string"
-          },
-          "serviceName": {
-            "type": "string"
-          }
-        }
-      },
-      "Transfer": {
-        "type": "object",
-        "properties": {
-          "IBAN": {
-            "type": "string"
-          },
-          "IUR": {
-            "type": "string"
-          },
-          "MBDAttachment": {
-            "type": "string"
-          },
-          "amount": {
-            "type": "string"
-          },
-          "companyName": {
-            "type": "string"
-          },
-          "fiscalCodePA": {
-            "type": "string"
-          },
-          "idTransfer": {
-            "type": "string"
-          },
-          "metadata": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MapEntry"
+          "metadata" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MapEntry"
             }
           },
-          "remittanceInformation": {
-            "type": "string"
+          "remittanceInformation" : {
+            "type" : "string"
           },
-          "transferCategory": {
-            "type": "string"
+          "transferCategory" : {
+            "type" : "string"
           }
         }
       },
-      "User": {
-        "type": "object",
-        "properties": {
-          "fiscalCode": {
-            "type": "string"
+      "User" : {
+        "type" : "object",
+        "properties" : {
+          "fiscalCode" : {
+            "type" : "string"
           },
-          "fullName": {
-            "type": "string"
+          "fullName" : {
+            "type" : "string"
           },
-          "name": {
-            "type": "string"
+          "name" : {
+            "type" : "string"
           },
-          "notificationEmail": {
-            "type": "string"
+          "notificationEmail" : {
+            "type" : "string"
           },
-          "surname": {
-            "type": "string"
+          "surname" : {
+            "type" : "string"
           },
-          "type": {
-            "type": "string"
+          "type" : {
+            "type" : "string"
           },
-          "userId": {
-            "type": "string"
+          "userId" : {
+            "type" : "string"
           },
-          "userStatus": {
-            "type": "string"
+          "userStatus" : {
+            "type" : "string"
           },
-          "userStatusDescription": {
-            "type": "string"
+          "userStatusDescription" : {
+            "type" : "string"
           }
         }
       },
-      "WalletItem": {
-        "type": "object",
-        "properties": {
-          "authRequest": {
-            "$ref": "#/components/schemas/AuthRequest"
+      "WalletItem" : {
+        "type" : "object",
+        "properties" : {
+          "authRequest" : {
+            "$ref" : "#/components/schemas/AuthRequest"
           },
-          "createDate": {
-            "type": "string"
+          "createDate" : {
+            "type" : "string"
           },
-          "enableableFunctions": {
-            "type": "array",
-            "items": {
-              "type": "string"
+          "enableableFunctions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
             }
           },
-          "favourite": {
-            "type": "boolean"
+          "favourite" : {
+            "type" : "boolean"
           },
-          "idWallet": {
-            "type": "string"
+          "idWallet" : {
+            "type" : "string"
           },
-          "info": {
-            "$ref": "#/components/schemas/WalletItemInfo"
+          "info" : {
+            "$ref" : "#/components/schemas/WalletItemInfo"
           },
-          "onboardingChannel": {
-            "type": "string"
+          "onboardingChannel" : {
+            "type" : "string"
           },
-          "pagoPa": {
-            "type": "boolean"
+          "pagoPa" : {
+            "type" : "boolean"
           },
-          "walletType": {
-            "type": "string",
-            "enum": [
-              "CARD",
-              "PAYPAL",
-              "BANCOMATPAY"
-            ]
+          "walletType" : {
+            "type" : "string",
+            "enum" : [ "CARD", "PAYPAL", "BANCOMATPAY" ]
           }
         }
       },
-      "WalletItemInfo": {
-        "type": "object",
-        "properties": {
-          "blurredNumber": {
-            "type": "string"
+      "WalletItemInfo" : {
+        "type" : "object",
+        "properties" : {
+          "blurredNumber" : {
+            "type" : "string"
           },
-          "brand": {
-            "type": "string"
+          "brand" : {
+            "type" : "string"
           },
-          "expireMonth": {
-            "type": "string"
+          "expireMonth" : {
+            "type" : "string"
           },
-          "expireYear": {
-            "type": "string"
+          "expireYear" : {
+            "type" : "string"
           },
-          "hashPan": {
-            "type": "string"
+          "hashPan" : {
+            "type" : "string"
           },
-          "holder": {
-            "type": "string"
+          "holder" : {
+            "type" : "string"
           },
-          "issuerAbi": {
-            "type": "string"
+          "issuerAbi" : {
+            "type" : "string"
           },
-          "issuerName": {
-            "type": "string"
+          "issuerName" : {
+            "type" : "string"
           },
-          "label": {
-            "type": "string"
+          "label" : {
+            "type" : "string"
           },
-          "type": {
-            "type": "string"
+          "type" : {
+            "type" : "string"
           }
         }
       }
     },
-    "securitySchemes": {
-      "ApiKey": {
-        "description": "The API key to access this function app.",
-        "in": "header",
-        "name": "Ocp-Apim-Subscription-Key",
-        "type": "apiKey"
+    "securitySchemes" : {
+      "ApiKey" : {
+        "description" : "The API key to access this function app.",
+        "in" : "header",
+        "name" : "Ocp-Apim-Subscription-Key",
+        "type" : "apiKey"
       }
     }
   }

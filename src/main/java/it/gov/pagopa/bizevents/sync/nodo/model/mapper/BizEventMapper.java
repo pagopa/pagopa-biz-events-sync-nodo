@@ -221,8 +221,8 @@ public class BizEventMapper {
     } catch (Exception e) {
       String msg =
           String.format(
-              "An error occurred during mapping of new model payment with ID=[%s] to Biz Event",
-              pp.getId());
+              "An error occurred during mapping of new model payment with ID=[%s] to Biz Event. %s",
+              pp.getId(), e);
       throw new BizEventSyncException(msg, e);
     }
 

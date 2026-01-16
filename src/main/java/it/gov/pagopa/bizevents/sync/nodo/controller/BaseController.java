@@ -22,7 +22,7 @@ public class BaseController {
   }
 
   @Operation(
-      summary = "health check",
+      summary = "Health Check",
       description = "Return OK if application is started",
       tags = {"Home"})
   @GetMapping(value = "/info")
