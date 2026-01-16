@@ -606,6 +606,9 @@ public class BizEventMapper {
 
   private static CtRicevutaTelematica extractRT(String blob) {
     CtRicevutaTelematica rt;
+    if (blob == null || blob.isBlank()) {
+      return null;
+    }
     try {
       String formattedBlob = blob.replaceAll("xmlns=[\"'][^\"']+[\"']", "");
       Unmarshaller unmarshaller = Constants.RT_JAXB_CONTEXT.createUnmarshaller();
@@ -622,7 +625,7 @@ public class BizEventMapper {
 
   private static void generateTransactionDetailFromPMInfo(PositionPayment pp, BizEvent bizEvent) {
     try {
-      Blob rawBlob = pp.getPmInfo();
+      byte[] rawBlob = pp.getPmInfo();
       if (rawBlob != null) {
           String pmInfo = CommonUtility.convertBlob(rawBlob);
           if (pmInfo != null) {

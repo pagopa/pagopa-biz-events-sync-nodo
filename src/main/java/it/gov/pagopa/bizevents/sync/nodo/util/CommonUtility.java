@@ -108,4 +108,11 @@ public class CommonUtility {
     }
     return convertedBlob;
   }
+
+  public static String convertBlob(byte[] blobContent) {
+    if (blobContent == null || blobContent.length == 0) {
+      return null;
+    }
+    return new String(blobContent, StandardCharsets.UTF_8);
+  }
 }
