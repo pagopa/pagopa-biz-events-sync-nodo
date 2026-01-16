@@ -168,7 +168,7 @@ public class BizEventsReaderService {
       log.info(
           "Executing analysis on insert timestamp [{} - {}] for payment in date [{} - {}]. Check on historic DB? [{}]",
           lowerBoundDate.toLocalDate().atStartOfDay(),
-          upperBoundDate.plusDays(1),
+          upperBoundDate.toLocalDate().atStartOfDay().plusDays(1),
           lowerBoundDate,
           upperBoundDate,
           isHistoricized);
@@ -178,12 +178,12 @@ public class BizEventsReaderService {
           isHistoricized
               ? this.historicPositionReceiptRepository.readReceiptsInTimeSlot(
                   lowerBoundDate.toLocalDate().atStartOfDay(),
-                  upperBoundDate.plusDays(1),
+                  upperBoundDate.toLocalDate().atStartOfDay().plusDays(1),
                   lowerBoundDate,
                   upperBoundDate)
               : this.positionReceiptRepository.readReceiptsInTimeSlot(
                   lowerBoundDate.toLocalDate().atStartOfDay(),
-                  upperBoundDate.plusDays(1),
+                  upperBoundDate.toLocalDate().atStartOfDay().plusDays(1),
                   lowerBoundDate,
                   upperBoundDate);
       log.info("Found [{}] new model receipts in analyzed time slot...", newModelReceipts.size());
@@ -192,12 +192,12 @@ public class BizEventsReaderService {
           isHistoricized
               ? this.historicRtRepository.readReceiptsInTimeSlot(
                   lowerBoundDate.toLocalDate().atStartOfDay(),
-                  upperBoundDate.plusDays(1),
+                  upperBoundDate.toLocalDate().atStartOfDay().plusDays(1),
                   lowerBoundDate,
                   upperBoundDate)
               : this.rtRepository.readReceiptsInTimeSlot(
                   lowerBoundDate.toLocalDate().atStartOfDay(),
-                  upperBoundDate.plusDays(1),
+                  upperBoundDate.toLocalDate().atStartOfDay().plusDays(1),
                   lowerBoundDate,
                   upperBoundDate);
       log.info("Found [{}] old model receipts in analyzed time slot...", oldModelReceipts.size());
