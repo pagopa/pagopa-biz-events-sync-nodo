@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonSyntaxException;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
+import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.enumeration.StatusType;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.DebtorPosition;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.MapEntry;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.PaymentInfo;
@@ -550,6 +551,9 @@ public class BizEventMapper {
     //
     bizEvent.setMissingInfo(missingInfo);
     bizEvent.setComplete(String.valueOf(missingInfo.isEmpty()));
+
+    bizEvent.setEventStatus(StatusType.DONE);
+    bizEvent.setEventRetryEnrichmentCount(0);
 
     return bizEvent;
   }
