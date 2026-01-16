@@ -1,7 +1,7 @@
 locals {
   apim_bizevents_sync_nodo_api = {
-    display_name          = "Biz Events-NdP Sync"
-    description           = "API to handle manual sync from NdP to Biz Events"
+    display_name          = "Biz Events - Recovery & Sync"
+    description           = "API to handle manual synchronization between NdP receipts and BizEvents"
     path                  = "bizevents/nodo-sync"
     subscription_required = true
     service_url           = null
@@ -9,9 +9,9 @@ locals {
 }
 
 
-##################
-##  API FdR PSP ##
-##################
+#####################
+##  API Manual Ops ##
+#####################
 
 resource "azurerm_api_management_api_version_set" "api_bizevents_sync_nodo_manual_operation" {
   name                = "${var.env_short}-bizevents-sync-nodo-manual-operation"
