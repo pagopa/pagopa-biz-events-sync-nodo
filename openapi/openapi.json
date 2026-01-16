@@ -45,7 +45,7 @@
             }
           }
         },
-        "summary" : "health check",
+        "summary" : "Health Check",
         "tags" : [ "Home" ]
       },
       "parameters" : [ {

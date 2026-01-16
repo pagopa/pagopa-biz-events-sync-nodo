@@ -1,7 +1,7 @@
 locals {
   apim_bizevents_sync_nodo_api = {
     display_name          = "Biz Events - Recovery & Sync"
-    description           = "API to handle manual synchronization between NdP receipts and BizEvents.\nFor other details, please refer to https://editor.swagger.io/?url=https://raw.githubusercontent.com/pagopa/pagopa-biz-events-sync-nodo/refs/heads/main/openapi/openapi.json"
+    description           = "API to handle manual synchronization between NdP receipts and BizEvents.\nFor other details, please refer to https://github.com/pagopa/pagopa-biz-events-sync-nodo"
     path                  = "bizevents/nodo-sync"
     subscription_required = true
     service_url           = null
