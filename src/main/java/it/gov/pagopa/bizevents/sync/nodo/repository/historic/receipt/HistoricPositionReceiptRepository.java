@@ -49,4 +49,19 @@ public interface HistoricPositionReceiptRepository extends JpaRepository<Positio
       @Param("maxDate") LocalDateTime maxDate,
       @Param("domainId") String domainId,
       @Param("noticeNumber") String noticeNumber);
+
+
+
+  @Query(
+      """
+      SELECT COUNT(pr)
+      FROM PositionReceipt pr
+      WHERE (pr.insertedTimestamp >= :minDate AND pr.insertedTimestamp < :maxDate)
+        AND (pr.paymentDateTime >= :minDateTime AND pr.paymentDateTime < :maxDateTime)
+      """)
+  long countByTimeSlot(
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
+      @Param("minDateTime") LocalDateTime minDateTime,
+      @Param("maxDateTime") LocalDateTime maxDateTime);
 }

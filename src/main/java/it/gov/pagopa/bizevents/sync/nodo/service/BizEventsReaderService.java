@@ -78,10 +78,18 @@ public class BizEventsReaderService {
         lowerBoundDate,
         upperBoundDate);
 
+    boolean isHistoricized = isHistoricizedReceipt(upperBoundDate);
+
     // Retrieve the count of receipts generated on the first occurrence for old payment models for
     // the time slot passed
     long numberOfFirstPayOldModelReceipts =
-        this.rtRepository.countFirstRPTsByTimeSlot(
+        isHistoricized
+        ? this.historicRtRepository.countFirstRPTsByTimeSlot(
+            lowerBoundDate.toLocalDate().atStartOfDay(),
+            upperBoundDate.plusDays(1),
+            lowerBoundDate,
+            upperBoundDate)
+        : this.rtRepository.countFirstRPTsByTimeSlot(
             lowerBoundDate.toLocalDate().atStartOfDay(),
             upperBoundDate.plusDays(1),
             lowerBoundDate,
@@ -90,7 +98,13 @@ public class BizEventsReaderService {
     // Retrieve the count of receipts generated on the retried occurrence for old payment models for
     // the time slot passed
     long numberOfRetriedOldModelReceipts =
-        this.rtRepository.countRetriedRPTsByTimeSlot(
+        isHistoricized
+        ? this.historicRtRepository.countRetriedRPTsByTimeSlot(
+                lowerBoundDate.toLocalDate().atStartOfDay(),
+                upperBoundDate.plusDays(1),
+                lowerBoundDate,
+                upperBoundDate)
+        : this.rtRepository.countRetriedRPTsByTimeSlot(
             lowerBoundDate.toLocalDate().atStartOfDay(),
             upperBoundDate.plusDays(1),
             lowerBoundDate,
@@ -107,7 +121,13 @@ public class BizEventsReaderService {
 
     // Retrieve the count of receipts generated for new payment models for the time slot passed
     long numberOfNewModelReceipts =
-        this.positionReceiptRepository.countByTimeSlot(
+        isHistoricized
+        ?  this.historicPositionReceiptRepository.countByTimeSlot(
+            lowerBoundDate.toLocalDate().atStartOfDay(),
+            upperBoundDate.plusDays(1),
+            lowerBoundDate,
+            upperBoundDate)
+        : this.positionReceiptRepository.countByTimeSlot(
             lowerBoundDate.toLocalDate().atStartOfDay(),
             upperBoundDate.plusDays(1),
             lowerBoundDate,
