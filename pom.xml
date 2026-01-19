@@ -22,7 +22,7 @@
         <postgresql-version>42.5.5</postgresql-version>
     </properties>
 
-    <version>0.3.0</version>
+    <version>0.3.0-1-feat-informative-api</version>
 
     <dependencies>
         <dependency>
