@@ -129,7 +129,7 @@ public class PositionPayment {
   private String bundlePaId;
 
   @Column(name = "PM_INFO")
-  private byte[] pmInfo; //blob;bytea
+  private byte[] pmInfo; // OracleDB: blob; PostgreSQL: bytea
 
   @Column(name = "MBD")
   private String mbd;

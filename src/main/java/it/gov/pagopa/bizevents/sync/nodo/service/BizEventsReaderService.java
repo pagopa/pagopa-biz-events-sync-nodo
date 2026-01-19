@@ -251,7 +251,7 @@ public class BizEventsReaderService {
 
       boolean isHistoricized = isHistoricizedReceipt(upperLimitDate);
 
-        // Searching from Position Receipt receipts table (New Model)
+      // Searching from Position Receipt receipts table (New Model)
       Set<ReceiptEventInfo> newModelReceipts =
           isHistoricized
               ? this.historicPositionReceiptRepository
