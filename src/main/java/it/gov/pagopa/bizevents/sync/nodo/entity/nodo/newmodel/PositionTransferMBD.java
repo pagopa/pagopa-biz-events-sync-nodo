@@ -49,10 +49,8 @@ public class PositionTransferMBD {
   private String updatedBy;
 
   @Lob
-  @Basic(fetch = LAZY)
-  @JdbcTypeCode(Types.BINARY)
   @Column(name = "XML_CONTENT")
-  private Blob xmlContent;
+  private byte[] xmlContent;
 
   @OneToOne
   @JoinColumn(name = "FK_POSITION_TRANSFER", referencedColumnName = "ID")

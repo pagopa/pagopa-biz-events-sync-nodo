@@ -193,6 +193,11 @@ public class BizEventSynchronizerService {
     List<Pair<LocalDateTime, LocalDateTime>> timeSlotsInError = new ArrayList<>();
 
     int slotSize = overriddenTimeSlotSize > 0 ? overriddenTimeSlotSize : defaultSlotSizeInMinutes;
+    if (bizEventsReaderService.isHistoricizedReceipt(upperLimitDate) && slotSize > defaultSlotSizeInMinutes) {
+        log.warn("Set slot size from [{}] to default value [{}] because of search in historical DB", slotSize, defaultSlotSizeInMinutes);
+        slotSize = defaultSlotSizeInMinutes;
+    }
+
     List<LocalDateTime> timeSlots =
         CommonUtility.splitInSlots(lowerLimitDate, upperLimitDate, slotSize);
     log.info(

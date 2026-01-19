@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonSyntaxException;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
+import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.enumeration.StatusType;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.DebtorPosition;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.MapEntry;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.PaymentInfo;
@@ -221,8 +222,8 @@ public class BizEventMapper {
     } catch (Exception e) {
       String msg =
           String.format(
-              "An error occurred during mapping of new model payment with ID=[%s] to Biz Event. %s",
-              pp.getId(), e);
+              "An error occurred during mapping of new model payment with NAV=[%s], domainId=[%s], ID=[%s] to Biz Event. %s",
+                  pp.getNoticeId(), pp.getPaFiscalCode(), pp.getId(), e);
       throw new BizEventSyncException(msg, e);
     }
 
@@ -249,7 +250,7 @@ public class BizEventMapper {
       throw new BizEventSyncException(msg);
     }
 
-    CtRicevutaTelematica decodedRT = extractRT(CommonUtility.convertBlob(rt.getRtXml().getXmlContent()));
+    CtRicevutaTelematica decodedRT = extractRT(rt.getRtXml().getXmlContent());
     List<CtDatiSingoloPagamentoRT> datiSingoloPagamento = new ArrayList<>();
     if (decodedRT != null) {
       datiSingoloPagamento = decodedRT.getDatiPagamento().getDatiSingoloPagamento();
@@ -400,8 +401,8 @@ public class BizEventMapper {
     } catch (Exception e) {
       String msg =
           String.format(
-              "An error occurred during mapping of old model payment with ID=[%s] to Biz Event",
-              rpt.getId());
+              "An error occurred during mapping of old model payment with with IUV=[%s], domainId=[%s], ID=[%s] to Biz Event",
+              rpt.getIuv(), rpt.getIdentDominio(), rpt.getId());
       throw new BizEventSyncException(msg, e);
     }
 
@@ -551,6 +552,9 @@ public class BizEventMapper {
     bizEvent.setMissingInfo(missingInfo);
     bizEvent.setComplete(String.valueOf(missingInfo.isEmpty()));
 
+    bizEvent.setEventStatus(StatusType.DONE);
+    bizEvent.setEventRetryEnrichmentCount(0);
+
     return bizEvent;
   }
 
@@ -606,6 +610,9 @@ public class BizEventMapper {
 
   private static CtRicevutaTelematica extractRT(String blob) {
     CtRicevutaTelematica rt;
+    if (blob == null || blob.isBlank()) {
+      return null;
+    }
     try {
       String formattedBlob = blob.replaceAll("xmlns=[\"'][^\"']+[\"']", "");
       Unmarshaller unmarshaller = Constants.RT_JAXB_CONTEXT.createUnmarshaller();
@@ -622,7 +629,7 @@ public class BizEventMapper {
 
   private static void generateTransactionDetailFromPMInfo(PositionPayment pp, BizEvent bizEvent) {
     try {
-      Blob rawBlob = pp.getPmInfo();
+      byte[] rawBlob = pp.getPmInfo();
       if (rawBlob != null) {
           String pmInfo = CommonUtility.convertBlob(rawBlob);
           if (pmInfo != null) {

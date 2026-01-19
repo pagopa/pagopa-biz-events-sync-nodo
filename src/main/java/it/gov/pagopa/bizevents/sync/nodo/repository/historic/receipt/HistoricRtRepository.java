@@ -12,6 +12,27 @@ import org.springframework.data.repository.query.Param;
 
 public interface HistoricRtRepository extends JpaRepository<Rt, Long> {
 
+    @Query(
+        """
+        SELECT DISTINCT new it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo(
+            rt.iuv AS iuv,
+            rt.ccp AS paymentToken,
+            rt.identDominio AS domainId,
+            rt.insertedTimestamp AS insertedTimestamp,
+            "OLD" AS version
+        )
+        FROM Rt rt
+        WHERE (rt.insertedTimestamp >= :minDate AND rt.insertedTimestamp < :maxDate)
+          AND rt.esito = 'ESEGUITO'
+          AND (rt.dataRicevuta >= :minDateTime AND rt.dataRicevuta < :maxDateTime)
+          AND rt.generataDa = 'PSP'
+        """)
+  Set<ReceiptEventInfo> readReceiptsInTimeSlot(
+       @Param("minDate") LocalDateTime minDate,
+       @Param("maxDate") LocalDateTime maxDate,
+       @Param("minDateTime") LocalDateTime minDateTime,
+       @Param("maxDateTime") LocalDateTime maxDateTime);
+
   @Query(
       """
       SELECT DISTINCT new it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo(
@@ -53,4 +74,45 @@ public interface HistoricRtRepository extends JpaRepository<Rt, Long> {
       @Param("domainId") String domainId,
       @Param("iuv") String iuv,
       @Param("ccp") String ccp);
+
+
+  @Query(
+      """
+      SELECT COUNT(rt)
+      FROM Rt rt
+      JOIN Rpt rpt
+        ON rpt.identDominio = rt.identDominio AND rpt.iuv = rt.iuv AND rpt.ccp = rt.ccp
+      WHERE (rt.insertedTimestamp >= :minDate AND rt.insertedTimestamp < :maxDate)
+        AND (rpt.insertedTimestamp >= :minDate AND rpt.insertedTimestamp < :maxDate)
+        AND rt.esito = 'ESEGUITO'
+        AND (rt.dataRicevuta >= :minDateTime AND rt.dataRicevuta < :maxDateTime)
+        AND (rpt.flagSeconda = 'N' OR rpt.flagSeconda IS NULL)
+        AND rt.generataDa = 'PSP'
+      """)
+  long countFirstRPTsByTimeSlot(
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
+      @Param("minDateTime") LocalDateTime minDateTime,
+      @Param("maxDateTime") LocalDateTime maxDateTime);
+
+
+
+  @Query(
+      """
+      SELECT COUNT(rt)
+      FROM Rt rt
+      JOIN Rpt rpt
+        ON rpt.identDominio = rt.identDominio AND rpt.iuv = rt.iuv AND rpt.ccp = rt.ccp
+      WHERE (rt.insertedTimestamp >= :minDate AND rt.insertedTimestamp < :maxDate)
+        AND (rpt.insertedTimestamp >= :minDate AND rpt.insertedTimestamp < :maxDate)
+        AND rt.esito = 'ESEGUITO'
+        AND (rt.dataRicevuta >= :minDateTime AND rt.dataRicevuta < :maxDateTime)
+        AND rpt.flagSeconda = 'Y'
+        AND rt.generataDa = 'PSP'
+      """)
+  long countRetriedRPTsByTimeSlot(
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
+      @Param("minDateTime") LocalDateTime minDateTime,
+      @Param("maxDateTime") LocalDateTime maxDateTime);
 }
