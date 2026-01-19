@@ -4,7 +4,7 @@
     "description": "placeholder-description",
     "termsOfService": "https://www.pagopa.gov.it/",
     "title": "test-artifactId",
-    "version": "0.2.3-9-feat-massive-in-historic"
+    "version": "0.3.0"
   },
   "servers": [
     {
