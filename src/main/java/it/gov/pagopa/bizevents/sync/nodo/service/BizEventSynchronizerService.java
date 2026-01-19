@@ -51,6 +51,60 @@ public class BizEventSynchronizerService {
     this.eventHubSenderService = eventHubSenderService;
   }
 
+  public SyncInformativeReport countEventsToSynchronize(
+      LocalDateTime lowerLimitDate,
+      LocalDateTime upperLimitDate,
+      int overriddenTimeSlotSize) {
+
+    List<Pair<LocalDateTime, LocalDateTime>> timeSlotsInError = new ArrayList<>();
+
+    int slotSize = overriddenTimeSlotSize > 0 ? overriddenTimeSlotSize : defaultSlotSizeInMinutes;
+    if (bizEventsReaderService.isHistoricizedReceipt(upperLimitDate) && slotSize > defaultSlotSizeInMinutes) {
+      log.warn("Set slot size from [{}] to default value [{}] because of search in historical DB", slotSize, defaultSlotSizeInMinutes);
+      slotSize = defaultSlotSizeInMinutes;
+    }
+
+    List<LocalDateTime> timeSlots =
+        CommonUtility.splitInSlots(lowerLimitDate, upperLimitDate, slotSize);
+    log.info(
+        "Split [{} - {}] time slot in different sections: {}",
+        lowerLimitDate,
+        upperLimitDate,
+        timeSlots);
+
+    List<SyncInformativeReportRecord> records = new ArrayList<>();
+    for (int index = 0; index < timeSlots.size() - 1; index++) {
+
+        // Extracting upper and lower date boundaries
+        LocalDateTime minDate = timeSlots.get(index);
+        LocalDateTime maxDate = timeSlots.get(index + 1);
+
+        // Count differences between receipts stored from NdP and elaborated BizEvents
+        log.info("Searching number of missing BizEvents for time slot [{} - {}]", minDate, maxDate);
+        long missingBizEventOnTimeSlot =
+                this.bizEventsReaderService.getNumberOfMissingBizEventsAtTimeSlot(minDate, maxDate);
+        records.add(SyncInformativeReportRecord.builder()
+            .timeSlot(SyncReportTimeSlot.builder()
+                .from(minDate)
+                .to(maxDate)
+                .build())
+            .numberOfReceipts(missingBizEventOnTimeSlot)
+            .build());
+    }
+
+    // Generate final report
+    return SyncInformativeReport.builder()
+        .status(SyncOutcome.TO_GENERATE)
+        .executionTimeSlot(
+            SyncReportTimeSlot.builder()
+                .from(lowerLimitDate)
+                .to(upperLimitDate)
+                .build())
+        .totalRecords(records.size())
+        .records(records)
+        .build();
+  }
+
   public SyncReport executeSynchronizationForSingleReceipt(
       @NotNull LocalDateTime lowerLimitDate,
       @NotNull LocalDateTime upperLimitDate,
