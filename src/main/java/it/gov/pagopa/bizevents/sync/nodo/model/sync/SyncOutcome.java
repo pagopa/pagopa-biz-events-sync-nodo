@@ -5,6 +5,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "The outcome of the synchronization process.")
 public enum SyncOutcome {
 
+    @Schema(description = "The synchronization operation is not started, returned in informative operations.")
+    TO_GENERATE,
+
     @Schema(description = "The requested receipt was not found in the NdP databases.")
     RECEIPT_NOT_FOUND,
 

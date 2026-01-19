@@ -63,83 +63,98 @@ public class BizEventsReaderService {
   public boolean checkIfMissingBizEventsAtTimeSlot(
       LocalDateTime lowerBoundDate, LocalDateTime upperBoundDate) {
 
-    // Retrieve the count of BizEvents for the passed time slot
-    long numberOfBizEvents = 0;
-    List<Long> countOfBizEventByTimeSlot =
-        this.bizEventsRepository.countBizEventsInTimeSlot(
-            lowerBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER),
-            upperBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER));
-    if (!countOfBizEventByTimeSlot.isEmpty()) {
-      numberOfBizEvents = countOfBizEventByTimeSlot.get(0);
-    }
-    log.info(
-        "Found [{}] BizEvents in time slot [{} - {}]",
-        numberOfBizEvents,
-        lowerBoundDate,
-        upperBoundDate);
-
-    boolean isHistoricized = isHistoricizedReceipt(upperBoundDate);
-
-    // Retrieve the count of receipts generated on the first occurrence for old payment models for
-    // the time slot passed
-    long numberOfFirstPayOldModelReceipts =
-        isHistoricized
-        ? this.historicRtRepository.countFirstRPTsByTimeSlot(
-            lowerBoundDate.toLocalDate().atStartOfDay(),
-            upperBoundDate.plusDays(1),
-            lowerBoundDate,
-            upperBoundDate)
-        : this.rtRepository.countFirstRPTsByTimeSlot(
-            lowerBoundDate.toLocalDate().atStartOfDay(),
-            upperBoundDate.plusDays(1),
-            lowerBoundDate,
-            upperBoundDate);
-
-    // Retrieve the count of receipts generated on the retried occurrence for old payment models for
-    // the time slot passed
-    long numberOfRetriedOldModelReceipts =
-        isHistoricized
-        ? this.historicRtRepository.countRetriedRPTsByTimeSlot(
-                lowerBoundDate.toLocalDate().atStartOfDay(),
-                upperBoundDate.plusDays(1),
-                lowerBoundDate,
-                upperBoundDate)
-        : this.rtRepository.countRetriedRPTsByTimeSlot(
-            lowerBoundDate.toLocalDate().atStartOfDay(),
-            upperBoundDate.plusDays(1),
-            lowerBoundDate,
-            upperBoundDate);
-
-    // Calculate the count of receipts useful for old payment models for the time slot passed
-    long numberOfOldModelReceipts =
-        numberOfFirstPayOldModelReceipts - numberOfRetriedOldModelReceipts;
-    log.info(
-        "Found [{}] receipts for old model in time slot [{} - {}]",
-        numberOfOldModelReceipts,
-        lowerBoundDate,
-        upperBoundDate);
-
-    // Retrieve the count of receipts generated for new payment models for the time slot passed
-    long numberOfNewModelReceipts =
-        isHistoricized
-        ?  this.historicPositionReceiptRepository.countByTimeSlot(
-            lowerBoundDate.toLocalDate().atStartOfDay(),
-            upperBoundDate.plusDays(1),
-            lowerBoundDate,
-            upperBoundDate)
-        : this.positionReceiptRepository.countByTimeSlot(
-            lowerBoundDate.toLocalDate().atStartOfDay(),
-            upperBoundDate.plusDays(1),
-            lowerBoundDate,
-            upperBoundDate);
-    log.info(
-        "Found [{}] receipts for new model in time slot [{} - {}]",
-        numberOfNewModelReceipts,
-        lowerBoundDate,
-        upperBoundDate);
-
-    return ((numberOfNewModelReceipts + numberOfOldModelReceipts) - numberOfBizEvents) > 0;
+    return getNumberOfMissingBizEventsAtTimeSlot(lowerBoundDate, upperBoundDate) > 0;
   }
+
+
+    /**
+     * Retrieve the number of discrepancies between the biz events and the receipts stored by
+     * NdP, searching in a past time slot.
+     *
+     * @param lowerBoundDate the lower bound of the timeslot
+     * @param upperBoundDate the upper bound of the timeslot
+     * @return the number of Biz Events that must be recovered.
+     */
+    public long getNumberOfMissingBizEventsAtTimeSlot(
+            LocalDateTime lowerBoundDate, LocalDateTime upperBoundDate) {
+
+        // Retrieve the count of BizEvents for the passed time slot
+        long numberOfBizEvents = 0;
+        List<Long> countOfBizEventByTimeSlot =
+                this.bizEventsRepository.countBizEventsInTimeSlot(
+                        lowerBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER),
+                        upperBoundDate.format(Constants.BIZ_EVENT_DATE_FORMATTER));
+        if (!countOfBizEventByTimeSlot.isEmpty()) {
+            numberOfBizEvents = countOfBizEventByTimeSlot.get(0);
+        }
+        log.info(
+                "Found [{}] BizEvents in time slot [{} - {}]",
+                numberOfBizEvents,
+                lowerBoundDate,
+                upperBoundDate);
+
+        boolean isHistoricized = isHistoricizedReceipt(upperBoundDate);
+
+        // Retrieve the count of receipts generated on the first occurrence for old payment models for
+        // the time slot passed
+        long numberOfFirstPayOldModelReceipts =
+                isHistoricized
+                        ? this.historicRtRepository.countFirstRPTsByTimeSlot(
+                        lowerBoundDate.toLocalDate().atStartOfDay(),
+                        upperBoundDate.plusDays(1),
+                        lowerBoundDate,
+                        upperBoundDate)
+                        : this.rtRepository.countFirstRPTsByTimeSlot(
+                        lowerBoundDate.toLocalDate().atStartOfDay(),
+                        upperBoundDate.plusDays(1),
+                        lowerBoundDate,
+                        upperBoundDate);
+
+        // Retrieve the count of receipts generated on the retried occurrence for old payment models for
+        // the time slot passed
+        long numberOfRetriedOldModelReceipts =
+                isHistoricized
+                        ? this.historicRtRepository.countRetriedRPTsByTimeSlot(
+                        lowerBoundDate.toLocalDate().atStartOfDay(),
+                        upperBoundDate.plusDays(1),
+                        lowerBoundDate,
+                        upperBoundDate)
+                        : this.rtRepository.countRetriedRPTsByTimeSlot(
+                        lowerBoundDate.toLocalDate().atStartOfDay(),
+                        upperBoundDate.plusDays(1),
+                        lowerBoundDate,
+                        upperBoundDate);
+
+        // Calculate the count of receipts useful for old payment models for the time slot passed
+        long numberOfOldModelReceipts =
+                numberOfFirstPayOldModelReceipts - numberOfRetriedOldModelReceipts;
+        log.info(
+                "Found [{}] receipts for old model in time slot [{} - {}]",
+                numberOfOldModelReceipts,
+                lowerBoundDate,
+                upperBoundDate);
+
+        // Retrieve the count of receipts generated for new payment models for the time slot passed
+        long numberOfNewModelReceipts =
+                isHistoricized
+                        ?  this.historicPositionReceiptRepository.countByTimeSlot(
+                        lowerBoundDate.toLocalDate().atStartOfDay(),
+                        upperBoundDate.plusDays(1),
+                        lowerBoundDate,
+                        upperBoundDate)
+                        : this.positionReceiptRepository.countByTimeSlot(
+                        lowerBoundDate.toLocalDate().atStartOfDay(),
+                        upperBoundDate.plusDays(1),
+                        lowerBoundDate,
+                        upperBoundDate);
+        log.info(
+                "Found [{}] receipts for new model in time slot [{} - {}]",
+                numberOfNewModelReceipts,
+                lowerBoundDate,
+                upperBoundDate);
+
+        return ((numberOfNewModelReceipts + numberOfOldModelReceipts) - numberOfBizEvents);
+    }
 
   public boolean checkIfMissingBizEvent(
       LocalDateTime lowerBoundDate,

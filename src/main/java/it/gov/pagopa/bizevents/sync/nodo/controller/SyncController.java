@@ -2,6 +2,7 @@ package it.gov.pagopa.bizevents.sync.nodo.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
+import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncInformativeReport;
 import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReport;
 import it.gov.pagopa.bizevents.sync.nodo.service.BizEventSynchronizerService;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
@@ -32,23 +33,20 @@ public class SyncController {
   @GetMapping(value = "/synchronize")
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<SyncReport> manuallySynchronize(
-      @NotNull
-          @RequestParam(name = "dateFrom")
-          @Schema(example = "2025-01-01T12:00:00", description = "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
-          LocalDateTime dateFrom,
-      @NotNull
-          @RequestParam(name = "dateTo")
-          @Schema(example = "2025-01-01T21:00:00", description = "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
-          LocalDateTime dateTo,
-      @RequestParam(name = "timeSlotSize", defaultValue = "-1")
-          @Schema(
-              example = "10",
-              description =
-                  "Override default time slot size in minutes. The values must be greater than 1. Default value is 60")
-          int overriddenTimeSlotSize,
-      @RequestParam(name = "showBizEvents", defaultValue = "true")
-          @Schema(example = "true", description = "Show generated BizEvents data in final report")
-          boolean showBizEvents) {
+    @NotNull
+      @RequestParam(name = "dateFrom")
+      @Schema(example = "2025-01-01T12:00:00", description = "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
+      LocalDateTime dateFrom,
+    @NotNull
+      @RequestParam(name = "dateTo")
+      @Schema(example = "2025-01-01T21:00:00", description = "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
+      LocalDateTime dateTo,
+    @RequestParam(name = "timeSlotSize", defaultValue = "-1")
+      @Schema(example = "10", description = "Override default time slot size in minutes. The values must be greater than 1. Default value is 60")
+      int overriddenTimeSlotSize,
+    @RequestParam(name = "showBizEvents", defaultValue = "true")
+      @Schema(example = "true", description = "Show generated BizEvents data in final report")
+      boolean showBizEvents) {
 
     log.info("Invoking BizEvent-to-Nodo synchronization via HTTP manual trigger!");
     long start = Calendar.getInstance().getTimeInMillis();
@@ -68,20 +66,20 @@ public class SyncController {
   @GetMapping(value = "/synchronize/single")
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<SyncReport> manuallySynchronizeSingleEvent(
-      @NotNull
-          @RequestParam(name = "dateFrom")
-          @Schema(example = "2025-01-01T12:00:00", description = "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
-          LocalDateTime dateFrom,
-      @NotNull
-          @RequestParam(name = "dateTo")
-          @Schema(example = "2025-01-01T21:00:00", description = "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
-          LocalDateTime dateTo,
-      @RequestParam(name = "domainId")
-          @Schema(example = "77777777777", description = "Creditor institution identifier")
-          String domainId,
-      @RequestParam(name = "noticeNumber")
-          @Schema(example = "300000000000000000", description = "Notice number")
-          String noticeNumber) {
+    @NotNull
+      @RequestParam(name = "dateFrom")
+      @Schema(example = "2025-01-01T12:00:00", description = "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
+      LocalDateTime dateFrom,
+    @NotNull
+      @RequestParam(name = "dateTo")
+      @Schema(example = "2025-01-01T21:00:00", description = "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
+      LocalDateTime dateTo,
+    @RequestParam(name = "domainId")
+      @Schema(example = "77777777777", description = "Creditor institution identifier")
+      String domainId,
+    @RequestParam(name = "noticeNumber")
+      @Schema(example = "300000000000000000", description = "Notice number")
+      String noticeNumber) {
 
     log.info("Invoking BizEvent-to-Nodo single BizEvent synchronization!");
     long start = Calendar.getInstance().getTimeInMillis();
@@ -90,6 +88,37 @@ public class SyncController {
             dateFrom, dateTo, domainId, noticeNumber);
     log.info(
         "Invoked BizEvent-to-Nodo single BizEvent synchronization completed in [{}] ms!",
+        CommonUtility.getTimelapse(start));
+    return ResponseEntity.status(HttpStatus.OK).body(report);
+  }
+
+
+  @Operation(
+      summary = "Check number of events to synchronize",
+      description = "Check the total number of events to synchronize in passed time slot.",
+      tags = {"Manual"})
+  @GetMapping(value = "/to-synchronize")
+  @ResponseStatus(HttpStatus.OK)
+  public ResponseEntity<SyncInformativeReport> countEventsToSynchronize(
+    @NotNull
+      @RequestParam(name = "dateFrom")
+      @Schema(example = "2025-01-01T12:00:00", description = "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
+      LocalDateTime dateFrom,
+    @NotNull
+      @RequestParam(name = "dateTo")
+      @Schema(example = "2025-01-01T21:00:00", description = "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).")
+      LocalDateTime dateTo,
+    @RequestParam(name = "timeSlotSize", defaultValue = "-1")
+      @Schema(example = "10", description = "Override default time slot size in minutes. The values must be greater than 1. Default value is 60")
+      int overriddenTimeSlotSize) {
+
+    log.info("Invoking count of BizEvent-to-Nodo BizEvents to synchronize!");
+    long start = Calendar.getInstance().getTimeInMillis();
+    SyncInformativeReport report =
+        bizEventSynchronizerService.countEventsToSynchronize(
+            dateFrom, dateTo, overriddenTimeSlotSize);
+    log.info(
+        "Invoked  count of BizEvent-to-Nodo BizEvents to synchronize completed in [{}] ms!",
         CommonUtility.getTimelapse(start));
     return ResponseEntity.status(HttpStatus.OK).body(report);
   }

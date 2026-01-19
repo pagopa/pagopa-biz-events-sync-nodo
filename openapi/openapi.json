@@ -4,7 +4,7 @@
     "description": "placeholder-description",
     "termsOfService": "https://www.pagopa.gov.it/",
     "title": "test-artifactId",
-    "version": "0.3.0"
+    "version": "0.3.0-1-feat-informative-api"
   },
   "servers": [
     {
@@ -233,6 +233,84 @@
           }
         },
         "summary": "Manually synchronize single BizEvents",
+        "tags": [
+          "Manual"
+        ]
+      },
+      "parameters": [
+        {
+          "description": "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
+          "in": "header",
+          "name": "X-Request-Id",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/manual/to-synchronize": {
+      "get": {
+        "description": "Check the total number of events to synchronize in passed time slot.",
+        "operationId": "countEventsToSynchronize",
+        "parameters": [
+          {
+            "description": "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+            "example": "2025-01-01T12:00:00",
+            "in": "query",
+            "name": "dateFrom",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+              "example": "2025-01-01T12:00:00"
+            }
+          },
+          {
+            "description": "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+            "example": "2025-01-01T21:00:00",
+            "in": "query",
+            "name": "dateTo",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+              "example": "2025-01-01T21:00:00"
+            }
+          },
+          {
+            "description": "Override default time slot size in minutes. The values must be greater than 1. Default value is 60",
+            "example": 10,
+            "in": "query",
+            "name": "timeSlotSize",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Override default time slot size in minutes. The values must be greater than 1. Default value is 60",
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncInformativeReport"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Check number of events to synchronize",
         "tags": [
           "Manual"
         ]
@@ -600,6 +678,55 @@
           }
         }
       },
+      "SyncInformativeReport": {
+        "type": "object",
+        "properties": {
+          "execution_time_slot": {
+            "$ref": "#/components/schemas/SyncReportTimeSlot"
+          },
+          "records": {
+            "type": "array",
+            "description": "The list of individual records describing the informative status on a single step.",
+            "items": {
+              "$ref": "#/components/schemas/SyncInformativeReportRecord"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "The outcome of the synchronization process.",
+            "example": "TO_GENERATE",
+            "enum": [
+              "TO_GENERATE",
+              "RECEIPT_NOT_FOUND",
+              "GENERATION_ERROR",
+              "PARTIALLY_GENERATED",
+              "GENERATED"
+            ]
+          },
+          "total_records": {
+            "type": "integer",
+            "description": "The total number of BizEvents analyzed by the informative process.",
+            "format": "int32",
+            "example": 7
+          }
+        },
+        "description": "A report that defines the status of the synchronization operation for each BizEvent manipulated and in its entirety."
+      },
+      "SyncInformativeReportRecord": {
+        "type": "object",
+        "properties": {
+          "number_of_receipts": {
+            "type": "integer",
+            "description": "The number of related receipt analyzed by informative operation.",
+            "format": "int64",
+            "example": 15
+          },
+          "time_slot": {
+            "$ref": "#/components/schemas/SyncReportTimeSlot"
+          }
+        },
+        "description": "The records describing the informative detail of a single step."
+      },
       "SyncReport": {
         "type": "object",
         "properties": {
@@ -623,6 +750,7 @@
             "description": "The outcome of the synchronization process.",
             "example": "GENERATED",
             "enum": [
+              "TO_GENERATE",
               "RECEIPT_NOT_FOUND",
               "GENERATION_ERROR",
               "PARTIALLY_GENERATED",
