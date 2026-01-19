@@ -86,7 +86,7 @@ public class BizEventSynchronizerService {
                 .from(minDate)
                 .to(maxDate)
                 .build())
-            .numberOfReceipts(missingBizEventOnTimeSlot)
+            .numberOfReceipts(missingBizEventOnTimeSlot < 0 ? 0 : missingBizEventOnTimeSlot)
             .build());
     }
 
