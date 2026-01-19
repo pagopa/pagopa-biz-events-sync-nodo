@@ -128,7 +128,6 @@ public class PositionPayment {
   @Column(name = "BUNDLE_PA_ID")
   private String bundlePaId;
 
-  @Lob
   @Column(name = "PM_INFO")
   private byte[] pmInfo; //blob;bytea
 
