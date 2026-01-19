@@ -4,7 +4,7 @@ microservice-chart: &microservice-chart
   fullnameOverride: ""
   image:
     repository: ghcr.io/pagopa/pagopa-biz-events-sync-nodo
-    tag: "0.2.3-8-feat-massive-in-historic"
+    tag: "0.2.3-9-feat-massive-in-historic"
     pullPolicy: Always
   livenessProbe:
     httpGet:
