@@ -2,8 +2,8 @@ apiVersion: v2
 name: pagopa-biz-events-sync-nodo
 description: Scheduled microservice that re-elaborates failed biz-events
 type: application
-version: 0.91.0
-appVersion: 0.2.3-7-feat-massive-in-historic
+version: 0.92.0
+appVersion: 0.2.3-8-feat-massive-in-historic
 dependencies:
   - name: microservice-chart
     version: 8.0.2
