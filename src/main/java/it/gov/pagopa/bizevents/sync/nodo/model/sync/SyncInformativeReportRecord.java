@@ -14,7 +14,7 @@ import lombok.*;
 @AllArgsConstructor
 @JsonPropertyOrder({
   "time_slot",
-  "number_of_receipts"
+  "count"
 })
 @Schema(description = "The records describing the informative detail of a single step.")
 public class SyncInformativeReportRecord {
@@ -23,7 +23,7 @@ public class SyncInformativeReportRecord {
   @Schema(description = "The fine-grained timeslot within which informative operation of this BizEvent was executed.")
   private SyncReportTimeSlot timeSlot;
 
-  @JsonProperty("number_of_receipts")
+  @JsonProperty("count")
   @Schema(example = "15", description = "The number of related receipt analyzed by informative operation.")
-  private long numberOfReceipts;
+  private long count;
 }

@@ -70,6 +70,7 @@ public class BizEventSynchronizerService {
         upperLimitDate,
         timeSlots);
 
+    long recordCount = 0;
     List<SyncInformativeReportRecord> records = new ArrayList<>();
     for (int index = 0; index < timeSlots.size() - 1; index++) {
 
@@ -81,13 +82,16 @@ public class BizEventSynchronizerService {
         log.info("Searching number of missing BizEvents for time slot [{} - {}]", minDate, maxDate);
         long missingBizEventOnTimeSlot =
                 this.bizEventsReaderService.getNumberOfMissingBizEventsAtTimeSlot(minDate, maxDate);
+
+        long normalizedRecordCountPerTimeslot = missingBizEventOnTimeSlot < 0 ? 0 : missingBizEventOnTimeSlot;
         records.add(SyncInformativeReportRecord.builder()
             .timeSlot(SyncReportTimeSlot.builder()
                 .from(minDate)
                 .to(maxDate)
                 .build())
-            .numberOfReceipts(missingBizEventOnTimeSlot < 0 ? 0 : missingBizEventOnTimeSlot)
+            .numberOfReceipts(normalizedRecordCountPerTimeslot)
             .build());
+        recordCount += normalizedRecordCountPerTimeslot;
     }
 
     // Generate final report
@@ -98,7 +102,7 @@ public class BizEventSynchronizerService {
                 .from(lowerLimitDate)
                 .to(upperLimitDate)
                 .build())
-        .totalRecords(records.size())
+        .totalCount(recordCount)
         .records(records)
         .build();
   }
