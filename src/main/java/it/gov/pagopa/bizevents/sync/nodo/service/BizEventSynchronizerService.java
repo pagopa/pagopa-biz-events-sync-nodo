@@ -89,7 +89,7 @@ public class BizEventSynchronizerService {
                 .from(minDate)
                 .to(maxDate)
                 .build())
-            .numberOfReceipts(normalizedRecordCountPerTimeslot)
+            .count(normalizedRecordCountPerTimeslot)
             .build());
         recordCount += normalizedRecordCountPerTimeslot;
     }
