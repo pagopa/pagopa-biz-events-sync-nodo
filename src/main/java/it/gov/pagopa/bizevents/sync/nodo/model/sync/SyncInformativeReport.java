@@ -17,7 +17,7 @@ import java.util.List;
 @JsonPropertyOrder({
   "status",
   "execution_time_slot",
-  "total_records"
+  "total_count"
 })
 @JsonInclude(Include.NON_NULL)
 @Schema(description = "A report that defines the status of the synchronization operation for each BizEvent manipulated and in its entirety.")
@@ -31,9 +31,9 @@ public class SyncInformativeReport {
   @Schema(description = "The timeslot within which informative operation was executed.")
   private SyncReportTimeSlot executionTimeSlot;
 
-  @JsonProperty("total_records")
+  @JsonProperty("total_count")
   @Schema(example = "7", description = "The total number of BizEvents analyzed by the informative process.")
-  private int totalRecords;
+  private long totalCount;
 
   @Schema(description = "The list of individual records describing the informative status on a single step.")
   private List<SyncInformativeReportRecord> records;
