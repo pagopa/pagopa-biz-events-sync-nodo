@@ -128,6 +128,8 @@ public class PositionPayment {
   @Column(name = "BUNDLE_PA_ID")
   private String bundlePaId;
 
+  @Lob
+  @JdbcTypeCode(Types.LONGVARBINARY)
   @Column(name = "PM_INFO")
   private byte[] pmInfo; // OracleDB: blob; PostgreSQL: bytea
 
