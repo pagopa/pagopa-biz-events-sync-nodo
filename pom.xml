@@ -22,7 +22,7 @@
         <postgresql-version>42.5.5</postgresql-version>
     </properties>
 
-    <version>0.4.1-5-fix-blob-postgres</version>
+    <version>0.4.1-6-fix-blob-postgres</version>
 
     <dependencies>
         <dependency>
