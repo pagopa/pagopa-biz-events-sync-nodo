@@ -34,9 +34,9 @@ public class RtXml {
   @Column(name = "TIPO_FIRMA")
   private String tipoFirma;
 
-  @Lob
+  @JdbcTypeCode(Types.LONGVARCHAR)
   @Column(name = "XML_CONTENT")
-  private String xmlContent;
+  private String xmlContent; // Oracle: CLOB, Postgres: TEXT
 
   @Column(name = "INSERTED_TIMESTAMP")
   private Timestamp insertedTimestamp;
