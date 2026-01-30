@@ -3,15 +3,11 @@ package it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
-import java.sql.Blob;
 import java.sql.Types;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Type;
-
-import static jakarta.persistence.FetchType.LAZY;
 
 @Getter
 @Setter
@@ -128,8 +124,9 @@ public class PositionPayment {
   @Column(name = "BUNDLE_PA_ID")
   private String bundlePaId;
 
+  @JdbcTypeCode(Types.VARBINARY)
   @Column(name = "PM_INFO")
-  private byte[] pmInfo; // OracleDB: blob; PostgreSQL: bytea
+  private byte[] pmInfo; // OracleDB: BLOB, PostgreSQL: BYTEA
 
   @Column(name = "MBD")
   private String mbd;
