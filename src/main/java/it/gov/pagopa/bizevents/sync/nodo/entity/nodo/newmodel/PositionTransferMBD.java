@@ -48,9 +48,9 @@ public class PositionTransferMBD {
   @Column(name = "UPDATED_BY")
   private String updatedBy;
 
-  @Lob
+  @JdbcTypeCode(Types.VARBINARY)
   @Column(name = "XML_CONTENT")
-  private byte[] xmlContent;
+  private byte[] xmlContent; // Oracle: BLOB, Postgres: BYTEA
 
   @OneToOne
   @JoinColumn(name = "FK_POSITION_TRANSFER", referencedColumnName = "ID")

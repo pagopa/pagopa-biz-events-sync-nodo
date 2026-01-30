@@ -132,7 +132,7 @@ public class PositionPayment {
 
   @JdbcTypeCode(Types.VARBINARY)
   @Column(name = "PM_INFO")
-  private byte[] pmInfo; // OracleDB: blob; PostgreSQL: bytea
+  private byte[] pmInfo; // OracleDB: BLOB, PostgreSQL: BYTEA
 
   @Column(name = "MBD")
   private String mbd;
