@@ -8,8 +8,10 @@ import java.sql.Types;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
+import org.hibernate.type.descriptor.jdbc.VarbinaryJdbcType;
 
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -128,7 +130,7 @@ public class PositionPayment {
   @Column(name = "BUNDLE_PA_ID")
   private String bundlePaId;
 
-  @JdbcTypeCode(Types.LONGVARBINARY)
+  @JdbcType(VarbinaryJdbcType.class)
   @Column(name = "PM_INFO")
   private byte[] pmInfo; // OracleDB: blob; PostgreSQL: bytea
 
