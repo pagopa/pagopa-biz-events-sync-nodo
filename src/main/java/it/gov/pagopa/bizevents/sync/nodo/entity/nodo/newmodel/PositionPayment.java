@@ -146,9 +146,6 @@ public class PositionPayment {
   @Column(name = "FLAG_STANDIN")
   private String flagStandin;
 
-  @Column(name = "TOUCHPOINT")
-  private String touchpoint;
-
   @OneToOne
   @JoinColumn(name = "FK_PAYMENT_PLAN", referencedColumnName = "ID")
   private PositionPaymentPlan paymentPlan;
