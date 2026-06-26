@@ -1,7 +1,7 @@
 package it.gov.pagopa.bizevents.sync.nodo.service;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
-import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.PositionActivate;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionActivate;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionPayment;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionTransfer;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.Rpt;
@@ -133,20 +133,10 @@ public class PaymentPositionReaderService {
       Optional<PositionActivate> positionActivateOpt =
           this.positionActivateRepository.readByPaymentTokenInTimeSlot(
               minDate, maxDate, paymentToken);
-      if (positionActivateOpt.isEmpty()) {
-        String msg =
-            String.format(
-                "No valid record found in POSITION_ACTIVATE table for paymentToken=[%s] in"
-                    + " range=[%s-%s]",
-                paymentToken, minDate, maxDate);
-        throw new BizEventSyncException(msg);
-      }
-
-      PositionActivate positionActivate = positionActivateOpt.get();
 
       bizEvent =
           BizEventMapper.fromNewModel(
-              positionPayment, positionActivate, positionTransfers, totalNotices, configCacheService.getConfigData());
+              positionPayment, positionActivateOpt, positionTransfers, totalNotices, configCacheService.getConfigData());
 
     } catch (DataAccessException e) {
       String msg =
@@ -255,20 +245,10 @@ public class PaymentPositionReaderService {
       Optional<PositionActivate> positionActivateOpt =
           this.positionActivateRepository.readByPaymentTokenInTimeSlot(
               minDate, maxDate, paymentToken);
-      if (positionActivateOpt.isEmpty()) {
-        String msg =
-            String.format(
-                "No valid record found in POSITION_ACTIVATE table for paymentToken=[%s] in"
-                    + " range=[%s-%s]",
-                paymentToken, minDate, maxDate);
-        throw new BizEventSyncException(msg);
-      }
-
-      PositionActivate positionActivate = positionActivateOpt.get();
 
       bizEvent =
           BizEventMapper.fromNewModel(
-              positionPayment, positionActivate, positionTransfers, totalNotices, configCacheService.getConfigData());
+              positionPayment, positionActivateOpt, positionTransfers, totalNotices, configCacheService.getConfigData());
 
     } catch (DataAccessException e) {
       String msg =

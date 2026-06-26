@@ -1,6 +1,6 @@
 package it.gov.pagopa.bizevents.sync.nodo.repository.primary.payment;
 
-import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.PositionActivate;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionActivate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
