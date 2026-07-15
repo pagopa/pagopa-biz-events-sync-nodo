@@ -17,7 +17,26 @@ public interface HistoricPositionReceiptRepository extends JpaRepository<Positio
           pr.paymentToken AS paymentToken,
           pr.paFiscalCode AS domainId,
           pr.insertedTimestamp AS insertedTimestamp,
-          it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion.NEW AS version
+          "NEW" AS version
+      )
+      FROM PositionReceipt pr
+      WHERE (pr.insertedTimestamp >= :minDate AND pr.insertedTimestamp < :maxDate)
+          AND (pr.paymentDateTime >= :minDateTime AND pr.paymentDateTime < :maxDateTime)
+      """)
+  Set<ReceiptEventInfo> readReceiptsInTimeSlot(
+            @Param("minDate") LocalDateTime minDate,
+            @Param("maxDate") LocalDateTime maxDate,
+            @Param("minDateTime") LocalDateTime minDateTime,
+            @Param("maxDateTime") LocalDateTime maxDateTime);
+
+  @Query(
+      """
+      SELECT new it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo(
+          pr.noticeId AS iuv,
+          pr.paymentToken AS paymentToken,
+          pr.paFiscalCode AS domainId,
+          pr.insertedTimestamp AS insertedTimestamp,
+          "NEW" AS version
       )
       FROM PositionReceipt pr
       WHERE pr.paymentDateTime >= :minDate
@@ -30,4 +49,19 @@ public interface HistoricPositionReceiptRepository extends JpaRepository<Positio
       @Param("maxDate") LocalDateTime maxDate,
       @Param("domainId") String domainId,
       @Param("noticeNumber") String noticeNumber);
+
+
+
+  @Query(
+      """
+      SELECT COUNT(pr)
+      FROM PositionReceipt pr
+      WHERE (pr.insertedTimestamp >= :minDate AND pr.insertedTimestamp < :maxDate)
+        AND (pr.paymentDateTime >= :minDateTime AND pr.paymentDateTime < :maxDateTime)
+      """)
+  long countByTimeSlot(
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
+      @Param("minDateTime") LocalDateTime minDateTime,
+      @Param("maxDateTime") LocalDateTime maxDateTime);
 }

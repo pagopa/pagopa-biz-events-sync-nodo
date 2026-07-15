@@ -2,15 +2,12 @@ package it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel;
 
 import jakarta.persistence.*;
 
-import java.sql.Blob;
 import java.sql.Timestamp;
 import java.sql.Types;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
-
-import static jakarta.persistence.FetchType.LAZY;
 
 @Getter
 @Setter
@@ -34,11 +31,9 @@ public class RtXml {
   @Column(name = "TIPO_FIRMA")
   private String tipoFirma;
 
-  @Lob
-  @Basic(fetch = LAZY)
-  @JdbcTypeCode(Types.BINARY)
+  @JdbcTypeCode(Types.LONGVARCHAR)
   @Column(name = "XML_CONTENT")
-  private Blob xmlContent;
+  private String xmlContent; // Oracle: CLOB, Postgres: TEXT
 
   @Column(name = "INSERTED_TIMESTAMP")
   private Timestamp insertedTimestamp;

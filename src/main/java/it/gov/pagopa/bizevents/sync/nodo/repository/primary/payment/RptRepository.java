@@ -2,6 +2,7 @@ package it.gov.pagopa.bizevents.sync.nodo.repository.primary.payment;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.Rpt;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,8 +20,8 @@ public interface RptRepository extends JpaRepository<Rpt, Long> {
         AND rpt.ccp = :ccp
       """)
   Optional<Rpt> readByUniqueIdentifier(
-      @Param("minDate") LocalDate minDate,
-      @Param("maxDate") LocalDate maxDate,
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
       @Param("domainId") String domainId,
       @Param("iuv") String iuv,
       @Param("ccp") String ccp);

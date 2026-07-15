@@ -19,7 +19,7 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
           rt.ccp AS paymentToken,
           rt.identDominio AS domainId,
           rt.insertedTimestamp AS insertedTimestamp,
-          it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion.OLD AS version
+          "OLD" AS version
       )
       FROM Rt rt
       WHERE (rt.insertedTimestamp >= :minDate AND rt.insertedTimestamp < :maxDate)
@@ -28,8 +28,8 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
         AND rt.generataDa = 'PSP'
       """)
   Set<ReceiptEventInfo> readReceiptsInTimeSlot(
-      @Param("minDate") LocalDate minDate,
-      @Param("maxDate") LocalDate maxDate,
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
       @Param("minDateTime") LocalDateTime minDateTime,
       @Param("maxDateTime") LocalDateTime maxDateTime);
 
@@ -40,7 +40,7 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
           rt.ccp AS paymentToken,
           rt.identDominio AS domainId,
           rt.insertedTimestamp AS insertedTimestamp,
-          it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion.OLD AS version
+          "OLD" AS version
       )
       FROM Rt rt
       JOIN Rpt rpt
@@ -69,8 +69,8 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
         AND rt.ccp = :ccp
       """)
   Optional<Rt> readByUniqueIdentifier(
-      @Param("minDate") LocalDate minDate,
-      @Param("maxDate") LocalDate maxDate,
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
       @Param("domainId") String domainId,
       @Param("iuv") String iuv,
       @Param("ccp") String ccp);
@@ -89,8 +89,8 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
         AND rt.generataDa = 'PSP'
       """)
   long countFirstRPTsByTimeSlot(
-      @Param("minDate") LocalDate minDate,
-      @Param("maxDate") LocalDate maxDate,
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
       @Param("minDateTime") LocalDateTime minDateTime,
       @Param("maxDateTime") LocalDateTime maxDateTime);
 
@@ -108,8 +108,8 @@ public interface RtRepository extends JpaRepository<Rt, Long> {
         AND rt.generataDa = 'PSP'
       """)
   long countRetriedRPTsByTimeSlot(
-      @Param("minDate") LocalDate minDate,
-      @Param("maxDate") LocalDate maxDate,
+      @Param("minDate") LocalDateTime minDate,
+      @Param("maxDate") LocalDateTime maxDate,
       @Param("minDateTime") LocalDateTime minDateTime,
       @Param("maxDateTime") LocalDateTime maxDateTime);
 }

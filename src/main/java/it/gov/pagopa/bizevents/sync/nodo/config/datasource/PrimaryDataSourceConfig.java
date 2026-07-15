@@ -41,6 +41,9 @@ public class PrimaryDataSourceConfig {
     @Value("${spring.datasource.primary.hibernate.dialect}")
     private String primaryDialect;
 
+    @Value("${spring.datasource.primary.schema}")
+    private String primarySchema;
+
     @Primary
     @Bean
     @ConfigurationProperties("spring.datasource.primary")
@@ -57,6 +60,7 @@ public class PrimaryDataSourceConfig {
                 .type(HikariDataSource.class)
                 .build();
         build.setPoolName("primary");
+        build.setSchema(primarySchema);
         return build;
     }
 
@@ -66,16 +70,13 @@ public class PrimaryDataSourceConfig {
 
         Map<String, Object> jpaProps = new HashMap<>();
         jpaProps.put("hibernate.dialect", primaryDialect);
+        jpaProps.put("hibernate.default_schema", primarySchema);
         jpaProps.put("hibernate.hbm2ddl.auto", "none");
         jpaProps.put("hibernate.archive.autodetection", "none");
-        //jpaProps.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
         jpaProps.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl");
 
         return builder
                 .dataSource(primaryDataSource())
-                /*.packages(
-                        "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel",
-                        "it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel")*/
                 .packages( // NewModel
                         PositionPayment.class,
                         PositionPaymentPlan.class,

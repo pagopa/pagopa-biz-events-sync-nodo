@@ -2,14 +2,11 @@ package it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel;
 
 import jakarta.persistence.*;
 
-import java.sql.Blob;
 import java.sql.Types;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
-
-import static jakarta.persistence.FetchType.LAZY;
 
 @Getter
 @Setter
@@ -48,11 +45,9 @@ public class PositionTransferMBD {
   @Column(name = "UPDATED_BY")
   private String updatedBy;
 
-  @Lob
-  @Basic(fetch = LAZY)
-  @JdbcTypeCode(Types.BINARY)
+  @JdbcTypeCode(Types.VARBINARY)
   @Column(name = "XML_CONTENT")
-  private Blob xmlContent;
+  private byte[] xmlContent; // Oracle: BLOB, Postgres: BYTEA
 
   @OneToOne
   @JoinColumn(name = "FK_POSITION_TRANSFER", referencedColumnName = "ID")

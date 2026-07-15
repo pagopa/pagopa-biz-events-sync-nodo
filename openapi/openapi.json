@@ -4,7 +4,7 @@
     "description": "placeholder-description",
     "termsOfService": "https://www.pagopa.gov.it/",
     "title": "test-artifactId",
-    "version": "0.2.0-2-PAGOPA-3638-add-payment-channel"
+    "version": "0.4.2"
   },
   "servers": [
     {
@@ -52,7 +52,7 @@
             }
           }
         },
-        "summary": "health check",
+        "summary": "Health Check",
         "tags": [
           "Home"
         ]
@@ -74,50 +74,50 @@
         "operationId": "manuallySynchronize",
         "parameters": [
           {
-            "description": "Lower limit date",
+            "description": "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
             "example": "2025-01-01T12:00:00",
             "in": "query",
             "name": "dateFrom",
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Lower limit date",
+              "description": "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
               "example": "2025-01-01T12:00:00"
             }
           },
           {
-            "description": "Upper limit date",
+            "description": "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
             "example": "2025-01-01T21:00:00",
             "in": "query",
             "name": "dateTo",
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Upper limit date",
+              "description": "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
               "example": "2025-01-01T21:00:00"
             }
           },
           {
-            "description": "Override default time slot size in minutes. The values must be greater than 1",
+            "description": "Override default time slot size in minutes. The values must be greater than 1. Default value is 60",
             "example": 10,
             "in": "query",
             "name": "timeSlotSize",
             "required": false,
             "schema": {
               "type": "string",
-              "description": "Override default time slot size in minutes. The values must be greater than 1",
+              "description": "Override default time slot size in minutes. The values must be greater than 1. Default value is 60",
               "example": 10
             }
           },
           {
-            "description": "Show generated biz events data in final report",
+            "description": "Show generated BizEvents data in final report",
             "example": true,
             "in": "query",
             "name": "showBizEvents",
             "required": false,
             "schema": {
               "type": "string",
-              "description": "Show generated biz events data in final report",
+              "description": "Show generated BizEvents data in final report",
               "example": true
             }
           }
@@ -157,6 +157,174 @@
           }
         }
       ]
+    },
+    "/manual/synchronize/single": {
+      "get": {
+        "description": "Execute a synchronization for single event, manually starting the operation.",
+        "operationId": "manuallySynchronizeSingleEvent",
+        "parameters": [
+          {
+            "description": "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+            "example": "2025-01-01T12:00:00",
+            "in": "query",
+            "name": "dateFrom",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+              "example": "2025-01-01T12:00:00"
+            }
+          },
+          {
+            "description": "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+            "example": "2025-01-01T21:00:00",
+            "in": "query",
+            "name": "dateTo",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+              "example": "2025-01-01T21:00:00"
+            }
+          },
+          {
+            "description": "Creditor institution identifier",
+            "example": 77777777777,
+            "in": "query",
+            "name": "domainId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Creditor institution identifier",
+              "example": 77777777777
+            }
+          },
+          {
+            "description": "Notice number",
+            "example": 300000000000000000,
+            "in": "query",
+            "name": "noticeNumber",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Notice number",
+              "example": 300000000000000000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncReport"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Manually synchronize single BizEvents",
+        "tags": [
+          "Manual"
+        ]
+      },
+      "parameters": [
+        {
+          "description": "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
+          "in": "header",
+          "name": "X-Request-Id",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/manual/to-synchronize": {
+      "get": {
+        "description": "Check the total number of events to synchronize in passed time slot.",
+        "operationId": "countEventsToSynchronize",
+        "parameters": [
+          {
+            "description": "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+            "example": "2025-01-01T12:00:00",
+            "in": "query",
+            "name": "dateFrom",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Lower limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+              "example": "2025-01-01T12:00:00"
+            }
+          },
+          {
+            "description": "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+            "example": "2025-01-01T21:00:00",
+            "in": "query",
+            "name": "dateTo",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Upper limit date (in yyyy-MM-dd'T'HH:mm:ss format).",
+              "example": "2025-01-01T21:00:00"
+            }
+          },
+          {
+            "description": "Override default time slot size in minutes. The values must be greater than 1. Default value is 60",
+            "example": 10,
+            "in": "query",
+            "name": "timeSlotSize",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Override default time slot size in minutes. The values must be greater than 1. Default value is 60",
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncInformativeReport"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This header identifies the call",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Check number of events to synchronize",
+        "tags": [
+          "Manual"
+        ]
+      },
+      "parameters": [
+        {
+          "description": "This header identifies the call, if not passed it is self-generated. This ID is returned in the response.",
+          "in": "header",
+          "name": "X-Request-Id",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
     }
   },
   "components": {
@@ -167,7 +335,13 @@
           "environment": {
             "type": "string"
           },
+          "historic_db": {
+            "type": "string"
+          },
           "name": {
+            "type": "string"
+          },
+          "primary_db": {
             "type": "string"
           },
           "version": {
@@ -275,7 +449,8 @@
           "version": {
             "type": "string"
           }
-        }
+        },
+        "description": "The data related to the BizEvent generated."
       },
       "Creditor": {
         "type": "object",
@@ -503,29 +678,93 @@
           }
         }
       },
-      "SyncReport": {
+      "SyncInformativeReport": {
         "type": "object",
         "properties": {
-          "error_during_computation": {
-            "type": "boolean"
-          },
           "execution_time_slot": {
             "$ref": "#/components/schemas/SyncReportTimeSlot"
           },
           "records": {
             "type": "array",
+            "description": "The list of individual records describing the informative status on a single step.",
+            "items": {
+              "$ref": "#/components/schemas/SyncInformativeReportRecord"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "The outcome of the synchronization process.",
+            "example": "TO_GENERATE",
+            "enum": [
+              "TO_GENERATE",
+              "RECEIPT_NOT_FOUND",
+              "GENERATION_ERROR",
+              "PARTIALLY_GENERATED",
+              "GENERATED"
+            ]
+          },
+          "total_count": {
+            "type": "integer",
+            "description": "The total number of BizEvents analyzed by the informative process.",
+            "format": "int64",
+            "example": 7
+          }
+        },
+        "description": "A report that defines the status of the synchronization operation for each BizEvent manipulated and in its entirety."
+      },
+      "SyncInformativeReportRecord": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "description": "The number of related receipt analyzed by informative operation.",
+            "format": "int64",
+            "example": 15
+          },
+          "time_slot": {
+            "$ref": "#/components/schemas/SyncReportTimeSlot"
+          }
+        },
+        "description": "The records describing the informative detail of a single step."
+      },
+      "SyncReport": {
+        "type": "object",
+        "properties": {
+          "execution_time_slot": {
+            "$ref": "#/components/schemas/SyncReportTimeSlot"
+          },
+          "records": {
+            "type": "array",
+            "description": "The list of individual records describing the synchronization status of a single BizEvent.",
             "items": {
               "$ref": "#/components/schemas/SyncReportRecord"
             }
           },
           "sent_to_event_hub": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "The flag that determines whether events have been sent to the EventHub infrastructure component to be ingested by the BizEvents processor. This does NOT define whether the BizEvent has been stored in the DB.",
+            "example": true
+          },
+          "status": {
+            "type": "string",
+            "description": "The outcome of the synchronization process.",
+            "example": "GENERATED",
+            "enum": [
+              "TO_GENERATE",
+              "RECEIPT_NOT_FOUND",
+              "GENERATION_ERROR",
+              "PARTIALLY_GENERATED",
+              "GENERATED"
+            ]
           },
           "total_records": {
             "type": "integer",
-            "format": "int32"
+            "description": "The total number of BizEvents regenerated through the executed process.",
+            "format": "int32",
+            "example": 7
           }
-        }
+        },
+        "description": "A report that defines the status of the synchronization operation for each BizEvent manipulated and in its entirety."
       },
       "SyncReportRecord": {
         "type": "object",
@@ -534,44 +773,64 @@
             "$ref": "#/components/schemas/BizEvent"
           },
           "biz_event_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The identifier of generated BizEvent. It contains a special prefix that defines whether the sync process was made.",
+            "example": "resync-000ac324-1c00-469f-8b00-950000fb1432"
           },
           "domain_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The identifier of the creditor institution.",
+            "example": "77777777777"
           },
           "iuv": {
-            "type": "string"
+            "type": "string",
+            "description": "The IUV code of related receipt.",
+            "example": "01102000021300930"
           },
           "model_version": {
             "type": "string",
+            "description": "The model of the payment related to the receipt. 'NEW' means payment position, 'OLD' means RPT",
+            "example": "NEW",
             "enum": [
               "NEW",
               "OLD"
             ]
           },
           "payment_token": {
-            "type": "string"
+            "type": "string",
+            "description": "The payment token of related trnasaction.",
+            "example": "000ff000ffffffff00000fff00000000"
           },
           "sync_status": {
-            "type": "string"
+            "type": "string",
+            "description": "The outcome of the synchronization of a single receipt.",
+            "example": "GENERATED",
+            "enum": [
+              "GENERATED",
+              "NOT_INSERTED"
+            ]
           },
           "time_slot": {
             "$ref": "#/components/schemas/SyncReportTimeSlot"
           }
-        }
+        },
+        "description": "The records describing the synchronization status of a single BizEvent."
       },
       "SyncReportTimeSlot": {
         "type": "object",
         "properties": {
           "from": {
             "type": "string",
+            "description": "The timeslot start (as date-time) from which synchronization operation was executed.",
             "format": "date-time"
           },
           "to": {
             "type": "string",
+            "description": "The timeslot end (as date-time) until which synchronization operation was executed.",
             "format": "date-time"
           }
-        }
+        },
+        "description": "The timeslot within which synchronization operation was executed."
       },
       "Transaction": {
         "type": "object",

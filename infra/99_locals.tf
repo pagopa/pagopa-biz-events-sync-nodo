@@ -5,7 +5,7 @@ locals {
   apim = {
     name       = "${local.product}-apim"
     rg         = "${local.product}-api-rg"
-    product_id = "bizevents-nodo-sync"
+    product_id = "technical_support_api"
   }
 
   apim_hostname = "api.${var.apim_dns_zone_prefix}.${var.external_domain}"

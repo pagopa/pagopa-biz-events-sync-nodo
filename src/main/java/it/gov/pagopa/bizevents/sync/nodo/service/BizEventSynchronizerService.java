@@ -6,9 +6,7 @@ import it.gov.pagopa.bizevents.sync.nodo.exception.BizEventSyncException;
 import it.gov.pagopa.bizevents.sync.nodo.model.bizevent.ReceiptEventInfo;
 import it.gov.pagopa.bizevents.sync.nodo.model.enumeration.PaymentModelVersion;
 import it.gov.pagopa.bizevents.sync.nodo.model.mapper.BizEventMapper;
-import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReport;
-import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReportRecord;
-import it.gov.pagopa.bizevents.sync.nodo.model.sync.SyncReportTimeSlot;
+import it.gov.pagopa.bizevents.sync.nodo.model.sync.*;
 import it.gov.pagopa.bizevents.sync.nodo.util.CommonUtility;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -53,15 +51,71 @@ public class BizEventSynchronizerService {
     this.eventHubSenderService = eventHubSenderService;
   }
 
+  public SyncInformativeReport countEventsToSynchronize(
+      LocalDateTime lowerLimitDate,
+      LocalDateTime upperLimitDate,
+      int overriddenTimeSlotSize) {
+
+    int slotSize = overriddenTimeSlotSize > 0 ? overriddenTimeSlotSize : defaultSlotSizeInMinutes;
+    if (bizEventsReaderService.isHistoricizedReceipt(upperLimitDate) && slotSize > defaultSlotSizeInMinutes) {
+      log.warn("Set slot size from [{}] to default value [{}] because of search in historical DB", slotSize, defaultSlotSizeInMinutes);
+      slotSize = defaultSlotSizeInMinutes;
+    }
+
+    List<LocalDateTime> timeSlots =
+        CommonUtility.splitInSlots(lowerLimitDate, upperLimitDate, slotSize);
+    log.info(
+        "Split [{} - {}] time slot in different sections: {}",
+        lowerLimitDate,
+        upperLimitDate,
+        timeSlots);
+
+    long recordCount = 0;
+    List<SyncInformativeReportRecord> records = new ArrayList<>();
+    for (int index = 0; index < timeSlots.size() - 1; index++) {
+
+        // Extracting upper and lower date boundaries
+        LocalDateTime minDate = timeSlots.get(index);
+        LocalDateTime maxDate = timeSlots.get(index + 1);
+
+        // Count differences between receipts stored from NdP and elaborated BizEvents
+        log.info("Searching number of missing BizEvents for time slot [{} - {}]", minDate, maxDate);
+        long missingBizEventOnTimeSlot =
+                this.bizEventsReaderService.getNumberOfMissingBizEventsAtTimeSlot(minDate, maxDate);
+
+        long normalizedRecordCountPerTimeslot = missingBizEventOnTimeSlot < 0 ? 0 : missingBizEventOnTimeSlot;
+        records.add(SyncInformativeReportRecord.builder()
+            .timeSlot(SyncReportTimeSlot.builder()
+                .from(minDate)
+                .to(maxDate)
+                .build())
+            .count(normalizedRecordCountPerTimeslot)
+            .build());
+        recordCount += normalizedRecordCountPerTimeslot;
+    }
+
+    // Generate final report
+    return SyncInformativeReport.builder()
+        .status(SyncOutcome.TO_GENERATE)
+        .executionTimeSlot(
+            SyncReportTimeSlot.builder()
+                .from(lowerLimitDate)
+                .to(upperLimitDate)
+                .build())
+        .totalCount(recordCount)
+        .records(records)
+        .build();
+  }
+
   public SyncReport executeSynchronizationForSingleReceipt(
       @NotNull LocalDateTime lowerLimitDate,
       @NotNull LocalDateTime upperLimitDate,
       String domainId,
       String noticeNumber) {
 
+    SyncOutcome status = SyncOutcome.GENERATED;
     List<BizEvent> allBizEventsAnalyzed = new LinkedList<>();
     Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents = new HashSet<>();
-    boolean errorDuringComputation = false;
 
     boolean isBizEventMissing =
         bizEventsReaderService.checkIfMissingBizEvent(
@@ -85,19 +139,22 @@ public class BizEventSynchronizerService {
 
       } catch (BizEventSyncException e) {
         log.error(e.getCustomMessage(), e);
-        errorDuringComputation = true;
+        status = SyncOutcome.GENERATION_ERROR;
       }
+    } else {
+        log.info("A valid BizEvent for domainId [{}] and notice number [{}] is already present!", domainId, noticeNumber);
+        status = SyncOutcome.RECEIPT_NOT_FOUND;
     }
 
     // Generate final report
     return generateReport(
+        status,
         allBizEventsAnalyzed,
         receiptsNotConvertedInBizEvents,
         lowerLimitDate,
         upperLimitDate,
         mustSendEventToEvent,
-        true,
-        errorDuringComputation);
+        true);
   }
 
   public SyncReport executeSynchronization(
@@ -106,9 +163,9 @@ public class BizEventSynchronizerService {
       int overriddenTimeSlotSize,
       boolean showEventData) {
 
+    SyncOutcome status = SyncOutcome.GENERATED;
     List<BizEvent> allBizEventsAnalyzed = new LinkedList<>();
     Set<ReceiptEventInfo> receiptsNotConvertedInBizEvents = new HashSet<>();
-    boolean errorDuringComputation = false;
 
     //
     List<Pair<LocalDateTime, LocalDateTime>> timeSlots =
@@ -142,19 +199,19 @@ public class BizEventSynchronizerService {
 
       } catch (BizEventSyncException e) {
         log.error(e.getCustomMessage(), e);
-        errorDuringComputation = true;
+        status = SyncOutcome.GENERATION_ERROR;
       }
     }
 
     // Generate final report
     return generateReport(
+        status,
         allBizEventsAnalyzed,
         receiptsNotConvertedInBizEvents,
         lowerLimitDate,
         upperLimitDate,
         mustSendEventToEvent,
-        showEventData,
-        errorDuringComputation);
+        showEventData);
   }
 
   private void generateNewBizEventsFromReceipts(
@@ -192,6 +249,11 @@ public class BizEventSynchronizerService {
     List<Pair<LocalDateTime, LocalDateTime>> timeSlotsInError = new ArrayList<>();
 
     int slotSize = overriddenTimeSlotSize > 0 ? overriddenTimeSlotSize : defaultSlotSizeInMinutes;
+    if (bizEventsReaderService.isHistoricizedReceipt(upperLimitDate) && slotSize > defaultSlotSizeInMinutes) {
+        log.warn("Set slot size from [{}] to default value [{}] because of search in historical DB", slotSize, defaultSlotSizeInMinutes);
+        slotSize = defaultSlotSizeInMinutes;
+    }
+
     List<LocalDateTime> timeSlots =
         CommonUtility.splitInSlots(lowerLimitDate, upperLimitDate, slotSize);
     log.info(
@@ -284,17 +346,16 @@ public class BizEventSynchronizerService {
   }
 
   private SyncReport generateReport(
+      SyncOutcome status,
       List<BizEvent> events,
       Set<ReceiptEventInfo> receiptEvents,
       LocalDateTime lowerLimitDate,
       LocalDateTime upperLimitDate,
       boolean sentToEventHub,
-      boolean showEventData,
-      boolean errorDuringComputation) {
+      boolean showEventData) {
 
     log.info("Synchronization ended! Generating report...");
     List<SyncReportRecord> records = new LinkedList<>();
-    boolean onError = errorDuringComputation;
     for (BizEvent bizEvent : events) {
 
       String paymentToken = bizEvent.getPaymentInfo().getPaymentToken();
@@ -326,7 +387,7 @@ public class BizEventSynchronizerService {
                           .from(relatedInfo.getLowerBoundTimeSlot())
                           .to(relatedInfo.getUpperBoundTimeSlot())
                           .build())
-              .syncStatus("GENERATED")
+              .syncStatus(SyncSingleRecordStatus.GENERATED)
               .build());
     }
 
@@ -347,24 +408,24 @@ public class BizEventSynchronizerService {
                           && receiptEvent.getPaymentToken().equals(rec.getPaymentToken()))
               .count();
       if (bizEventsInsertedWithThisTriple == 0) {
-        onError = true;
+        status = status != SyncOutcome.GENERATION_ERROR ? SyncOutcome.PARTIALLY_GENERATED : status;
         records.add(
             SyncReportRecord.builder()
                 .iuv(receiptEvent.getIuv())
                 .domainId(receiptEvent.getDomainId())
                 .paymentToken(receiptEvent.getPaymentToken())
                 .modelVersion(receiptEvent.getVersion())
-                .syncStatus("NOT_INSERTED")
+                .syncStatus(SyncSingleRecordStatus.NOT_INSERTED)
                 .build());
       }
     }
 
     return SyncReport.builder()
+        .status(status)
         .executionTimeSlot(
             SyncReportTimeSlot.builder().from(lowerLimitDate).to(upperLimitDate).build())
         .totalRecords(records.size())
         .sentToEventHub(sentToEventHub)
-        .errorDuringComputation(onError)
         .records(records)
         .build();
   }
