@@ -22,7 +22,7 @@
         <postgresql-version>42.7.11</postgresql-version>
     </properties>
 
-    <version>0.4.3</version>
+    <version>0.4.4</version>
 
     <dependencies>
         <dependency>
