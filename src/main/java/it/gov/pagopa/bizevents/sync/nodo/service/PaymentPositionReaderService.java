@@ -1,6 +1,7 @@
 package it.gov.pagopa.bizevents.sync.nodo.service;
 
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.BizEvent;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionActivate;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionPayment;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionTransfer;
 import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.oldmodel.Rpt;
@@ -30,6 +31,8 @@ public class PaymentPositionReaderService {
 
   private final PaymentPositionRepository paymentPositionRepository;
 
+  private final PositionActivateRepository positionActivateRepository;
+
   private final PositionTransferRepository positionTransferRepository;
 
   private final RtRepository rtRepository;
@@ -56,6 +59,7 @@ public class PaymentPositionReaderService {
 
   public PaymentPositionReaderService(
       PaymentPositionRepository paymentPositionRepository,
+      PositionActivateRepository positionActivateRepository,
       PositionTransferRepository positionTransferRepository,
       RtRepository rtRepository,
       RptRepository rptRepository,
@@ -70,6 +74,7 @@ public class PaymentPositionReaderService {
       ConfigCacheService configCacheService) {
 
     this.paymentPositionRepository = paymentPositionRepository;
+    this.positionActivateRepository = positionActivateRepository;
     this.positionTransferRepository = positionTransferRepository;
     this.rtRepository = rtRepository;
     this.rptRepository = rptRepository;
@@ -125,9 +130,13 @@ public class PaymentPositionReaderService {
         throw new BizEventSyncException(msg);
       }
 
+      Optional<PositionActivate> positionActivateOpt =
+          this.positionActivateRepository.readByPaymentTokenInTimeSlot(
+              minDate, maxDate, paymentToken);
+
       bizEvent =
           BizEventMapper.fromNewModel(
-              positionPayment, positionTransfers, totalNotices, configCacheService.getConfigData());
+              positionPayment, positionActivateOpt, positionTransfers, totalNotices, configCacheService.getConfigData());
 
     } catch (DataAccessException e) {
       String msg =
@@ -243,9 +252,13 @@ public class PaymentPositionReaderService {
         throw new BizEventSyncException(msg);
       }
 
+      Optional<PositionActivate> positionActivateOpt =
+          this.positionActivateRepository.readByPaymentTokenInTimeSlot(
+              minDate, maxDate, paymentToken);
+
       bizEvent =
           BizEventMapper.fromNewModel(
-              positionPayment, positionTransfers, totalNotices, configCacheService.getConfigData());
+              positionPayment, positionActivateOpt, positionTransfers, totalNotices, configCacheService.getConfigData());
 
     } catch (DataAccessException e) {
       String msg =

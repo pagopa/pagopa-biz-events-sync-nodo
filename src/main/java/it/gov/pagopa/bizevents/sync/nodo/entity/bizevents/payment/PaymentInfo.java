@@ -41,6 +41,8 @@ public class PaymentInfo {
 
   private String touchpoint;
 
+  private String paymentChannel;
+
   private String remittanceInformation;
 
   private String description;

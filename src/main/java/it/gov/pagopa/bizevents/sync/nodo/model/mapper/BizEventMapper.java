@@ -8,6 +8,7 @@ import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.enumeration.StatusType
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.DebtorPosition;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.MapEntry;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.PaymentInfo;
+import it.gov.pagopa.bizevents.sync.nodo.entity.nodo.newmodel.PositionActivate;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.subject.Debtor;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.subject.Payer;
 import it.gov.pagopa.bizevents.sync.nodo.entity.bizevents.payment.transfer.Transfer;
@@ -53,6 +54,7 @@ public class BizEventMapper {
 
   public static BizEvent fromNewModel(
       PositionPayment pp,
+      Optional<PositionActivate> pa,
       List<PositionTransfer> transfers,
       Long totalNotices,
       ConfigDataV1 configData) {
@@ -150,7 +152,8 @@ public class BizEventMapper {
                       .idCiBundle(pp.getBundlePaId())
                       .totalNotice(totalNotices.toString())
                       .paymentMethod(pp.getPaymentMethod())
-                      .touchpoint(pp.getPaymentChannel())
+                      .touchpoint(pa.map(PositionActivate::getTouchpoint).orElse(null))
+                      .paymentChannel(pp.getPaymentChannel())
                       .remittanceInformation(ps.getDescription())
                       .iur(pp.getPaymentToken())
                       .metadata(extractMetadata(ppp.getMetadata()))
