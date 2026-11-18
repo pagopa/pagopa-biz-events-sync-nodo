@@ -72,7 +72,7 @@ microservice-chart: &microservice-chart
           type: Utilization # Allowed types are 'Utilization' or 'AverageValue'
           value: "75"
   envConfig: &envConfig
-    JAVA_TOOL_OPTIONS: "-XX:-UseBASE64Intrinsics -XX:UseAVX=2"
+    JAVA_TOOL_OPTIONS: "-XX:-UseBASE64Intrinsics"
     APP_ENVIRONMENT: "dev"
     WEBSITE_SITE_NAME: 'pagopabizeventssyncnodo' # required to show cloud role name in application insights
     ENV: 'azure-dev'
